@@ -1,0 +1,30 @@
+{% extends 'alm/base_project.html' %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block alm_content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">{{ project.name }}</h1>
+    <a href="{% url 'project_edit' project.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>
+</div>
+<p class="text-gray-500 mb-6">{{ project.description|default:"Aucune description" }}</p>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ stats.members_count }}</div>
+        <div class="text-sm text-gray-500">Membres</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ stats.requirements_count }}</div>
+        <div class="text-sm text-gray-500">Exigences</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ stats.tests_count }}</div>
+        <div class="text-sm text-gray-500">Tests</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ stats.tickets_count }}</div>
+        <div class="text-sm text-gray-500">Tickets</div>
+    </div>
+</div>
+{% endblock %}

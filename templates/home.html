@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accueil - {{ site_config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="text-center mb-12">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenue sur {{ site_config.site_name }}</h1>
+    <p class="text-gray-500">Sélectionnez un module pour commencer</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {% for tile in tiles %}
+        <a href="{{ tile.url }}" class="group h-full">
+            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col items-center text-center hover:-translate-y-1 h-full">
+                <div class="w-20 h-20 mb-4 flex items-center justify-center shrink-0">
+                    <img src="{% static tile.icon %}" alt="{{ tile.title }}" class="max-w-full max-h-full">
+                </div>
+                <h2 class="text-lg font-semibold text-gray-800 group-hover:text-[#1a3a6b] transition-colors">{{ tile.title }}</h2>
+                <p class="text-sm text-gray-500 mt-auto pt-2">{{ tile.description }}</p>
+            </div>
+        </a>
+    {% endfor %}
+</div>
+{% endblock %}

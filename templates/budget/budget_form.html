@@ -1,0 +1,30 @@
+{% extends 'budget/base_budget.html' %}
+{% load static %}
+{% block title %}{{ title }} - {{ site_config.site_name }}{% endblock %}
+{% block budget_content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ title }}</h1>
+</div>
+<form method="post" class="bg-white rounded-xl shadow-md p-6 max-w-lg space-y-4">
+    {% csrf_token %}
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Année</label>
+        <input type="number" name="year" value="{{ budget.year|default:'' }}" required min="2020" max="2100" class="w-full rounded-lg border-gray-300">
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+        <select name="budget_type" class="w-full rounded-lg border-gray-300">
+            <option value="investment" {% if budget.budget_type == 'investment' %}selected{% endif %}>Investissement</option>
+            <option value="fonctionnement" {% if budget.budget_type == 'fonctionnement' %}selected{% endif %}>Fonctionnement</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Montant (€)</label>
+        <input type="number" name="amount" value="{{ budget.amount|default:'' }}" step="0.01" min="0" required class="w-full rounded-lg border-gray-300">
+    </div>
+    <div class="flex gap-3 pt-2">
+        <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+        <a href="{% url 'budget_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Annuler</a>
+    </div>
+</form>
+{% endblock %}

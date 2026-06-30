@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ title|default:"Budget IT" }} - {{ site_config.site_name }}{% endblock %}
+{% block content %}
+<div class="flex gap-6">
+    <aside class="w-56 shrink-0">
+        <nav class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-[#1a3a6b] text-white px-4 py-3 font-semibold text-sm">Budget IT</div>
+            <div class="divide-y divide-gray-100">
+                <a href="{% url 'budget_dashboard' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 {% if request.resolver_match.url_name == 'budget_dashboard' %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}">
+                    📊 Tableau de bord
+                </a>
+                <a href="{% url 'dat_list' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 {% if request.resolver_match.url_name == 'dat_list' or request.resolver_match.url_name == 'dat_detail' or request.resolver_match.url_name == 'dat_create' or request.resolver_match.url_name == 'dat_update' %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}">
+                    📋 DAT
+                </a>
+                <a href="{% url 'budget_list' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 {% if 'budget' in request.resolver_match.url_name and request.resolver_match.url_name != 'budget_home' and request.resolver_match.url_name != 'budget_dashboard' %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}">
+                    💰 Budgets
+                </a>
+                <a href="{% url 'todo_kanban' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 {% if 'todo' in request.resolver_match.url_name %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}">
+                    ✅ Tâches
+                </a>
+                <a href="/guichet/" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 text-gray-700">
+                    🎫 Guichet IT
+                </a>
+                <a href="{% url 'provider_list' %}" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-gray-50 {% if 'provider' in request.resolver_match.url_name %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}">
+                    🏢 Fournisseurs
+                </a>
+            </div>
+        </nav>
+    </aside>
+    <div class="flex-1 min-w-0">
+        {% block budget_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

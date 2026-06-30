@@ -1,0 +1,107 @@
+{% extends 'budget/base_budget.html' %}
+{% load static %}
+{% block title %}Todo - {{ site_config.site_name }}{% endblock %}
+{% block budget_content %}
+<h1 class="text-2xl font-bold text-gray-800 mb-4">Kanban</h1>
+
+<form method="post" action="{% url 'todo_create' %}" class="flex gap-2 mb-6">
+    {% csrf_token %}
+    <input type="text" name="title" placeholder="Titre de la tâche" required class="flex-1 rounded-lg border-gray-300 text-sm">
+    <input type="date" name="deadline" required class="rounded-lg border-gray-300 text-sm">
+    <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Ajouter</button>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="kanban">
+    {% for col in columns %}
+    <div>
+        <div class="bg-gray-50 rounded-xl p-4">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold text-gray-700">
+                    {% if col.status == 'todo' %}📋 À faire
+                    {% elif col.status == 'in_progress' %}🔄 En cours
+                    {% elif col.status == 'done' %}✅ Réalisé{% endif %}
+                </h3>
+                <span class="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-1 rounded-full">{{ col.items|length }}</span>
+            </div>
+            <div class="space-y-3 min-h-[250px] kanban-col" data-status="{{ col.status }}">
+                {% for item in col.items %}
+                <div class="bg-white rounded-lg shadow-sm p-3 kanban-card" draggable="true" data-id="{{ item.pk }}" data-color="{{ item.color_class }}">
+                    <div class="flex justify-between items-start">
+                        <strong class="text-sm text-gray-800">{{ item.title }}</strong>
+                        <form method="post" action="{% url 'todo_delete' item.pk %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-gray-400 hover:text-red-500 text-xs">✕</button>
+                        </form>
+                    </div>
+                    {% if item.description %}
+                    <p class="text-xs text-gray-500 mt-1">{{ item.description }}</p>
+                    {% endif %}
+                    <div class="mt-2">
+                        {% if item.color_class == 'safe' %}
+                            <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">{{ item.deadline|date:"d/m/Y" }}</span>
+                        {% elif item.color_class == 'warning' %}
+                            <span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full">{{ item.deadline|date:"d/m/Y" }}</span>
+                        {% elif item.color_class == 'critical' %}
+                            <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full">⚠ Aujourd'hui !</span>
+                        {% elif item.color_class == 'overdue' %}
+                            <span class="bg-gray-200 text-gray-600 text-xs px-2 py-0.5 rounded-full">⚠ Dépassée ({{ item.deadline|date:"d/m/Y" }})</span>
+                        {% elif item.color_class == 'done' %}
+                            <span class="bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full">✔ Terminé</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-xs text-gray-400 text-center py-6">Aucune tâche</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.kanban-card { cursor: grab; border-left: 4px solid #e5e7eb; }
+.kanban-card:active { cursor: grabbing; opacity: 0.7; }
+.kanban-card[data-color="safe"] { border-left-color: #22c55e; }
+.kanban-card[data-color="warning"] { border-left-color: #eab308; }
+.kanban-card[data-color="critical"] { border-left-color: #ef4444; }
+.kanban-card[data-color="overdue"] { border-left-color: #6b7280; }
+.kanban-card[data-color="done"] { border-left-color: #22c55e; background-color: #f9fafb; }
+.kanban-col { min-height: 250px; }
+.kanban-col.drag-over { background-color: rgba(59, 130, 246, 0.08); border-radius: 0.5rem; }
+</style>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+document.querySelectorAll('.kanban-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+        card.classList.add('opacity-40');
+    });
+    card.addEventListener('dragend', e => {
+        card.classList.remove('opacity-40');
+        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+    });
+});
+document.querySelectorAll('.kanban-col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        const newStatus = col.dataset.status;
+        const url = '{% url "todo_update_status" pk=99999 %}'.replace('99999', id);
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(r => r.json())
+        .then(data => { if (data.ok) location.reload(); });
+    });
+});
+</script>
+{% endblock %}

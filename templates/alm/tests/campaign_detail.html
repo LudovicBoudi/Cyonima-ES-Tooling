@@ -1,0 +1,58 @@
+{% extends 'alm/base_project.html' %}
+{% load static %}
+
+{% block title %}{{ campaign.name }} - {{ project.name }}{% endblock %}
+
+{% block alm_content %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-xl font-semibold">{{ campaign.name }}</h1>
+    <a href="{% url 'campaign_add_tests' project.id campaign.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Ajouter des tests</a>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="kanban-board">
+    {% for col_id, col_label in columns.items %}
+    <div class="bg-gray-50 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">{{ col_id }}</h3>
+        <div class="space-y-2 min-h-[100px]" data-status="{{ col_id }}" data-campaign="{{ campaign.id }}">
+            {% for ct in col_label %}
+            <div class="bg-white rounded shadow-sm p-3 text-sm cursor-move" data-id="{{ ct.id }}">
+                <div class="font-medium">{{ ct.test_scenario.get_formatted_number }}</div>
+                <div class="text-gray-500 text-xs">{{ ct.test_scenario.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#kanban-board > div > div').forEach(function(el) {
+        new Sortable(el, {
+            group: 'kanban',
+            animation: 150,
+            onEnd: function(evt) {
+                var items = [];
+                document.querySelectorAll('#kanban-board > div').forEach(function(col) {
+                    var status = col.dataset.status;
+                    col.querySelectorAll('[data-id]').forEach(function(card, idx) {
+                        items.push({
+                            id: parseInt(card.dataset.id),
+                            status: status,
+                            position: idx
+                        });
+                    });
+                });
+                fetch('{% url "campaign_update_status" project.id campaign.id %}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+                    body: JSON.stringify(items)
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

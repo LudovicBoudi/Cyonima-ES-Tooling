@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ blog_title }} - {{ site_config.site_name }}{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">{{ blog_title }}</h1>
+        {% if can_write %}
+            <a href="{% url create_url %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouvel article</a>
+        {% endif %}
+    </div>
+    <div class="divide-y">
+        {% for a in articles %}
+        <div class="px-6 py-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <a href="{% url detail_url a.id %}" class="font-medium hover:text-[#1a3a6b]">{{ a.title }}</a>
+                    <p class="text-xs text-gray-400 mt-1">{{ a.display_id }} - {{ a.created_by.username }} - {{ a.created_at|date:"d/m/Y" }}</p>
+                </div>
+                <div class="flex gap-2 text-xs">
+                    <a href="{% url detail_url a.id %}" class="text-blue-600 hover:underline">Lire</a>
+                    <a href="{% url delete_url a.id %}" class="text-red-600 hover:underline">Supprimer</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="px-6 py-8 text-center text-gray-500">Aucun article</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

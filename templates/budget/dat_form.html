@@ -1,0 +1,111 @@
+{% extends 'budget/base_budget.html' %}
+{% load static %}
+{% block title %}Nouvelle DAT - {{ site_config.site_name }}{% endblock %}
+{% block budget_content %}
+<div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Nouvelle Demande d'Achat</h1>
+    <p class="text-sm text-gray-500">Créer une nouvelle DAT avec ses lignes d'achat</p>
+</div>
+
+<form method="post" class="space-y-6">
+    {% csrf_token %}
+    <div class="bg-white rounded-xl shadow-md p-6 space-y-4">
+        <h2 class="text-lg font-semibold text-gray-700">Informations générales</h2>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fournisseur</label>
+            <select name="provider" required class="w-full rounded-lg border-gray-300">
+                <option value="">Sélectionner...</option>
+                {% for p in providers %}
+                    <option value="{{ p.pk }}">{{ p.company_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Contact</label>
+                <input type="text" name="contact_name" required class="w-full rounded-lg border-gray-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email contact</label>
+                <input type="email" name="contact_email" required class="w-full rounded-lg border-gray-300">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                <input type="text" name="contact_phone" required class="w-full rounded-lg border-gray-300">
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" rows="2" class="w-full rounded-lg border-gray-300"></textarea>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-gray-700">Lignes d'achat</h2>
+            <button type="button" onclick="addLine()" class="text-sm text-blue-600 hover:text-blue-800">+ Ajouter une ligne</button>
+        </div>
+        <table class="w-full text-sm" id="lines-table">
+            <thead class="bg-gray-50 text-gray-600">
+                <tr>
+                    <th class="text-left px-2 py-2">Produit</th>
+                    <th class="text-left px-2 py-2">Réf.</th>
+                    <th class="text-center px-2 py-2">Qté</th>
+                    <th class="text-center px-2 py-2">Unité</th>
+                    <th class="text-right px-2 py-2">Prix U.</th>
+                    <th class="text-left px-2 py-2">Type</th>
+                    <th class="text-left px-2 py-2">Catégorie</th>
+                    <th class="px-2 py-2"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr class="line-row">
+                    <td class="px-2 py-2"><input type="text" name="product[]" required class="w-full rounded border-gray-300 text-sm"></td>
+                    <td class="px-2 py-2"><input type="text" name="reference[]" class="w-full rounded border-gray-300 text-sm"></td>
+                    <td class="px-2 py-2"><input type="number" name="quantity[]" value="1" min="1" required class="w-20 rounded border-gray-300 text-sm text-center"></td>
+                    <td class="px-2 py-2">
+                        <select name="unit[]" class="rounded border-gray-300 text-sm">
+                            <option value="U">Unité</option>
+                            <option value="D">Jour</option>
+                        </select>
+                    </td>
+                    <td class="px-2 py-2"><input type="number" name="unit_price[]" step="0.01" min="0" required class="w-28 rounded border-gray-300 text-sm text-right"></td>
+                    <td class="px-2 py-2">
+                        <select name="budget_type[]" class="rounded border-gray-300 text-sm">
+                            <option value="investment">Investissement</option>
+                            <option value="fonctionnement">Fonctionnement</option>
+                        </select>
+                    </td>
+                    <td class="px-2 py-2">
+                        <select name="budget_category[]" class="rounded border-gray-300 text-sm">
+                            <option value="licences">Licences</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="pc">PC</option>
+                            <option value="servers">Serveurs</option>
+                            <option value="network">Réseau</option>
+                            <option value="security">Sécurité</option>
+                            <option value="consulting">Conseil</option>
+                        </select>
+                    </td>
+                    <td class="px-2 py-2"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 text-sm">✕</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex justify-end gap-4">
+        <a href="{% url 'dat_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Annuler</a>
+        <button type="submit" class="px-6 py-2 bg-[#1a3a6b] text-white rounded-lg hover:bg-blue-800">Créer la DAT</button>
+    </div>
+</form>
+
+<script>
+function addLine() {
+    const tbody = document.querySelector('#lines-table tbody');
+    const first = tbody.querySelector('.line-row');
+    const clone = first.cloneNode(true);
+    clone.querySelectorAll('input').forEach(i => i.value = '');
+    tbody.appendChild(clone);
+}
+</script>
+{% endblock %}

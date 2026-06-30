@@ -1,0 +1,27 @@
+{% extends 'administration/base_admin.html' %}
+
+{% block title %}Sauvegarde{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-4xl text-[#1a3a6b] mb-4">&#128190;</div>
+        <h2 class="text-lg font-semibold mb-2">Télécharger une sauvegarde</h2>
+        <p class="text-sm text-gray-500 mb-4">Exporte toutes les données au format ZIP</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded text-sm hover:bg-[#142b52]">Télécharger</button>
+        </form>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6 text-center">
+        <div class="text-4xl text-green-600 mb-4">&#128194;</div>
+        <h2 class="text-lg font-semibold mb-2">Restaurer une sauvegarde</h2>
+        <p class="text-sm text-gray-500 mb-4">Importe un fichier ZIP de sauvegarde</p>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="backup_file" accept=".zip" class="text-sm mb-4">
+            <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded text-sm hover:bg-green-700">Restaurer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

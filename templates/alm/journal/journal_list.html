@@ -1,0 +1,25 @@
+{% extends 'alm/base_project.html' %}
+
+{% block title %}Journal - {{ project.name }}{% endblock %}
+
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Journal d'activité</h1>
+        <a href="{% url 'journal_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau compte rendu</a>
+    </div>
+    <div class="divide-y">
+        {% for r in reports %}
+        <div class="px-6 py-4">
+            <div class="flex justify-between text-sm">
+                <span class="font-medium">{{ r.user.username }}</span>
+                <span class="text-gray-400 text-xs">{{ r.report_date|date:"d/m/Y" }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">{{ r.content|linebreaks }}</p>
+        </div>
+        {% empty %}
+        <p class="px-6 py-8 text-center text-gray-500">Aucun compte rendu</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

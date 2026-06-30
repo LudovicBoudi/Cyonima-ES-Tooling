@@ -1,0 +1,45 @@
+{% extends 'alm/base_project.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block alm_content %}
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-6">{{ title }}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <input type="text" name="name" value="{{ scenario.name|default:'' }}" required class="w-full px-3 py-2 border rounded text-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Conditions d'exécution</label>
+            <textarea name="execution_conditions" rows="2" class="w-full px-3 py-2 border rounded text-sm">{{ scenario.execution_conditions|default:'' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" rows="3" class="w-full px-3 py-2 border rounded text-sm">{{ scenario.description|default:'' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Exigences liées</label>
+            <select name="requirements" multiple class="w-full px-3 py-2 border rounded text-sm h-24">
+                {% for r in requirements %}
+                    <option value="{{ r.id }}" {% if scenario and r in scenario.requirements.all %}selected{% endif %}>{{ r.get_formatted_number }} - {{ r.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-3">Étapes (max 10)</label>
+            {% for i in "1234567890"|make_list %}
+            <div class="grid grid-cols-2 gap-2 mb-2">
+                <input type="text" name="action_{{ forloop.counter }}" placeholder="Action {{ forloop.counter }}" value="{% if scenario %}{{ scenario.steps.all|dictsort:'step_number'|slice:forloop.counter %}{% endif %}" class="px-3 py-2 border rounded text-sm">
+                <input type="text" name="expected_{{ forloop.counter }}" placeholder="Résultat attendu {{ forloop.counter }}" value="" class="px-3 py-2 border rounded text-sm">
+            </div>
+            {% endfor %}
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Enregistrer</button>
+            <a href="{% url 'test_list' project.id %}" class="px-4 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

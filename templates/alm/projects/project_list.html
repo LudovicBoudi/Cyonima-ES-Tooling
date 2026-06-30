@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Projets{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Projets</h1>
+        <a href="{% url 'project_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau projet</a>
+    </div>
+    <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for p in projects %}
+                <a href="{% url 'project_detail' p.id %}" class="block p-4 border rounded-lg hover:shadow-md transition">
+                    <h3 class="font-semibold text-gray-800">{{ p.name }}</h3>
+                    <p class="text-sm text-gray-500 mt-1">{{ p.description|truncatewords:20 }}</p>
+                    <p class="text-xs text-gray-400 mt-2">Créé par {{ p.created_by.username }} le {{ p.created_at|date:"d/m/Y" }}</p>
+                </a>
+            {% empty %}
+                <p class="col-span-full text-center text-gray-500 py-8">Aucun projet</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

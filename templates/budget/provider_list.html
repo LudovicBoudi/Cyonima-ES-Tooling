@@ -1,0 +1,38 @@
+{% extends 'budget/base_budget.html' %}
+{% load static %}
+{% block title %}Fournisseurs - {{ site_config.site_name }}{% endblock %}
+{% block budget_content %}
+<div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Fournisseurs</h1>
+    <a href="{% url 'provider_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouveau fournisseur</a>
+</div>
+<div class="bg-white rounded-xl shadow-md overflow-hidden">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600">
+            <tr>
+                <th class="text-left px-4 py-3">Entreprise</th>
+                <th class="text-left px-4 py-3">Contact</th>
+                <th class="text-left px-4 py-3">Email</th>
+                <th class="text-left px-4 py-3">Téléphone</th>
+                <th class="text-right px-4 py-3"></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for p in providers %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium">{{ p.company_name }}</td>
+                <td class="px-4 py-3">{{ p.sales_contact }}</td>
+                <td class="px-4 py-3">{{ p.email }}</td>
+                <td class="px-4 py-3">{{ p.phone }}</td>
+                <td class="px-4 py-3 text-right space-x-2">
+                    <a href="{% url 'provider_edit' p.pk %}" class="text-blue-600 hover:underline text-sm">Modifier</a>
+                    <a href="{% url 'provider_delete' p.pk %}" class="text-red-600 hover:underline text-sm">Supprimer</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Aucun fournisseur</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

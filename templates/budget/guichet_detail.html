@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}{{ ticket.get_formatted_number }} - Guichet IT{% endblock %}
+{% block content %}
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h1 class="text-xl font-bold">{{ ticket.get_formatted_number }}</h1>
+            <p class="text-gray-500 text-sm">{{ ticket.title }}</p>
+        </div>
+        <span class="px-3 py-1 rounded text-sm font-medium
+            {% if ticket.ticket_type == 'incident' %}bg-red-100 text-red-700
+            {% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ ticket.get_ticket_type_display }}
+        </span>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mb-4">
+        <div><span class="text-gray-500">Statut :</span> {{ ticket.get_status_display }}</div>
+        <div><span class="text-gray-500">Assigné :</span> {{ ticket.assigned_to|default:"-" }}</div>
+        <div><span class="text-gray-500">Créé par :</span> {{ ticket.created_by.username }}</div>
+        <div><span class="text-gray-500">Date :</span> {{ ticket.created_at|date:"d/m/Y H:i" }}</div>
+    </div>
+    {% if ticket.description %}
+    <div class="text-sm text-gray-700 border-t pt-4">{{ ticket.description|linebreaks }}</div>
+    {% endif %}
+</div>
+
+{% if transitions %}
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Transition</h2>
+    <form method="post" class="space-y-3">
+        {% csrf_token %}
+        <div class="flex gap-3 items-end">
+            <div class="flex-1">
+                <select name="transition" class="w-full rounded-lg border-gray-300 text-sm">
+                    {% for s in transitions %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Appliquer</button>
+        </div>
+        <textarea name="comment" placeholder="Commentaire (optionnel)" rows="2" class="w-full rounded-lg border-gray-300 text-sm"></textarea>
+    </form>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-lg font-semibold mb-4">Historique</h2>
+    <div class="space-y-3">
+        {% for log in logs %}
+        <div class="text-sm border-l-4 border-[#1a3a6b] pl-3">
+            <div class="text-gray-500 text-xs">{{ log.created_at|date:"d/m/Y H:i" }} - {{ log.user.username }}</div>
+            <div>
+                {% if log.from_status %}{{ log.from_status }} → {% endif %}
+                <strong>{{ log.to_status }}</strong>
+            </div>
+            {% if log.comment %}<div class="text-gray-600 mt-1">{{ log.comment }}</div>{% endif %}
+        </div>
+        {% empty %}
+        <p class="text-sm text-gray-500">Aucun historique</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

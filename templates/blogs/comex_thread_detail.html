@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ thread.title }} - COMEX{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-bold">{{ thread.title }}</h1>
+        <a href="{% url 'comex_thread_list' %}" class="text-sm text-gray-500 hover:underline">← Tous les fils</a>
+    </div>
+    <div class="space-y-4 mb-6">
+        {% for msg in thread.messages.all %}
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between text-sm text-gray-400 mb-2">
+                <span class="font-medium text-gray-700">{{ msg.created_by.username }}</span>
+                <span>{{ msg.created_at|date:"d/m/Y H:i" }}</span>
+            </div>
+            <div class="text-gray-700">{{ msg.content|linebreaks }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">Répondre</h3>
+        <form method="post" class="space-y-3">
+            {% csrf_token %}
+            <textarea name="content" rows="4" maxlength="4000" required class="w-full px-3 py-2 border rounded text-sm"></textarea>
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Envoyer</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'administration/base_admin.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-lg mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-6">{{ title }}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="flex gap-3">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Enregistrer</button>
+            <a href="{% url 'admin_user_list' %}" class="px-4 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

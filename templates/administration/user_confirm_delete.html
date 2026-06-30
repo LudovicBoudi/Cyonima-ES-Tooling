@@ -1,0 +1,18 @@
+{% extends 'administration/base_admin.html' %}
+
+{% block title %}Supprimer {{ edit_user.username }}{% endblock %}
+
+{% block admin_content %}
+<div class="max-w-lg mx-auto bg-white rounded-lg shadow p-6 text-center">
+    <div class="text-5xl text-red-500 mb-4">&#9888;</div>
+    <h1 class="text-xl font-semibold mb-2">Confirmer la suppression</h1>
+    <p class="text-gray-500 mb-6">Voulez-vous vraiment supprimer l'utilisateur <strong>{{ edit_user.username }}</strong> ?</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="flex gap-3 justify-center">
+            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Confirmer</button>
+            <a href="{% url 'admin_user_list' %}" class="px-4 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

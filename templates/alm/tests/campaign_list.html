@@ -1,0 +1,25 @@
+{% extends 'alm/base_project.html' %}
+
+{% block title %}Campagnes - {{ project.name }}{% endblock %}
+
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Campagnes de test</h1>
+        <a href="{% url 'campaign_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouvelle campagne</a>
+    </div>
+    <ul class="divide-y">
+        {% for c in campaigns %}
+        <li class="px-6 py-3 flex justify-between items-center">
+            <a href="{% url 'campaign_detail' project.id c.id %}" class="font-medium hover:text-[#1a3a6b]">{{ c.name }}</a>
+            <div class="space-x-2">
+                <a href="{% url 'campaign_detail' project.id c.id %}" class="text-sm text-blue-600 hover:underline">Détail</a>
+                <a href="{% url 'campaign_delete' project.id c.id %}" class="text-sm text-red-600 hover:underline">Supprimer</a>
+            </div>
+        </li>
+        {% empty %}
+        <li class="px-6 py-8 text-center text-gray-500">Aucune campagne</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

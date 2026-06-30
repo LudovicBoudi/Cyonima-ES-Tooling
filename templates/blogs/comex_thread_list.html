@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Zone d'échange COMEX{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Zone d'échange COMEX</h1>
+        <a href="{% url 'comex_thread_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau fil</a>
+    </div>
+    <div class="divide-y">
+        {% for t in threads %}
+        <div class="px-6 py-4">
+            <div class="flex justify-between items-start">
+                <div>
+                    <a href="{% url 'comex_thread_detail' t.id %}" class="font-medium hover:text-[#1a3a6b]">{{ t.title }}</a>
+                    <p class="text-xs text-gray-400 mt-1">{{ t.display_id }} - {{ t.created_by.username }} - {{ t.messages.count }} message{% if t.messages.count > 1 %}s{% endif %}</p>
+                </div>
+                <a href="{% url 'comex_thread_detail' t.id %}" class="text-sm text-blue-600 hover:underline">Ouvrir</a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="px-6 py-8 text-center text-gray-500">Aucun fil de discussion</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

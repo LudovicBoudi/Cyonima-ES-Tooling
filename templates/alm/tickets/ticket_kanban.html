@@ -1,0 +1,31 @@
+{% extends 'alm/base_project.html' %}
+
+{% block title %}Kanban - Tickets {{ project.name }}{% endblock %}
+
+{% block alm_content %}
+<div class="flex items-center gap-4 mb-6">
+    <h1 class="text-xl font-semibold">Kanban</h1>
+    <div class="flex gap-1 text-sm">
+        <a href="?type=incident" class="px-3 py-1 rounded {% if current_type == 'incident' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %}">Incidents</a>
+        <a href="?type=tache" class="px-3 py-1 rounded {% if current_type == 'tache' %}bg-blue-100 text-blue-700{% else %}bg-gray-100 text-gray-600{% endif %}">Tâches</a>
+        <a href="?type=ft" class="px-3 py-1 rounded {% if current_type == 'ft' %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-600{% endif %}">FT</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    {% for col, tickets in columns.items %}
+    <div class="bg-gray-50 rounded-lg p-3">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase">{{ col }}</h3>
+        <div class="space-y-2">
+            {% for t in tickets %}
+            <a href="{% url 'ticket_detail' project.id t.id %}" class="block bg-white rounded shadow-sm p-3 text-sm hover:shadow">
+                <div class="font-mono text-xs text-gray-400">{{ t.get_formatted_number }}</div>
+                <div class="font-medium">{{ t.title|truncatewords:8 }}</div>
+                <div class="text-xs text-gray-400 mt-1">{{ t.assigned_to|default:"-" }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cyonima-ES-Tools{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a3a6b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <nav class="bg-[#1a3a6b] text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                        {% if site_config.logo %}
+                            <img src="{{ site_config.logo.url }}" alt="{{ site_config.site_name }}" class="h-10">
+                        {% else %}
+                            <span class="text-2xl font-bold">C</span>
+                        {% endif %}
+                        <span class="font-semibold text-lg">{{ site_config.site_name }}</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        {% if user.is_staff %}
+                            <a href="{% url 'admin_dashboard' %}" class="text-sm hover:text-gray-300">Administration</a>
+                        {% endif %}
+                        <span class="text-sm">{{ user.username }}</span>
+                        <a href="{% url 'password_change' %}" class="text-sm hover:text-gray-300">Mot de passe</a>
+                        <form method="post" action="{% url 'logout' %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-sm hover:text-gray-300">Déconnexion</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 mt-4">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-lg shadow-sm mb-2 {% if message.tags == 'error' %}bg-red-100 text-red-700 border border-red-200{% else %}bg-green-100 text-green-700 border border-green-200{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
+            &copy; {% now "Y" %} Cyonima de la communauté RENEGA2
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

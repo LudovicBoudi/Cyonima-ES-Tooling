@@ -1,0 +1,57 @@
+{% extends 'administration/base_admin.html' %}
+
+{% block title %}Administration - {{ site_config.site_name }}{% endblock %}
+
+{% block admin_content %}
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ users_count }}</div>
+        <div class="text-sm text-gray-500">Utilisateurs</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ providers_count }}</div>
+        <div class="text-sm text-gray-500">Fournisseurs</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ budgets_count }}</div>
+        <div class="text-sm text-gray-500">Budgets</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ dat_count }}</div>
+        <div class="text-sm text-gray-500">DAT</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4 text-center">
+        <div class="text-3xl font-bold text-[#1a3a6b]">{{ todo_count }}</div>
+        <div class="text-sm text-gray-500">Tâches</div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Derniers utilisateurs</h2>
+        <ul class="divide-y">
+            {% for u in recent_users %}
+                <li class="py-2 flex justify-between text-sm">
+                    <span>{{ u.username }}</span>
+                    <span class="text-gray-500">{{ u.date_joined|date:"d/m/Y" }}</span>
+                </li>
+            {% empty %}
+                <li class="py-2 text-sm text-gray-500">Aucun utilisateur</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Dernières DAT</h2>
+        <ul class="divide-y">
+            {% for dat in recent_dats %}
+                <li class="py-2 flex justify-between text-sm">
+                    <span>{{ dat.display_id }}</span>
+                    <span class="text-gray-500">{{ dat.get_status_display }}</span>
+                </li>
+            {% empty %}
+                <li class="py-2 text-sm text-gray-500">Aucune DAT</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
