@@ -1,0 +1,66 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}GED — Documents{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Documents</h1>
+        <a href="{% url 'ged_document_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">+ Ajouter</a>
+    </div>
+
+    <form method="get" class="flex gap-2 mb-4">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher..." class="flex-1 border rounded-lg px-3 py-2 text-sm">
+        <button type="submit" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">Rechercher</button>
+        {% if q or cat %}<a href="{% url 'ged_document_list' %}" class="text-gray-500 px-3 py-2 text-sm">✕ Effacer</a>{% endif %}
+    </form>
+
+    {% regroup documents by category as docs_by_cat %}
+    {% if not q %}
+        {% for group in docs_by_cat %}
+        <div class="mb-6">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase mb-2 px-1">
+                {% if group.grouper %}{{ group.grouper.name }}{% else %}Non classé{% endif %}
+            </h2>
+            <div class="space-y-1">
+                {% for doc in group.list %}
+                <div class="flex items-center justify-between py-2 px-3 rounded hover:bg-gray-50 text-sm">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="text-gray-400 text-lg">📄</span>
+                        <div class="min-w-0">
+                            <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate block">{{ doc.title }}</a>
+                            <span class="text-xs text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <a href="{% url 'ged_document_download' doc.pk %}" class="text-blue-600 hover:underline text-xs" title="Télécharger">⬇</a>
+                        <a href="{% url 'ged_document_edit' doc.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-400 py-12">Aucun document</p>
+        {% endfor %}
+    {% else %}
+        <div class="space-y-1">
+            {% for doc in documents %}
+            <div class="flex items-center justify-between py-2 px-3 rounded hover:bg-gray-50 text-sm">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="text-gray-400 text-lg">📄</span>
+                    <div class="min-w-0">
+                        <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate block">{{ doc.title }}</a>
+                        <span class="text-xs text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</span>
+                    </div>
+                </div>
+                <div class="flex gap-2 shrink-0">
+                    <a href="{% url 'ged_document_download' doc.pk %}" class="text-blue-600 hover:underline text-xs">⬇</a>
+                    <a href="{% url 'ged_document_edit' doc.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-center text-gray-400 py-12">Aucun résultat</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

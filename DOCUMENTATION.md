@@ -191,14 +191,76 @@ Gestion administrative du personnel.
 
 ### Fonctionnalités
 - **Tableau de bord** : effectif, actifs, essais, congés en cours, demandes en attente, graphiques (employés par département, contrats par type), anniversaires du mois, dernières demandes de congé.
-- **Employés** : fiche complète (coordonnées, département, poste, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
+- **Employés** : fiche complète (coordonnées, département, poste, société prestataire, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
 - **Départements** : liste avec nombre d'employés, description.
-- **Contrats** : CDI, CDD, stage, alternance, freelance, intérim — avec dates, salaire, poste.
-- **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours.
+- **Contrats** : CDI, CDD, mission, stage, alternance, freelance, intérim — avec dates, salaire, poste. Colorisation par échéance (vert >3mo, jaune 1-3mo, orange <1mo, rouge expiré/semaine). CDI toujours vert.
+- **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours. Calendrier mensuel avec navigation, affichage par initiales colorées. Détection de conflits (chevauchement dans le même département).
 
 ---
 
-## 8. COMEX (`/comex/`)
+## 10. ERP — Devis et Factures (`/erp/`)
+
+Module de gestion comptable avec devis, factures, avoirs et paiements.
+
+### Identifiants
+| Document | Préfixe | Exemple |
+|----------|---------|---------|
+| Devis | `DEV-{seq:04d}` | `DEV-0042` |
+| Facture | `FACT-{seq:04d}` | `FACT-0018` |
+| Avoir | `AVOIR-{seq:04d}` | `AVOIR-0003` |
+| Facture fournisseur | `FACF-{seq:04d}` | `FACF-0007` |
+
+### Fonctionnalités
+- **Tableau de bord** : CA mensuel et trimestriel, impayés, donut par statut.
+- **Devis → Facture** : conversion en un clic depuis le détail du devis.
+- **Lignes** : chaque document contient des lignes (description, quantité, prix unitaire, TVA) stockées en JSON.
+- **Paiements** : création d'un paiement qui met automatiquement la facture en statut « payée » si le montant est atteint.
+- **Avoirs** : documents de correction liés à une facture.
+- **Factures fournisseurs** : suivi des factures reçues.
+
+---
+
+## 11. GED — Gestion Électronique de Documents (`/ged/`)
+
+Module de classement, recherche et téléchargement de fichiers avec catégories et tags.
+
+### Fonctionnalités
+- **Catégories** : catégories colorées pour organiser les documents.
+- **Recherche** : champ de recherche plein texte avec filtre par catégorie.
+- **Prévisualisation** : aperçu des images et des PDF directement dans le navigateur.
+- **Téléchargement** : compteur de téléchargements automatique.
+- **Numérotation** : chaque document reçoit un numéro de registre `DOC-{année}-{seq:05d}`.
+- **Tags** : tags libres pour un classement transversal.
+- **Versioning** : champ version pour le suivi des révisions.
+
+---
+
+## 12. Ressources Externes (`/ressources/`)
+
+Pages d'information statiques sur les principales réglementations SSI.
+
+### Pages disponibles
+| Ressource | Description |
+|-----------|-------------|
+| **RGPD** | Règlement Général sur la Protection des Données (UE) 2016/679 |
+| **IGI 1300** | Instruction Générale Interministérielle — protection du secret de la défense nationale |
+| **IM 900** | Instruction Ministérielle — protection du secret au ministère des Armées |
+| **II 901** | Instruction Interministérielle — protection des SI diffusion restreinte |
+| **PCI DSS** | Payment Card Industry Data Security Standard (v4.0) |
+| **NIS 2** | Directive européenne sur la sécurité des réseaux et des systèmes d'information |
+| **EBIOS RM** | Méthode française d'analyse des risques SSI (ANSSI) |
+| **IEC 62443** | Cybersécurité des systèmes industriels et ICS |
+| **ISO 27001** | Management de la sécurité de l'information (SMSI) |
+| **ISO 27032** | Lignes directrices pour la cybersécurité |
+
+### Navigation
+- Page d'accueil : grille de toutes les ressources disponibles.
+- Chaque page contient un sommaire avec ancres, un bandeau coloré, et des sections détaillées.
+- Retour facile à la liste via le lien en bas de page.
+
+---
+
+## 13. COMEX (`/comex/`)
 
 Forum d'échange réservé à la direction et aux administrateurs.
 - Création de fils de discussion.
@@ -207,7 +269,7 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 ---
 
-## 8. Notifications
+## 14. Notifications
 
 - **Paramètres** : chaque utilisateur peut configurer ses notifications par type (email ou in-app) via son profil.
 - Création automatique d'un paramétrage vide à la création du compte.
@@ -215,7 +277,7 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 ---
 
-## 9. Rôles et permissions
+## 15. Rôles et permissions
 
 | Code rôle | Accès |
 |-----------|-------|
@@ -231,7 +293,7 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 10. Double authentification (2FA)
+## 16. Double authentification (2FA)
 
 1. L'utilisateur active la 2FA dans son profil.
 2. À la connexion, un code à 6 chiffres est envoyé par email.

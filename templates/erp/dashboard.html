@@ -1,0 +1,59 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}ERP — Tableau de bord{% endblock %}
+{% block erp_content %}
+<div class="space-y-6">
+    <h1 class="text-xl font-bold">Tableau de bord ERP</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-sm text-gray-500">CA mensuel</p>
+            <p class="text-2xl font-bold text-green-700">{{ ca_mensuel }} €</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-sm text-gray-500">CA trimestriel</p>
+            <p class="text-2xl font-bold text-blue-700">{{ ca_trimestriel }} €</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-sm text-gray-500">Impayés clients</p>
+            <p class="text-2xl font-bold text-red-700">{{ unpaid_count }} ({{ unpaid_total }} €)</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="font-semibold mb-3">Factures par statut</h2>
+            <canvas id="statusChart" height="180"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="font-semibold mb-3">Derniers devis</h2>
+            <div class="space-y-2 text-sm">
+                {% for q in recent_quotations %}
+                <a href="{% url 'erp_quotation_detail' q.pk %}" class="flex justify-between items-center p-2 rounded hover:bg-gray-50">
+                    <span class="font-medium">{{ q.number }}</span>
+                    <span class="text-gray-500">{{ q.company|default:'-' }} — {{ q.total_ttc }} €</span>
+                </a>
+                {% empty %}
+                <p class="text-gray-400">Aucun devis</p>
+                {% endfor %}
+            </div>
+            <a href="{% url 'erp_quotation_create' %}" class="inline-block mt-3 text-sm text-blue-600 hover:underline">Nouveau devis</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for s in invoices_by_status %}'{{ s.label }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for s in invoices_by_status %}{{ s.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: ['#94a3b8','#facc15','#22c55e','#ef4444','#d1d5db'],
+            borderWidth: 0,
+        }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+});
+</script>
+{% endblock %}

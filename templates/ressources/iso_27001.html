@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ISO 27001{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+    <nav class="mb-8 text-sm breadcrumbs">
+        <a href="{% url 'ressources_home' %}" class="text-indigo-600 hover:text-indigo-800">&larr; Ressources</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-700 font-semibold">ISO 27001</span>
+    </nav>
+
+    <div class="bg-gradient-to-r from-sky-600 to-sky-800 rounded-2xl p-10 mb-10 text-white shadow-xl">
+        <div class="flex items-center gap-6">
+            <span class="text-6xl">✅</span>
+            <div>
+                <h1 class="text-4xl font-bold mb-2">ISO 27001</h1>
+                <p class="text-xl text-sky-200">Information Security Management System (ISMS)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Sommaire</h2>
+        <ul class="space-y-2 text-lg">
+            <li><a href="#intro" class="text-indigo-600 hover:text-indigo-800 font-medium">1. Présentation</a></li>
+            <li><a href="#pdca" class="text-indigo-600 hover:text-indigo-800 font-medium">2. Le cycle PDCA</a></li>
+            <li><a href="#annexe" class="text-indigo-600 hover:text-indigo-800 font-medium">3. Annexe A — 93 mesures</a></li>
+            <li><a href="#certification" class="text-indigo-600 hover:text-indigo-800 font-medium">4. Certification</a></li>
+            <li><a href="#demarche" class="text-indigo-600 hover:text-indigo-800 font-medium">5. Démarche de mise en œuvre</a></li>
+        </ul>
+    </div>
+
+    <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Présentation</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            La norme <strong>ISO 27001</strong> (ISO/IEC 27001) est la norme internationale de référence pour
+            le <strong>management de la sécurité de l'information</strong> (SMSI / ISMS). Elle spécifie les
+            exigences pour établir, mettre en œuvre, maintenir et améliorer un système de management de la
+            sécurité de l'information.
+        </p>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Éditée conjointement par l'<strong>ISO</strong> (International Organization for Standardization) et
+            la <strong>CEI</strong> (Commission Électrotechnique Internationale), sa version actuelle est
+            l'<strong>ISO 27001:2022</strong>, publiée en octobre 2022, qui remplace la version 2013.
+        </p>
+        <p class="text-gray-700 leading-relaxed">
+            <strong>Objectif :</strong> Protéger la confidentialité, l'intégrité et la disponibilité (CIA triad)
+            des informations de l'organisation, en adoptant une approche fondée sur l'analyse des risques.
+        </p>
+    </section>
+
+    <section id="pdca" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Le cycle PDCA</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'ISO 27001 s'appuie sur le modèle <strong>Plan-Do-Check-Act</strong> (PDCA) appliqué au SMSI :
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                <h3 class="font-bold text-blue-700 mb-2">🟢 PLAN — Planifier</h3>
+                <p class="text-blue-600 text-sm">Définir la politique, le périmètre, l'analyse des risques, la sélection des objectifs de contrôle et des mesures.</p>
+            </div>
+            <div class="bg-orange-50 rounded-xl p-5 border border-orange-200">
+                <h3 class="font-bold text-orange-700 mb-2">🟠 DO — Mettre en œuvre</h3>
+                <p class="text-orange-600 text-sm">Mettre en œuvre les mesures de sécurité, les procédures, la formation et la sensibilisation.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-700 mb-2">🟣 CHECK — Vérifier</h3>
+                <p class="text-purple-600 text-sm">Audits internes, revues de direction, mesures d'efficacité, détection des écarts.</p>
+            </div>
+            <div class="bg-green-50 rounded-xl p-5 border border-green-200">
+                <h3 class="font-bold text-green-700 mb-2">🔵 ACT — Agir</h3>
+                <p class="text-green-600 text-sm">Actions correctives, préventives, amélioration continue du SMSI.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="annexe" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Annexe A — 93 mesures (ISO 27001:2022)</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'annexe A de la version 2022 liste <strong>93 mesures</strong> réparties en <strong>4 thèmes</strong>
+            (contre 114 mesures et 14 domaines dans la version 2013) :
+        </p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-sky-100 text-sky-900">
+                        <th class="p-3 font-semibold border border-sky-200">Thème</th>
+                        <th class="p-3 font-semibold border border-sky-200">Nombre de mesures</th>
+                        <th class="p-3 font-semibold border border-sky-200">Exemples</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">Organisationnel</td>
+                        <td class="p-3 border border-gray-200">37</td>
+                        <td class="p-3 border border-gray-200">Politiques, rôles, sécurité RH, gestion des incidents</td>
+                    </tr>
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">Personnes</td>
+                        <td class="p-3 border border-gray-200">8</td>
+                        <td class="p-3 border border-gray-200">Sensibilisation, formation, confidentialité</td>
+                    </tr>
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">Physique</td>
+                        <td class="p-3 border border-gray-200">14</td>
+                        <td class="p-3 border border-gray-200">Contrôle d'accès physique, sécurité des équipements</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold border border-gray-200">Technologique</td>
+                        <td class="p-3 border border-gray-200">34</td>
+                        <td class="p-3 border border-gray-200">Contrôle d'accès logique, chiffrement, sauvegarde</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="certification" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Certification</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            La certification ISO 27001 est délivrée par des organismes accrédités après un audit réussi :
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li><strong>Audit initial</strong> (étape 1) : revue documentaire du SMSI.</li>
+            <li><strong>Audit initial</strong> (étape 2) : audit sur site de la mise en œuvre effective.</li>
+            <li><strong>Surveillance</strong> : audits de suivi annuels.</li>
+            <li><strong>Recertification</strong> : audit complet tous les 3 ans.</li>
+        </ul>
+    </section>
+
+    <section id="demarche" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Démarche de mise en œuvre</h2>
+        <ol class="list-decimal list-inside text-gray-700 space-y-2 ml-4">
+            <li><strong>Engagement de la direction</strong> : Obtenir le soutien et les ressources nécessaires.</li>
+            <li><strong>Définition du périmètre</strong> : Quels processus, sites et actifs sont couverts par le SMSI.</li>
+            <li><strong>Politique de sécurité</strong> : Rédiger et diffuser la politique de sécurité de l'information.</li>
+            <li><strong>Analyse des risques</strong> : Identifier, évaluer et traiter les risques (EBIOS RM, ISO 27005).</li>
+            <li><strong>Déclaration d'applicabilité</strong> : Sélectionner les mesures de l'annexe A applicables.</li>
+            <li><strong>Mise en œuvre</strong> : Déployer les mesures techniques et organisationnelles.</li>
+            <li><strong>Audits internes</strong> : Vérifier l'efficacité du SMSI.</li>
+            <li><strong>Revue de direction</strong> : Revue périodique par la direction pour l'amélioration continue.</li>
+            <li><strong>Certification</strong> : Faire auditer par un organisme accrédité.</li>
+        </ol>
+    </section>
+
+    <div class="mt-8 text-center">
+        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour aux ressources
+        </a>
+    </div>
+</div>
+{% endblock %}

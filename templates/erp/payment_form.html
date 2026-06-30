@@ -1,0 +1,56 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}Enregistrer un paiement — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">Enregistrer un paiement</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date</label>
+                <input type="date" name="date" value="" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Montant</label>
+                <input type="number" step="0.01" name="amount" class="w-full border rounded-lg px-3 py-2 text-sm" required>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Mode de paiement</label>
+                <select name="method" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="virement">Virement</option>
+                    <option value="carte">Carte bancaire</option>
+                    <option value="cheque">Chèque</option>
+                    <option value="especes">Espèces</option>
+                    <option value="prelevement">Prélèvement</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Facture client (optionnelle)</label>
+            <select name="invoice" class="w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="">—</option>
+                {% for inv in invoices %}
+                <option value="{{ inv.pk }}" {% if request.GET.invoice == inv.pk|stringformat:'s' %}selected{% endif %}>{{ inv.number }} — {{ inv.company|default:'' }} (reste {{ inv.remaining }} €)</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Facture fournisseur (optionnelle)</label>
+            <select name="supplier_invoice" class="w-full border rounded-lg px-3 py-2 text-sm">
+                <option value="">—</option>
+                {% for inv in supplier_invoices %}
+                <option value="{{ inv.pk }}">{{ inv.internal_number }} — {{ inv.provider|default:'' }} (reste {{ inv.remaining }} €)</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Notes</label>
+            <textarea name="notes" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'erp_dashboard' %}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

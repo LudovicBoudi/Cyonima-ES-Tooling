@@ -1,0 +1,50 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}{{ q.number }} — Devis{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-xl font-bold">{{ q.number }}</h1>
+            <p class="text-sm text-gray-500">{{ q.date|date:"d/m/Y" }}</p>
+        </div>
+        <div class="flex gap-2">
+            {% if q.status == 'brouillon' or q.status == 'accepte' %}
+            <a href="{% url 'erp_quotation_convert' q.pk %}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Convertir en facture</a>
+            {% endif %}
+            <a href="{% url 'erp_quotation_edit' q.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
+            <form method="post" action="{% url 'erp_quotation_delete' q.pk %}" onsubmit="return confirm('Supprimer ce devis ?')" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">Supprimer</button>
+            </form>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        <div><span class="text-gray-500">Société :</span> <span class="font-medium">{{ q.company|default:'-' }}</span></div>
+        <div><span class="text-gray-500">Contact :</span> <span class="font-medium">{{ q.contact|default:'-' }}</span></div>
+        <div><span class="text-gray-500">Statut :</span> <span class="px-2 py-0.5 rounded text-xs font-medium {% if q.status == 'accepte' %}bg-green-200 text-green-800{% elif q.status == 'refuse' %}bg-red-200 text-red-800{% elif q.status == 'envoye' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ q.get_status_display }}</span></div>
+        <div><span class="text-gray-500">Valable jusqu'au :</span> <span class="font-medium">{{ q.valid_until|date:"d/m/Y"|default:'-' }}</span></div>
+    </div>
+    <table class="w-full text-sm mb-4">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Description</th><th class="pb-2">Qté</th><th class="pb-2">P.U. HT</th><th class="pb-2">TVA</th><th class="pb-2 text-right">Total HT</th></tr></thead>
+        <tbody>{% for l in q.lines %}<tr class="border-b border-gray-100">
+            <td class="py-2">{{ l.description }}</td>
+            <td class="py-2">{{ l.quantity }}</td>
+            <td class="py-2">{{ l.unit_price }} €</td>
+            <td class="py-2">{{ l.vat_rate|default:20 }}%</td>
+            <td class="py-2 text-right">{% widthratio l.quantity 1 l.unit_price %} €</td>
+        </tr>{% endfor %}</tbody>
+    </table>
+    <div class="text-right space-y-1 text-sm">
+        <p>Total HT : <strong>{{ q.total_ht }} €</strong></p>
+        <p>TVA : <strong>{{ q.total_tva }} €</strong></p>
+        <p class="text-lg font-bold">Total TTC : {{ q.total_ttc }} €</p>
+    </div>
+    {% if q.notes %}<div class="mt-4 p-3 bg-gray-50 rounded text-sm"><strong>Notes :</strong> {{ q.notes }}</div>{% endif %}
+    {% if invoices %}
+    <div class="mt-6">
+        <h2 class="font-semibold mb-2">Factures associées</h2>
+        {% for inv in invoices %}<a href="{% url 'erp_invoice_detail' inv.pk %}" class="text-blue-600 hover:underline text-sm block">{{ inv.number }}</a>{% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

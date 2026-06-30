@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}PCI DSS{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+    <nav class="mb-8 text-sm breadcrumbs">
+        <a href="{% url 'ressources_home' %}" class="text-indigo-600 hover:text-indigo-800">&larr; Ressources</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-700 font-semibold">PCI DSS</span>
+    </nav>
+
+    <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl p-10 mb-10 text-white shadow-xl">
+        <div class="flex items-center gap-6">
+            <span class="text-6xl">💳</span>
+            <div>
+                <h1 class="text-4xl font-bold mb-2">PCI DSS</h1>
+                <p class="text-xl text-purple-200">Payment Card Industry Data Security Standard</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Sommaire</h2>
+        <ul class="space-y-2 text-lg">
+            <li><a href="#intro" class="text-indigo-600 hover:text-indigo-800 font-medium">1. Présentation</a></li>
+            <li><a href="#objectifs" class="text-indigo-600 hover:text-indigo-800 font-medium">2. 6 objectifs & 12 exigences</a></li>
+            <li><a href="#niveaux" class="text-indigo-600 hover:text-indigo-800 font-medium">3. Niveaux de conformité</a></li>
+            <li><a href="#eval" class="text-indigo-600 hover:text-indigo-800 font-medium">4. Évaluation & audit</a></li>
+            <li><a href="#v4" class="text-indigo-600 hover:text-indigo-800 font-medium">5. PCI DSS v4.0</a></li>
+        </ul>
+    </div>
+
+    <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Présentation</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Le <strong>PCI DSS</strong> est un standard de sécurité développé par le <strong>PCI Security Standards Council</strong>
+            (fondé par American Express, Discover, JCB, Mastercard et Visa) pour protéger les données de cartes de paiement.
+        </p>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Il s'applique à toute entité qui stocke, traite ou transmet des données de titulaires de cartes
+            (numéros de carte, dates d'expiration, codes de sécurité) ainsi qu'aux données d'authentification sensibles.
+        </p>
+        <p class="text-gray-700 leading-relaxed">
+            <strong>Date de référence :</strong> La version actuelle est la <strong>v4.0.1</strong> (juin 2024).
+            La v3.2.1 a été retirée le 31 mars 2024.
+        </p>
+    </section>
+
+    <section id="objectifs" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. 6 objectifs & 12 exigences</h2>
+        <div class="space-y-4">
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 1 — Mettre en place un pare-feu</h3>
+                <p class="text-purple-700 text-sm">Exigence 1 : Installer et maintenir une configuration de pare-feu pour protéger les données de titulaires de carte.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 2 — Configurations sécurisées</h3>
+                <p class="text-purple-700 text-sm">Exigence 2 : Ne pas utiliser les paramètres par défaut fournis par le fabricant.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 3 — Protéger les données stockées</h3>
+                <p class="text-purple-700 text-sm">Exigence 3 & 4 : Protéger les données stockées et chiffrer les transmissions.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 4 — Programmes antivirus</h3>
+                <p class="text-purple-700 text-sm">Exigence 5 : Utiliser et mettre à jour régulièrement des logiciels antivirus.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 5 — Accès contrôlé</h3>
+                <p class="text-purple-700 text-sm">Exigences 6-8 : Développer et maintenir des systèmes sécurisés, restreindre l'accès aux données, identifier et authentifier.</p>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
+                <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 6 — Surveillance & tests</h3>
+                <p class="text-purple-700 text-sm">Exigences 9-12 : Accès physique restreint, surveillance des accès, tests réguliers, politique de sécurité formelle.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="niveaux" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Niveaux de conformité</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Les commerçants sont classés en 4 niveaux selon le volume de transactions par an :
+        </p>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-purple-100 text-purple-900">
+                        <th class="p-3 font-semibold border border-purple-200">Niveau</th>
+                        <th class="p-3 font-semibold border border-purple-200">Volume transactions Visa/an</th>
+                        <th class="p-3 font-semibold border border-purple-200">Type d'évaluation</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700">
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">1</td>
+                        <td class="p-3 border border-gray-200">&gt; 6 millions</td>
+                        <td class="p-3 border border-gray-200">QSA annuel + scan ASV trimestriel</td>
+                    </tr>
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">2</td>
+                        <td class="p-3 border border-gray-200">1 à 6 millions</td>
+                        <td class="p-3 border border-gray-200">QSA annuel + scan ASV trimestriel</td>
+                    </tr>
+                    <tr class="border-b border-gray-200">
+                        <td class="p-3 font-bold border border-gray-200">3</td>
+                        <td class="p-3 border border-gray-200">20 000 à 1 million</td>
+                        <td class="p-3 border border-gray-200">SAQ annuel + scan ASV trimestriel</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold border border-gray-200">4</td>
+                        <td class="p-3 border border-gray-200">&lt; 20 000</td>
+                        <td class="p-3 border border-gray-200">SAQ annuel + scan ASV trimestriel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="eval" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Évaluation & audit</h2>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li><strong>QSA</strong> (Qualified Security Assessor) : Auditeur agréé pour les évaluations sur site.</li>
+            <li><strong>SAQ</strong> (Self-Assessment Questionnaire) : Auto-évaluation pour les niveaux 3 et 4.</li>
+            <li><strong>ASV</strong> (Approved Scanning Vendor) : Scan de vulnérabilités externe trimestriel.</li>
+            <li><strong>AOC</strong> (Attestation of Compliance) : Attestation délivrée en cas de conformité.</li>
+            <li><strong>ROC</strong> (Report on Compliance) : Rapport détaillé d'évaluation pour le niveau 1.</li>
+        </ul>
+    </section>
+
+    <section id="v4" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. PCI DSS v4.0</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            La <strong>version 4.0</strong> (mars 2022, obligatoire depuis avril 2024) introduit des évolutions majeures :
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                <h3 class="font-bold text-blue-700 mb-2">Nouvelles exigences</h3>
+                <p class="text-blue-600 text-sm">Gestion des identités et des accès renforcée, authentification multifacteur (MFA) étendue, chiffrement plus strict.</p>
+            </div>
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                <h3 class="font-bold text-blue-700 mb-2">Approche personnalisée</h3>
+                <p class="text-blue-600 text-sm">Possibilité de définir des contrôles compensatoires personnalisés documentés.</p>
+            </div>
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                <h3 class="font-bold text-blue-700 mb-2">Sécurité continue</h3>
+                <p class="text-blue-600 text-sm">Passage d'une approche ponctuelle à une gestion continue de la sécurité.</p>
+            </div>
+            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+                <h3 class="font-bold text-blue-700 mb-2">Flexibilité accrue</h3>
+                <p class="text-blue-600 text-sm">Nouvelles options pour répondre aux objectifs de sécurité de manière différenciée.</p>
+            </div>
+        </div>
+        <p class="text-gray-600 mt-4 text-sm italic">Certaines exigences v4.0 sont « best practice » jusqu'au 31 mars 2025, puis deviendront obligatoires au 1er avril 2025.</p>
+    </section>
+
+    <div class="mt-8 text-center">
+        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour aux ressources
+        </a>
+    </div>
+</div>
+{% endblock %}

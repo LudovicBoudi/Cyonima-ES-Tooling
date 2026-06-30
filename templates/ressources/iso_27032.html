@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}ISO 27032{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+    <nav class="mb-8 text-sm breadcrumbs">
+        <a href="{% url 'ressources_home' %}" class="text-indigo-600 hover:text-indigo-800">&larr; Ressources</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-700 font-semibold">ISO 27032</span>
+    </nav>
+
+    <div class="bg-gradient-to-r from-violet-600 to-violet-800 rounded-2xl p-10 mb-10 text-white shadow-xl">
+        <div class="flex items-center gap-6">
+            <span class="text-6xl">🌍</span>
+            <div>
+                <h1 class="text-4xl font-bold mb-2">ISO 27032</h1>
+                <p class="text-xl text-violet-200">Guidelines for Cybersecurity</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Sommaire</h2>
+        <ul class="space-y-2 text-lg">
+            <li><a href="#intro" class="text-indigo-600 hover:text-indigo-800 font-medium">1. Présentation</a></li>
+            <li><a href="#perimetre" class="text-indigo-600 hover:text-indigo-800 font-medium">2. Périmètre et approche</a></li>
+            <li><a href="#piliers" class="text-indigo-600 hover:text-indigo-800 font-medium">3. Les 6 piliers</a></li>
+            <li><a href="#parties" class="text-indigo-600 hover:text-indigo-800 font-medium">4. Parties prenantes</a></li>
+            <li><a href="#normes" class="text-indigo-600 hover:text-indigo-800 font-medium">5. Liens avec les autres normes</a></li>
+        </ul>
+    </div>
+
+    <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Présentation</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            La norme <strong>ISO 27032</strong> (ISO/IEC 27032) est la norme internationale fournissant des
+            <strong>lignes directrices pour la cybersécurité</strong>. Elle s'adresse aux organisations de
+            toutes tailles et secteurs pour les aider à comprendre et à gérer les risques liés au cyberespace.
+        </p>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Publiée par l'ISO et la CEI, sa version actuelle est <strong>l'ISO 27032:2023</strong> qui remplace
+            la version 2012. Elle sert de guide de référence pour coordonner la cybersécurité avec les autres
+            domaines de la sécurité de l'information.
+        </p>
+        <p class="text-gray-700 leading-relaxed">
+            <strong>Objectif :</strong> Fournir un cadre global pour la cybersécurité, en abordant les aspects
+            techniques, organisationnels et humains, tout en assurant la coordination entre les parties prenantes.
+        </p>
+    </section>
+
+    <section id="perimetre" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Périmètre et approche</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'ISO 27032 couvre un périmètre large qui inclut :
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li>La <strong>sécurité de l'information</strong> (confidentialité, intégrité, disponibilité).</li>
+            <li>La <strong>sécurité des réseaux</strong> et des infrastructures.</li>
+            <li>La <strong>sécurité des applications</strong> et des services web.</li>
+            <li>La <strong>protection de la vie privée</strong> et des données personnelles.</li>
+            <li>La <strong>résilience</strong> et la continuité d'activité.</li>
+            <li>La <strong>coordination</strong> entre entités publiques et privées.</li>
+        </ul>
+    </section>
+
+    <section id="piliers" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Les 6 piliers</h2>
+        <div class="space-y-4">
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">🛡️</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Gouvernance de la cybersécurité</h3>
+                    <p class="text-violet-700 text-sm">Stratégie, politiques, rôles et responsabilités, alignement avec les objectifs métier.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">📋</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Gestion des risques</h3>
+                    <p class="text-violet-700 text-sm">Identification, analyse, évaluation et traitement des risques cyber.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">🔐</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Mesures techniques</h3>
+                    <p class="text-violet-700 text-sm">Contrôles d'accès, chiffrement, détection d'intrusion, sécurité des réseaux et des applications.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">👥</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Facteurs humains</h3>
+                    <p class="text-violet-700 text-sm">Sensibilisation, formation, culture de la sécurité, gestion des comportements.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">🔄</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Gestion des incidents</h3>
+                    <p class="text-violet-700 text-sm">Détection, réponse, analyse forensique, retour d'expérience et amélioration continue.</p>
+                </div>
+            </div>
+            <div class="flex gap-4 items-start bg-violet-50 rounded-xl p-5 border border-violet-200">
+                <span class="text-2xl shrink-0">🤝</span>
+                <div>
+                    <h3 class="font-bold text-violet-800">Coordination et partage d'information</h3>
+                    <p class="text-violet-700 text-sm">Collaboration avec CERT/CSIRT, échange de renseignements sur les menaces, coopération public-privé.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="parties" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Parties prenantes</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'ISO 27032 identifie et définit les rôles des différentes parties prenantes de la cybersécurité :
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-violet-700 mb-2">Dirigeants</h3>
+                <p class="text-gray-600 text-sm">Responsables de la stratégie, de l'allocation des ressources et de la prise de décision.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-violet-700 mb-2">RSSI / DSI</h3>
+                <p class="text-gray-600 text-sm">Responsables de la mise en œuvre opérationnelle et du pilotage de la cybersécurité.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-violet-700 mb-2">Utilisateurs</h3>
+                <p class="text-gray-600 text-sm">Employés et collaborateurs formés et sensibilisés aux bonnes pratiques.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-violet-700 mb-2">Partenaires externes</h3>
+                <p class="text-gray-600 text-sm">Fournisseurs, prestataires, autorités, CERT/CSIRT, organismes de régulation.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="normes" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Liens avec les autres normes</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'ISO 27032 s'articule avec les autres normes de la famille ISO 27000 :
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li><strong>ISO 27001</strong> : Fournit le cadre SMSI dans lequel s'inscrit la cybersécurité.</li>
+            <li><strong>ISO 27002</strong> : Code de bonnes pratiques pour les mesures de sécurité.</li>
+            <li><strong>ISO 27005</strong> : Gestion des risques en sécurité de l'information.</li>
+            <li><strong>ISO 27031</strong> : Continuité d'activité et résilience des TIC.</li>
+            <li><strong>ISO 27035</strong> : Gestion des incidents de sécurité.</li>
+            <li><strong>ISO 27701</strong> : Protection de la vie privée (extension de l'ISO 27001).</li>
+        </ul>
+    </section>
+
+    <div class="mt-8 text-center">
+        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour aux ressources
+        </a>
+    </div>
+</div>
+{% endblock %}

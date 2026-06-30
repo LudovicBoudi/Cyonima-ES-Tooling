@@ -1,0 +1,23 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}Factures fournisseurs — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Factures fournisseurs</h1>
+        <a href="{% url 'erp_supplier_invoice_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle facture fournisseur</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N° interne</th><th class="pb-2">N° fournisseur</th><th class="pb-2">Fournisseur</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for inv in invoices %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium">{{ inv.internal_number }}</td>
+            <td class="py-2">{{ inv.number|default:'-' }}</td>
+            <td class="py-2">{{ inv.provider|default:'-' }}</td>
+            <td class="py-2 text-gray-600">{{ inv.date|date:"d/m/Y" }}</td>
+            <td class="py-2">{{ inv.total_ttc }} €</td>
+            <td class="py-2">{{ inv.paid_amount }} €</td>
+            <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if inv.status == 'payee' %}bg-green-200 text-green-800{% elif inv.status == 'enregistree' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ inv.get_status_display }}</span></td>
+            <td class="py-2 text-right flex gap-2 text-xs justify-end"><a href="{% url 'erp_supplier_invoice_edit' inv.pk %}" class="text-amber-600 hover:underline">Modifier</a><a href="{% url 'erp_supplier_invoice_delete' inv.pk %}" class="text-red-600 hover:underline">Supprimer</a></td>
+        </tr>{% empty %}<tr><td colspan="8" class="py-8 text-center text-gray-400">Aucune facture fournisseur</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

@@ -45,6 +45,10 @@ Cyonima-ES-Tooling/
 │   │   ├── providers/
 │   │   ├── todo/
 │   │   └── guichet/       # Guichet IT (tickets incidents + EBI)
+│   ├── analytics/         # Web Analytics (middleware + dashboard)
+│   ├── erp/               # Devis, factures, avoirs, paiements
+│   ├── ged/               # GED — documents avec catégories, tags
+│   ├── ressources/        # Pages statiques réglementaires (RGPD, PCI DSS…)
 │   ├── core/              # Page d'accueil, SiteConfig
 │   └── notifications/     # Système de notifications
 ├── config/
@@ -58,6 +62,9 @@ Cyonima-ES-Tooling/
 │   ├── wiki/
 │   ├── crm/
 │   ├── hr/
+│   ├── erp/
+│   ├── ged/
+│   ├── ressources/
 │   └── ...
 ├── static/
 │   ├── images/
@@ -110,9 +117,26 @@ Cyonima-ES-Tooling/
 - `Contract` — contrat (CDI, CDD, stage…) avec dates et salaire
 - `LeaveRequest` — demande de congé avec workflow (demandé → validé / refusé)
 
+### erp
+- `Quotation` — devis, identifiant `DEV-{seq:04d}`, JSONField lignes
+- `Invoice` — facture, identifiant `FACT-{seq:04d}`, JSONField lignes
+- `CreditNote` — avoir, identifiant `AVOIR-{seq:04d}`, JSONField lignes
+- `SupplierInvoice` — facture fournisseur, identifiant `FACF-{seq:04d}`, JSONField lignes
+- `Payment` — paiement, lie automatiquement le statut payée
+
+### ged
+- `DocumentCategory` — catégorie avec couleur
+- `Document` — titre, fichier, version, tags, compteur téléchargements, numéro `DOC-{year}-{seq:05d}`
+
+### analytics
+- `PageView` — url, utilisateur, session_key, ip, user_agent, timestamp
+
 ### notifications
 - `NotificationSetting` — préférences par utilisateur
 - `Notification` — notification individuelle
+
+### ressources
+Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300, IM 900, II 901, PCI DSS, NIS 2)
 
 ## URLs principales
 
@@ -126,6 +150,9 @@ Cyonima-ES-Tooling/
 | `/wiki/` | Wiki collaboratif |
 | `/crm/` | CRM |
 | `/rh/` | Ressources Humaines |
+| `/erp/` | ERP (devis, factures) |
+| `/ged/` | GED (documents) |
+| `/ressources/` | Ressources Externes (RGPD, PCI DSS, NIS 2…) |
 | `/projects/` | ALM |
 | `/blog/securite/` | Blog sécurité |
 | `/blog/direction/` | Blog direction |
@@ -161,6 +188,22 @@ Nouveau → En cours → Résolu → Fermé
 ```
 Nouveau → En étude → Validé → Réalisé → Fermé
 ```
+
+### ERP
+```
+Devis (DEV) → converti → Facture (FACT)
+Paiement → statut facture passe en « payée »
+```
+
+### Leave Request
+```
+Demandée → Validée
+        → Refusée
+```
+
+### Contrat (couleurs)
+- CDI : vert (permanent)
+- CDD / Mission : vert (>3mo), jaune (1-3mo), orange (<1mo), rouge (<1sem ou expiré)
 
 ## Permissions
 

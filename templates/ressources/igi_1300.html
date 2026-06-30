@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}IGI 1300{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+    <nav class="mb-8 text-sm breadcrumbs">
+        <a href="{% url 'ressources_home' %}" class="text-indigo-600 hover:text-indigo-800">&larr; Ressources</a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="text-gray-700 font-semibold">IGI 1300</span>
+    </nav>
+
+    <div class="bg-gradient-to-r from-red-700 to-red-900 rounded-2xl p-10 mb-10 text-white shadow-xl">
+        <div class="flex items-center gap-6">
+            <span class="text-6xl">🔒</span>
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Instruction Générale Interministérielle n°1300</h1>
+                <p class="text-xl text-red-200">Protection du secret de la défense nationale</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Sommaire</h2>
+        <ul class="space-y-2 text-lg">
+            <li><a href="#intro" class="text-indigo-600 hover:text-indigo-800 font-medium">1. Présentation</a></li>
+            <li><a href="#niveaux" class="text-indigo-600 hover:text-indigo-800 font-medium">2. Niveaux de classification</a></li>
+            <li><a href="#habilitation" class="text-indigo-600 hover:text-indigo-800 font-medium">3. Habilitation</a></li>
+            <li><a href="#mesures" class="text-indigo-600 hover:text-indigo-800 font-medium">4. Mesures de protection</a></li>
+            <li><a href="#ssi" class="text-indigo-600 hover:text-indigo-800 font-medium">5. Sécurité des systèmes d'information</a></li>
+        </ul>
+    </div>
+
+    <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Présentation</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'<strong>IGI 1300</strong> est l'instruction générale interministérielle sur la protection du secret
+            de la défense nationale. Elle constitue le <strong>référentiel fondamental</strong> en matière de
+            classification et de protection des informations et supports classifiés.
+        </p>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            Elle définit les règles à appliquer pour la protection des informations et supports classifiés,
+            quel que soit leur support (papier, numérique, etc.), tout au long de leur cycle de vie
+            (création, transmission, stockage, destruction).
+        </p>
+        <p class="text-gray-700 leading-relaxed">
+            <strong>Domaine d'application :</strong> Tous les ministères et organismes publics ou privés
+            détenant, traitant ou produisant des informations classifiées de défense nationale.
+        </p>
+    </section>
+
+    <section id="niveaux" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. Niveaux de classification</h2>
+        <div class="space-y-4">
+            <div class="bg-green-50 rounded-xl p-5 border border-green-200 flex items-center gap-4">
+                <span class="text-3xl">🟢</span>
+                <div>
+                    <h3 class="font-bold text-green-800 text-lg">Confidentiel</h3>
+                    <p class="text-green-700">Niveau le moins élevé. Informations dont la divulgation pourrait nuire à la défense nationale.</p>
+                </div>
+            </div>
+            <div class="bg-yellow-50 rounded-xl p-5 border border-yellow-200 flex items-center gap-4">
+                <span class="text-3xl">🟡</span>
+                <div>
+                    <h3 class="font-bold text-yellow-800 text-lg">Secret</h3>
+                    <p class="text-yellow-700">Informations dont la divulgation pourrait gravement nuire à la défense nationale.</p>
+                </div>
+            </div>
+            <div class="bg-red-50 rounded-xl p-5 border border-red-200 flex items-center gap-4">
+                <span class="text-3xl">🔴</span>
+                <div>
+                    <h3 class="font-bold text-red-800 text-lg">Très Secret</h3>
+                    <p class="text-red-700">Niveau le plus élevé. Informations dont la divulgation pourrait exceptionnellement nuire à la défense nationale.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="habilitation" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Habilitation</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'accès aux informations classifiées est subordonné à une <strong>habilitation</strong> délivrée par
+            l'autorité compétente, après une procédure d'enquête administrative.
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li>L'habilitation est personnelle et nominative.</li>
+            <li>Elle est limitée dans le temps et révisable à tout moment.</li>
+            <li>Elle n'est accordée qu'aux personnes ayant un <strong>besoin d'en connaître</strong>.</li>
+            <li>La procédure d'enquête vérifie la loyauté, la fiabilité et la vulnérabilité de la personne.</li>
+        </ul>
+    </section>
+
+    <section id="mesures" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Mesures de protection</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-red-700 mb-2">Stockage</h3>
+                <p class="text-gray-600 text-sm">Coffres-forts, armoires fortes, locaux sécurisés avec contrôle d'accès.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-red-700 mb-2">Transmission</h3>
+                <p class="text-gray-600 text-sm">Voies chiffrées agréées, valises diplomatiques, messageries sécurisées.</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                <h3 class="font-bold text-red-700 mb-2">Destruction</h3>
+                <p class="text-gray-600 text-sm">Broyage, incinération, déchiquetage certifié selon les normes en vigueur.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="ssi" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. Sécurité des systèmes d'information</h2>
+        <p class="text-gray-700 leading-relaxed mb-4">
+            L'IGI 1300 impose des règles strictes pour les systèmes d'information traitant des données classifiées :
+        </p>
+        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+            <li><strong>Cloisonnement physique et logique</strong> des réseaux classifiés et non classifiés.</li>
+            <li><strong>Chiffrement</strong> certifié par l'ANSSI pour les données au repos et en transit.</li>
+            <li><strong>Authentification forte</strong> pour tous les accès.</li>
+            <li><strong>Journalisation</strong> exhaustive des accès et tentatives d'accès.</li>
+            <li><strong>Audits réguliers</strong> par les autorités compétentes.</li>
+        </ul>
+    </section>
+
+    <div class="mt-8 text-center">
+        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Retour aux ressources
+        </a>
+    </div>
+</div>
+{% endblock %}

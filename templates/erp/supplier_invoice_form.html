@@ -1,0 +1,81 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}{% if invoice %}Modifier {{ invoice.internal_number }}{% else %}Nouvelle facture fournisseur{% endif %} — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">{% if invoice %}Modifier {{ invoice.internal_number }}{% else %}Nouvelle facture fournisseur{% endif %}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">N° facture fournisseur</label>
+                <input type="text" name="number" value="{{ invoice.number|default:'' }}" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Fournisseur</label>
+                <select name="provider" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="">—</option>
+                    {% for p in providers %}<option value="{{ p.pk }}" {% if invoice and invoice.provider_id == p.pk %}selected{% endif %}>{{ p.company_name }}</option>{% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date</label>
+                <input type="date" name="date" value="{{ invoice.date|date:'Y-m-d'|default:'' }}" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Date d'échéance</label>
+                <input type="date" name="due_date" value="{{ invoice.due_date|date:'Y-m-d'|default:'' }}" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Statut</label>
+            <select name="status" class="w-full border rounded-lg px-3 py-2 text-sm">
+                {% for code, label in status_choices %}<option value="{{ code }}" {% if invoice and invoice.status == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Lignes</label>
+            <div id="lines-container" class="space-y-2"></div>
+            <button type="button" onclick="addLine()" class="text-sm text-blue-600 hover:underline mt-2">+ Ajouter une ligne</button>
+            <textarea name="lines_json" id="lines_json" class="hidden"></textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Notes</label>
+            <textarea name="notes" rows="3" class="w-full border rounded-lg px-3 py-2 text-sm">{{ invoice.notes|default:'' }}</textarea>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'erp_supplier_invoice_list' %}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+<script>
+const lines = {{ invoice.lines|safe|default:'[]' }};
+function addLine(desc, qty, price, vat) {
+    const div = document.createElement('div');
+    div.className = 'flex gap-2 items-end';
+    div.innerHTML = `
+        <input type="text" placeholder="Description" value="${desc||''}" class="flex-1 border rounded px-2 py-1 text-sm" oninput="saveLines()">
+        <input type="number" step="0.01" placeholder="Qté" value="${qty||1}" class="w-20 border rounded px-2 py-1 text-sm" oninput="saveLines()">
+        <input type="number" step="0.01" placeholder="P.U. HT" value="${price||0}" class="w-28 border rounded px-2 py-1 text-sm" oninput="saveLines()">
+        <input type="number" step="0.1" placeholder="TVA %" value="${vat||20}" class="w-20 border rounded px-2 py-1 text-sm" oninput="saveLines()">
+        <button type="button" onclick="this.parentElement.remove();saveLines()" class="text-red-500 text-sm">✕</button>
+    `;
+    document.getElementById('lines-container').appendChild(div);
+}
+function saveLines() {
+    const rows = [];
+    document.querySelectorAll('#lines-container > div').forEach(div => {
+        const inputs = div.querySelectorAll('input');
+        rows.push({
+            description: inputs[0].value,
+            quantity: parseFloat(inputs[1].value) || 0,
+            unit_price: parseFloat(inputs[2].value) || 0,
+            vat_rate: parseFloat(inputs[3].value) || 0,
+        });
+    });
+    document.getElementById('lines_json').value = JSON.stringify(rows);
+}
+lines.forEach(l => addLine(l.description, l.quantity, l.unit_price, l.vat_rate));
+if (!lines.length) addLine();
+</script>
+{% endblock %}

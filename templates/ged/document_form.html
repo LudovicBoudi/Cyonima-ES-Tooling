@@ -1,0 +1,47 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}{% if doc %}Modifier {{ doc.title }}{% else %}Ajouter un document{% endif %} — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5 max-w-2xl">
+    <h1 class="text-xl font-bold mb-4">{% if doc %}Modifier : {{ doc.title }}{% else %}Ajouter un document{% endif %}</h1>
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Titre *</label>
+            <input type="text" name="title" value="{{ doc.title|default:'' }}" required class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Catégorie</label>
+                <select name="category" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="">—</option>
+                    {% for c in categories %}
+                    <option value="{{ c.pk }}" {% if doc and doc.category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Version</label>
+                <input type="text" name="version" value="{{ doc.version|default:'1.0' }}" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Fichier {% if doc %}(laisser vide pour conserver l'actuel){% endif %} *</label>
+            <input type="file" name="file" {% if not doc %}required{% endif %} class="w-full text-sm">
+            {% if doc %}<p class="text-xs text-gray-400 mt-1">Actuel : {{ doc.filename }} ({{ doc.size_display }})</p>{% endif %}
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea name="description" rows="3" class="w-full border rounded-lg px-3 py-2 text-sm">{{ doc.description|default:'' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Tags</label>
+            <input type="text" name="tags" value="{{ doc.tags|default:'' }}" placeholder="ex: contrat, client, 2026" class="w-full border rounded-lg px-3 py-2 text-sm">
+            <p class="text-xs text-gray-400 mt-0.5">Séparés par des virgules</p>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'ged_document_list' %}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

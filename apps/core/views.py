@@ -10,6 +10,9 @@ def home(request):
         {'title': 'Wiki',                     'description': 'Base de connaissances collaborative',           'icon': 'images/wiki-icon.png',              'url': '/wiki/'},
         {'title': 'CRM',                      'description': 'Gestion de la relation client (contacts, affaires, interactions)', 'icon': 'images/crm-icon.png', 'url': '/crm/'},
         {'title': 'Ressources Humaines',       'description': 'Employés, contrats, congés, départements',                 'icon': 'images/hr-icon.png',              'url': '/rh/'},
+        {'title': 'ERP', 'description': 'Devis, factures, avoirs, paiements', 'icon': 'images/erp-icon.png', 'url': '/erp/'},
+        {'title': 'GED', 'description': 'Gestion électronique de documents', 'icon': 'images/ged-icon.png', 'url': '/ged/'},
+        {'title': 'Ressources Externes', 'description': 'Références réglementaires (RGPD, IGI 1300, IM 900, II 901)', 'icon': 'images/ressources-icon.png', 'url': '/ressources/'},
         {'title': 'Gestion de projet ALM', 'description': 'Projets, exigences, tests, tickets', 'icon': 'images/Project-icon.png', 'url': '/projects/'},
         {'title': 'Blog Sécurité', 'description': 'Actualités et alertes sécurité', 'icon': 'images/Security-blog-icon.png', 'url': '/blog/securite/'},
         {'title': 'Blog Direction', 'description': 'Communications de la direction générale', 'icon': 'images/DG-blog-icon.png', 'url': '/blog/direction/'},
@@ -18,5 +21,5 @@ def home(request):
         {'title': 'Zone COMEX', 'description': "Espace d'échange du comité exécutif", 'icon': 'images/COMEX-exchange-zone-icon.png', 'url': '/comex/'},
     ]
     if request.user.is_staff:
-        tiles.insert(0, {'title': 'Administration', 'description': 'Gestion des utilisateurs, fournisseurs, budgets', 'icon': 'images/Global-App-logo-icon.png', 'url': '/administration/'})
+        tiles.insert(0, {'title': 'Administration', 'description': 'Gestion des utilisateurs, rôles, configuration, sauvegarde et analytics', 'icon': 'images/Global-App-logo-icon.png', 'url': '/administration/'})
     return render(request, 'home.html', {'tiles': tiles})

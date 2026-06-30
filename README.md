@@ -18,6 +18,9 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **Wiki** | Pages de documentation collaborative | `/wiki/` |
 | **CRM** | Gestion de la relation client (contacts, sociétés, affaires) | `/crm/` |
 | **RH** | Ressources Humaines (employés, contrats, congés) | `/rh/` |
+| **ERP** | Devis, factures, avoirs, paiements, factures fournisseurs | `/erp/` |
+| **GED** | Gestion électronique de documents (classement, recherche) | `/ged/` |
+| **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 
 ## Prérequis
@@ -78,3 +81,5 @@ Accès via l'interface : `/administration/sauvegarde/`.
 - SQLite (développement), PostgreSQL/MySQL (production)
 - Chart.js (graphiques), WeasyPrint (PDF), openpyxl (XLSX)
 - CKEditor 5 (éditeur de texte riche) — blogs et wiki
+- Pillow (traitement d'images), python-magic (détection MIME)
+- Système de rôles multiples (ManyToMany) avec 7 rôles prédéfinis

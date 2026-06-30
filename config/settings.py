@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'apps.analytics',
     'apps.crm',
     'apps.hr',
+    'apps.erp',
+    'apps.ged',
+    'apps.ressources',
 ]
 
 MIDDLEWARE = [

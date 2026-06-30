@@ -1,0 +1,47 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}{{ doc.title }} — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5 max-w-3xl">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-xl font-bold">{{ doc.title }}</h1>
+            <p class="text-sm text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'ged_document_download' doc.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">⬇ Télécharger</a>
+            <a href="{% url 'ged_document_edit' doc.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
+            <form method="post" action="{% url 'ged_document_delete' doc.pk %}" onsubmit="return confirm('Supprimer définitivement ?')" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">Supprimer</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        <div><span class="text-gray-500">Catégorie :</span> {% if doc.category %}<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ doc.category.color }}"></span>{{ doc.category.name }}{% else %}<span class="text-gray-400">Non classé</span>{% endif %}</div>
+        <div><span class="text-gray-500">Type :</span> {{ doc.file_type|upper }}</div>
+        <div><span class="text-gray-500">Version :</span> {{ doc.version }}</div>
+        <div><span class="text-gray-500">Téléchargements :</span> {{ doc.download_count }}</div>
+        <div><span class="text-gray-500">Ajouté par :</span> {{ doc.created_by.get_full_name|default:doc.created_by.username }}</div>
+        <div><span class="text-gray-500">Le :</span> {{ doc.created_at|date:"d/m/Y H:i" }}</div>
+        {% if tags_list %}<div class="col-span-2"><span class="text-gray-500">Tags :</span> {% for tag in tags_list %}<span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs mr-1">{{ tag }}</span>{% endfor %}</div>{% endif %}
+    </div>
+
+    {% if doc.description %}
+    <div class="p-4 bg-gray-50 rounded-lg text-sm mb-6">
+        <strong>Description :</strong>
+        <p class="mt-1 text-gray-700">{{ doc.description }}</p>
+    </div>
+    {% endif %}
+
+    {% if doc.file_type in 'jpg,jpeg,png,gif,svg,webp' %}
+    <div class="mt-4">
+        <img src="{{ doc.file.url }}" alt="{{ doc.title }}" class="max-w-full rounded-lg border">
+    </div>
+    {% elif doc.file_type in 'pdf' %}
+    <div class="mt-4">
+        <iframe src="{{ doc.file.url }}" class="w-full h-[600px] rounded-lg border"></iframe>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
