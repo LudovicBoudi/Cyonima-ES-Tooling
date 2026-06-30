@@ -7,6 +7,7 @@ def home(request):
     tiles = [
         {'title': 'Gestion budgétaire IT', 'description': 'Budgets, fournisseurs, DAT et tableau de bord', 'icon': 'images/IT-budget-icon.png', 'url': '/budget/'},
         {'title': 'Guichet IT', 'description': "Tickets d'incidents et expressions de besoins informatiques", 'icon': 'images/IT-guichet-icon.png', 'url': '/guichet/'},
+        {'title': 'Wiki', 'description': 'Base de connaissances collaborative', 'icon': 'images/wiki-icon.png', 'url': '/wiki/'},
         {'title': 'Gestion de projet ALM', 'description': 'Projets, exigences, tests, tickets', 'icon': 'images/Project-icon.png', 'url': '/projects/'},
         {'title': 'Blog Sécurité', 'description': 'Actualités et alertes sécurité', 'icon': 'images/Security-blog-icon.png', 'url': '/blog/securite/'},
         {'title': 'Blog Direction', 'description': 'Communications de la direction générale', 'icon': 'images/DG-blog-icon.png', 'url': '/blog/direction/'},

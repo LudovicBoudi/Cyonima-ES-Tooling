@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ page.title }} - Wiki{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-start mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">{{ page.title }}</h1>
+                <p class="text-xs text-gray-400 mt-1">
+                    Créé par {{ page.created_by.username }} le {{ page.created_at|date:"d/m/Y" }}
+                    {% if page.updated_by and page.updated_at != page.created_at %}
+                    — Mis à jour par {{ page.updated_by.username }} le {{ page.updated_at|date:"d/m/Y H:i" }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex gap-2 shrink-0">
+                <a href="{% url 'wiki_edit' page.slug %}" class="text-blue-600 hover:underline text-sm">Modifier</a>
+                <a href="{% url 'wiki_list' %}" class="text-gray-500 hover:underline text-sm">← Toutes les pages</a>
+            </div>
+        </div>
+        <div class="text-gray-700 leading-relaxed break-words overflow-hidden border-t pt-4 wiki-content">
+            {{ page.content|safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

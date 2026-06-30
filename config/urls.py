@@ -15,6 +15,7 @@ urlpatterns = [
     path('projects/', include('apps.alm.reports.urls')),
     path('budget/', include('apps.budget.urls')),
     path('guichet/', include('apps.budget.guichet.urls')),
+    path('wiki/', include('apps.wiki.urls')),
     path('blog/securite/', include('apps.blogs.sec_blog.urls')),
     path('blog/direction/', include('apps.blogs.dg_blog.urls')),
     path('blog/communication/', include('apps.blogs.blog_com.urls')),

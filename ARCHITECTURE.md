@@ -35,6 +35,7 @@ Cyonima-ES-Tooling/
 │   │   ├── blog_com/
 │   │   ├── blog_it/
 │   │   └── comex_forum/
+│   ├── wiki/              # Wiki collaboratif
 │   ├── budget/            # Gestion budgétaire IT
 │   │   ├── budgets/
 │   │   ├── dashboard/
@@ -52,6 +53,7 @@ Cyonima-ES-Tooling/
 │   ├── administration/
 │   ├── alm/
 │   ├── blogs/
+│   ├── wiki/
 │   └── ...
 ├── static/
 │   ├── images/
@@ -85,8 +87,11 @@ Cyonima-ES-Tooling/
 - `Requirement`, `TestScenario`, `TestCampaign`
 
 ### blogs
-- `Article` — article de blog (présent dans chaque app blog)
+- `SecurityArticle`, `DirectionArticle`, `ComArticle`, `ITArticle` — articles de blog avec titre, contenu (HTML via CKEditor), image à la une, pièces jointes
 - `ComexThread`, `ComexPost` — forum COMEX
+
+### wiki
+- `WikiPage` — titre, slug (auto-généré avec déduplication), contenu (HTML via CKEditor), auteur, timestamps
 
 ### notifications
 - `NotificationSetting` — préférences par utilisateur
@@ -101,6 +106,7 @@ Cyonima-ES-Tooling/
 | `/administration/` | Admin custom |
 | `/budget/` | Budget IT |
 | `/guichet/` | Guichet IT |
+| `/wiki/` | Wiki collaboratif |
 | `/projects/` | ALM |
 | `/blog/securite/` | Blog sécurité |
 | `/blog/direction/` | Blog direction |

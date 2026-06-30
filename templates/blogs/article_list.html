@@ -1,32 +1,41 @@
-{% extends 'base.html' %}
+{% extends 'blogs/base_blog.html' %}
 
 {% block title %}{{ blog_title }} - {{ site_config.site_name }}{% endblock %}
 
-{% block content %}
-<div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b flex justify-between items-center">
-        <h1 class="text-xl font-semibold">{{ blog_title }}</h1>
-        {% if can_write %}
-            <a href="{% url create_url %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouvel article</a>
-        {% endif %}
-    </div>
-    <div class="divide-y">
-        {% for a in articles %}
-        <div class="px-6 py-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <a href="{% url detail_url a.id %}" class="font-medium hover:text-[#1a3a6b]">{{ a.title }}</a>
-                    <p class="text-xs text-gray-400 mt-1">{{ a.display_id }} - {{ a.created_by.username }} - {{ a.created_at|date:"d/m/Y" }}</p>
-                </div>
-                <div class="flex gap-2 text-xs">
-                    <a href="{% url detail_url a.id %}" class="text-blue-600 hover:underline">Lire</a>
-                    <a href="{% url delete_url a.id %}" class="text-red-600 hover:underline">Supprimer</a>
-                </div>
+{% block blog_content %}
+<div class="mb-6 flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-gray-800">{{ blog_title }}</h1>
+    {% if can_write %}
+        <a href="{% url create_url %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvel article</a>
+    {% endif %}
+</div>
+<div class="space-y-6">
+    {% for a in articles %}
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <div class="flex justify-between items-start mb-3">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">{{ a.title }}</h2>
+                <p class="text-xs text-gray-400 mt-1">{{ a.display_id }} — {{ a.created_by.username }} — {{ a.created_at|date:"d/m/Y" }}</p>
+            </div>
+            <div class="flex gap-2 text-xs shrink-0">
+                <a href="{% url detail_url a.id %}" class="text-blue-600 hover:underline">Lire</a>
+                {% if can_write %}
+                <a href="{% url edit_url a.id %}" class="text-amber-600 hover:underline">Modifier</a>
+                <a href="{% url delete_url a.id %}" class="text-red-600 hover:underline">Supprimer</a>
+                {% endif %}
             </div>
         </div>
-        {% empty %}
-        <p class="px-6 py-8 text-center text-gray-500">Aucun article</p>
-        {% endfor %}
+        {% if a.image %}
+        <div class="mb-4">
+            <img src="{{ a.image.url }}" alt="{{ a.title }}" class="w-full max-h-64 object-cover rounded-lg">
+        </div>
+        {% endif %}
+        <div class="text-gray-700 leading-relaxed break-words overflow-hidden">
+            {{ a.content|safe }}
+        </div>
     </div>
+    {% empty %}
+    <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-400">Aucun article</div>
+    {% endfor %}
 </div>
 {% endblock %}

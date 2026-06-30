@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.backup',
     'apps.administration',
+    'apps.wiki',
 ]
 
 MIDDLEWARE = [

@@ -11,6 +11,7 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **Guichet IT** | Tickets d'incidents et expressions de besoins informatiques | `/guichet/` |
 | **ALM** | Projets, exigences, tests, tickets (incidents/tâches/FT) | `/projects/` |
 | **Blogs** | Sécurité, direction, communication, IT | `/blog/*/` |
+| **Wiki** | Pages de documentation collaborative | `/wiki/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 
 ## Prérequis
@@ -53,7 +54,7 @@ Serveur accessible sur `http://127.0.0.1:8080`.
 
 - Identifiant : `admin`
 - Mot de passe : `admin123Admin!`
-- Rôles : `admin`, `it_manager`
+- Rôles : `admin` (tous accès), `it_manager` (budget, guichet, blog IT)
 
 ## Sauvegarde
 
@@ -69,4 +70,5 @@ Accès via l'interface : `/administration/sauvegarde/`.
 - Django 6.0.6, Python 3.12
 - Tailwind CSS (CDN)
 - SQLite (développement), PostgreSQL/MySQL (production)
-- Chart.js, WeasyPrint, openpyxl
+- Chart.js (graphiques), WeasyPrint (PDF), openpyxl (XLSX)
+- CKEditor 5 (éditeur de texte riche) — blogs et wiki

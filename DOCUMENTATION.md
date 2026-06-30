@@ -140,11 +140,31 @@ Quatre blogs accessibles selon le rôle :
 | Communication | `/blog/communication/` | `communication` ou `admin` |
 | IT | `/blog/it/` | `it_manager` ou `admin` |
 
-Fonctionnalités : création, édition, suppression d'articles.
+### Liste des articles
+- Affichage complet des articles (titre, image à la une, contenu, métadonnées) les uns en dessous des autres.
+- Barre latérale : 30 derniers articles, lien "Tous les articles", bouton "Nouvel article".
+
+### Édition d'articles
+- Création et modification avec éditeur de texte riche (CKEditor 5) — mise en forme HTML (titres, gras, listes, etc.).
+- Possibilité d'ajouter une image à la une.
+- Suppression avec confirmation.
 
 ---
 
-## 7. COMEX (`/comex/`)
+## 7. Wiki (`/wiki/`)
+
+Documentation collaborative accessible à tous les utilisateurs connectés.
+
+### Fonctionnalités
+- **Liste** des pages avec lien vers le détail.
+- **Création** : titre et contenu saisis avec CKEditor 5 (éditeur WYSIWYG).
+- **Modification** : toute page peut être éditée (bouton "Modifier").
+- **Suppression** : confirmation avant suppression.
+- **Slugs** : génération automatique à partir du titre avec gestion des doublons.
+
+---
+
+## 8. COMEX (`/comex/`)
 
 Forum d'échange réservé à la direction et aux administrateurs.
 - Création de fils de discussion.

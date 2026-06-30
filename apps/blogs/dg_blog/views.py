@@ -14,8 +14,10 @@ def article_list(request):
     return render(request, 'blogs/article_list.html', {
         'articles': articles,
         'blog_title': 'Blog Direction Générale',
+        'list_url': 'dg_blog_list',
         'create_url': 'dg_blog_create',
         'detail_url': 'dg_blog_detail',
+        'edit_url': 'dg_blog_edit',
         'can_write': can_write(request.user),
         'delete_url': 'dg_blog_delete',
     })
@@ -24,10 +26,16 @@ def article_list(request):
 @login_required
 def article_detail(request, article_id):
     article = get_object_or_404(DirectionArticle, id=article_id)
+    articles = DirectionArticle.objects.all()
     return render(request, 'blogs/article_detail.html', {
         'article': article,
+        'articles': articles,
         'blog_title': 'Blog Direction Générale',
         'list_url': 'dg_blog_list',
+        'create_url': 'dg_blog_create',
+        'detail_url': 'dg_blog_detail',
+        'edit_url': 'dg_blog_edit',
+        'can_write': can_write(request.user),
     })
 
 
@@ -40,14 +48,42 @@ def article_create(request):
         article = DirectionArticle.objects.create(
             title=request.POST['title'],
             content=request.POST['content'],
+            image=request.FILES.get('image'),
             created_by=request.user,
         )
         messages.success(request, f"Article {article.display_id()} créé.")
         return redirect('dg_blog_detail', article_id=article.id)
     return render(request, 'blogs/article_form.html', {
+        'page': None,
         'blog_title': 'Blog Direction Générale',
         'list_url': 'dg_blog_list',
         'create_url': 'dg_blog_create',
+        'detail_url': 'dg_blog_detail',
+        'edit_url': 'dg_blog_edit',
+    })
+
+
+@login_required
+def article_edit(request, article_id):
+    article = get_object_or_404(DirectionArticle, id=article_id)
+    if request.user != article.created_by and not (hasattr(request.user, 'profile') and request.user.profile.is_admin()):
+        messages.error(request, "Vous ne pouvez pas modifier cet article.")
+        return redirect('dg_blog_detail', article_id=article.id)
+    if request.method == 'POST':
+        article.title = request.POST['title']
+        article.content = request.POST['content']
+        if request.FILES.get('image'):
+            article.image = request.FILES['image']
+        article.save()
+        messages.success(request, f"Article {article.display_id()} modifié.")
+        return redirect('dg_blog_detail', article_id=article.id)
+    return render(request, 'blogs/article_form.html', {
+        'page': article,
+        'blog_title': 'Blog Direction Générale',
+        'list_url': 'dg_blog_list',
+        'create_url': 'dg_blog_create',
+        'detail_url': 'dg_blog_detail',
+        'edit_url': 'dg_blog_edit',
     })
 
 
