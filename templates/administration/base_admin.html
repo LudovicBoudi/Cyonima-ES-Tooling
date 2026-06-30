@@ -9,6 +9,7 @@
             <a href="{% url 'admin_user_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'admin_user_list' %}bg-gray-100 font-medium{% endif %}">Utilisateurs</a>
             <a href="{% url 'admin_site_config' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'admin_site_config' %}bg-gray-100 font-medium{% endif %}">Configuration</a>
             <a href="{% url 'admin_backup' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'admin_backup' %}bg-gray-100 font-medium{% endif %}">Sauvegarde</a>
+            <a href="{% url 'admin_analytics' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'admin_analytics' %}bg-gray-100 font-medium{% endif %}">Web Analytics</a>
             <hr class="my-2">
             <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">Retour à l'accueil</a>
         </div>

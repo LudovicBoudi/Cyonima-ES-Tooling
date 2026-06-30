@@ -1,0 +1,22 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}Sociétés — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Sociétés</h1>
+        <a href="{% url 'crm_company_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle société</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Nom</th><th class="pb-2">Ville</th><th class="pb-2">Téléphone</th><th class="pb-2 text-right">Contacts</th><th class="pb-2 text-right">Affaires</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for c in companies %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2"><a href="{% url 'crm_company_detail' c.pk %}" class="text-blue-600 hover:underline font-medium">{{ c.name }}</a></td>
+            <td class="py-2 text-gray-600">{{ c.city }}</td>
+            <td class="py-2 text-gray-600">{{ c.phone }}</td>
+            <td class="py-2 text-right">{{ c.contact_count }}</td>
+            <td class="py-2 text-right">{{ c.deal_count }}</td>
+            <td class="py-2 text-right"><a href="{% url 'crm_company_edit' c.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>
+        </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucune société</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

@@ -37,6 +37,9 @@ INSTALLED_APPS = [
     'apps.backup',
     'apps.administration',
     'apps.wiki',
+    'apps.analytics',
+    'apps.crm',
+    'apps.hr',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.analytics.middleware.AnalyticsMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

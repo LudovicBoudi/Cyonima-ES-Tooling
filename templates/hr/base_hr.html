@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex gap-6">
+    <aside class="w-56 shrink-0">
+        <div class="bg-white rounded-lg shadow p-4 space-y-1 sticky top-24">
+            <h3 class="font-semibold text-gray-700 mb-3 px-3">Ressources Humaines</h3>
+            <a href="{% url 'hr_dashboard' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'hr_dashboard' %}bg-gray-100 font-medium{% endif %}">Tableau de bord</a>
+            <a href="{% url 'hr_employee_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'hr_employee' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Employés</a>
+            <a href="{% url 'hr_department_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'hr_department' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Départements</a>
+            <a href="{% url 'hr_contract_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'hr_contract' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Contrats</a>
+            <a href="{% url 'hr_leave_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'hr_leave' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Congés</a>
+            <hr class="my-2">
+            <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
+        </div>
+    </aside>
+    <div class="flex-1 min-w-0">
+        {% block hr_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

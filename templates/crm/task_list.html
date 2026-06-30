@@ -1,0 +1,26 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}Tâches — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Tâches CRM</h1>
+        <a href="{% url 'crm_task_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle tâche</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Titre</th><th class="pb-2">Contact</th><th class="pb-2">Assigné à</th><th class="pb-2">Échéance</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for t in tasks %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium {% if t.completed %}line-through text-gray-400{% endif %}">{{ t.title }}</td>
+            <td class="py-2 text-gray-600">{% if t.contact %}{{ t.contact }}{% endif %}</td>
+            <td class="py-2 text-gray-600">{% if t.assigned_to %}{{ t.assigned_to.username }}{% endif %}</td>
+            <td class="py-2 {% if t.due_date and t.due_date < today and not t.completed %}text-red-600 font-semibold{% endif %}">{% if t.due_date %}{{ t.due_date|date:"d/m/Y" }}{% endif %}</td>
+            <td class="py-2">{% if t.completed %}<span class="text-green-600">✓ Terminée</span>{% else %}<span class="text-amber-600">En cours</span>{% endif %}</td>
+            <td class="py-2 text-right flex gap-2 justify-end">
+                <a href="{% url 'crm_task_toggle' t.pk %}" class="text-xs {% if t.completed %}text-gray-500{% else %}text-green-600{% endif %} hover:underline">{% if t.completed %}Rouvrir{% else %}Terminer{% endif %}</a>
+                <a href="{% url 'crm_task_edit' t.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a>
+                <a href="{% url 'crm_task_delete' t.pk %}" class="text-red-600 hover:underline text-xs">Supprimer</a>
+            </td>
+        </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucune tâche</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

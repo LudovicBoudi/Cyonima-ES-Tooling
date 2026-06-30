@@ -6,6 +6,7 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('administration/', include('apps.administration.urls')),
+    path('administration/analytiques/', include('apps.analytics.urls')),
     path('accounts/', include('apps.accounts.urls')),
     path('projects/', include('apps.alm.projects.urls')),
     path('projects/', include('apps.alm.requirements.urls')),
@@ -16,6 +17,8 @@ urlpatterns = [
     path('budget/', include('apps.budget.urls')),
     path('guichet/', include('apps.budget.guichet.urls')),
     path('wiki/', include('apps.wiki.urls')),
+    path('crm/', include('apps.crm.urls')),
+    path('rh/', include('apps.hr.urls')),
     path('blog/securite/', include('apps.blogs.sec_blog.urls')),
     path('blog/direction/', include('apps.blogs.dg_blog.urls')),
     path('blog/communication/', include('apps.blogs.blog_com.urls')),

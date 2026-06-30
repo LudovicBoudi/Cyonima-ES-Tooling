@@ -1,0 +1,45 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}{{ company.name }} — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-start mb-6">
+        <h1 class="text-xl font-bold">{{ company.name }}</h1>
+        <div class="flex gap-2 text-sm">
+            <a href="{% url 'crm_company_edit' company.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+            <a href="{% url 'crm_company_delete' company.pk %}" class="text-red-600 hover:underline">Supprimer</a>
+            <a href="{% url 'crm_company_list' %}" class="text-gray-500 hover:underline">← Retour</a>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        {% if company.sector %}<div><span class="text-gray-500">Secteur :</span> {{ company.sector }}</div>{% endif %}
+        {% if company.address %}<div><span class="text-gray-500">Adresse :</span> {{ company.address }}{% if company.postal_code %} {{ company.postal_code }}{% endif %} {{ company.city }}</div>{% endif %}
+        {% if company.country %}<div><span class="text-gray-500">Pays :</span> {{ company.country }}</div>{% endif %}
+        {% if company.phone %}<div><span class="text-gray-500">Tél :</span> {{ company.phone }}</div>{% endif %}
+        {% if company.email %}<div><span class="text-gray-500">Email :</span> {{ company.email }}</div>{% endif %}
+        {% if company.website %}<div><span class="text-gray-500">Site :</span> {{ company.website }}</div>{% endif %}
+        {% if company.siret %}<div><span class="text-gray-500">SIRET :</span> {{ company.siret }}</div>{% endif %}
+    </div>
+    {% if company.notes %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-6">{{ company.notes|linebreaks }}</div>{% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+            <h2 class="text-lg font-semibold mb-3">Contacts ({{ contacts|length }})</h2>
+            {% for c in contacts %}
+            <div class="py-2 border-b border-gray-100">
+                <p class="font-medium">{{ c.first_name }} {{ c.last_name }}</p>
+                <p class="text-xs text-gray-400">{% if c.function %}{{ c.function }} — {% endif %}{{ c.email }}</p>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucun contact</p>{% endfor %}
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold mb-3">Affaires ({{ deals|length }})</h2>
+            {% for d in deals %}
+            <div class="py-2 border-b border-gray-100">
+                <p class="font-medium">{{ d.title }}</p>
+                <p class="text-xs text-gray-400">{{ d.get_stage_display }} — {{ d.amount }} €</p>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucune affaire</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'hr/base_hr.html' %}
+{% block title %}Contrats — RH{% endblock %}
+{% block hr_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Contrats</h1>
+        <a href="{% url 'hr_contract_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouveau contrat</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Employé</th><th class="pb-2">Type</th><th class="pb-2">Début</th><th class="pb-2">Fin</th><th class="pb-2 text-right">Salaire</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for c in contracts %}<tr class="border-b border-gray-100 hover:bg-gray-50{% if c.row_color == 'red' %} bg-red-50 hover:bg-red-100{% elif c.row_color == 'orange' %} bg-orange-50 hover:bg-orange-100{% elif c.row_color == 'yellow' %} bg-yellow-50 hover:bg-yellow-100{% elif c.row_color == 'green' %} bg-green-50 hover:bg-green-100{% endif %}">
+            <td class="py-2 font-medium">{{ c.employee }}</td>
+            <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{{ c.get_type_display }}</span></td>
+            <td class="py-2 text-gray-600">{{ c.start_date|date:"d/m/Y" }}</td>
+            <td class="py-2 text-gray-600">{{ c.end_date|date:"d/m/Y"|default:'—' }}</td>
+            <td class="py-2 text-right">{{ c.salary|floatformat:0 }} €</td>
+            <td class="py-2 text-right"><a href="{% url 'hr_contract_edit' c.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>
+        </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun contrat</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

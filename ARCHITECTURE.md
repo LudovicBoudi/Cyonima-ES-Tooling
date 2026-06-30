@@ -36,6 +36,8 @@ Cyonima-ES-Tooling/
 │   │   ├── blog_it/
 │   │   └── comex_forum/
 │   ├── wiki/              # Wiki collaboratif
+│   ├── crm/               # CRM (contacts, affaires, interactions)
+│   ├── hr/                # RH (employés, contrats, congés)
 │   ├── budget/            # Gestion budgétaire IT
 │   │   ├── budgets/
 │   │   ├── dashboard/
@@ -54,6 +56,8 @@ Cyonima-ES-Tooling/
 │   ├── alm/
 │   ├── blogs/
 │   ├── wiki/
+│   ├── crm/
+│   ├── hr/
 │   └── ...
 ├── static/
 │   ├── images/
@@ -93,6 +97,19 @@ Cyonima-ES-Tooling/
 ### wiki
 - `WikiPage` — titre, slug (auto-généré avec déduplication), contenu (HTML via CKEditor), auteur, timestamps
 
+### crm
+- `Company` — société (coordonnées, SIRET, secteur)
+- `Contact` — contact rattaché à une société
+- `Deal` — affaire avec pipeline (prospection → devis → négociation → gagné/perdu)
+- `Interaction` — historique d'appels, emails, réunions, notes
+- `CrmTask` — tâche liée à un contact ou une affaire
+
+### hr
+- `Employee` — fiche employé (coordonnées, département, poste, statut, dates)
+- `Department` — département avec responsable
+- `Contract` — contrat (CDI, CDD, stage…) avec dates et salaire
+- `LeaveRequest` — demande de congé avec workflow (demandé → validé / refusé)
+
 ### notifications
 - `NotificationSetting` — préférences par utilisateur
 - `Notification` — notification individuelle
@@ -107,6 +124,8 @@ Cyonima-ES-Tooling/
 | `/budget/` | Budget IT |
 | `/guichet/` | Guichet IT |
 | `/wiki/` | Wiki collaboratif |
+| `/crm/` | CRM |
+| `/rh/` | Ressources Humaines |
 | `/projects/` | ALM |
 | `/blog/securite/` | Blog sécurité |
 | `/blog/direction/` | Blog direction |

@@ -1,0 +1,23 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block crm_content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
+    <h1 class="text-xl font-semibold mb-6">{{ title }}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Titre *</label><input type="text" name="title" value="{{ task.title|default:'' }}" required class="w-full px-3 py-2 border rounded text-sm"></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Contact</label><select name="contact" class="w-full px-3 py-2 border rounded text-sm"><option value="">—</option>{% for c in contacts %}<option value="{{ c.pk }}" {% if task and task.contact_id == c.pk %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Affaire</label><select name="deal" class="w-full px-3 py-2 border rounded text-sm"><option value="">—</option>{% for d in deals %}<option value="{{ d.pk }}" {% if task and task.deal_id == d.pk %}selected{% endif %}>{{ d.title }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Assigné à</label><select name="assigned_to" class="w-full px-3 py-2 border rounded text-sm"><option value="">—</option>{% for u in users %}<option value="{{ u.pk }}" {% if task and task.assigned_to_id == u.pk %}selected{% endif %}>{{ u.username }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Échéance</label><input type="date" name="due_date" value="{% if task and task.due_date %}{{ task.due_date|date:'Y-m-d' }}{% endif %}" class="w-full px-3 py-2 border rounded text-sm"></div>
+            <div class="col-span-2"><label class="flex items-center gap-2 text-sm"><input type="checkbox" name="completed" {% if task and task.completed %}checked{% endif %} class="rounded border-gray-300"> Terminée</label></div>
+            <div class="col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><textarea name="description" rows="4" class="w-full px-3 py-2 border rounded text-sm">{{ task.description|default:'' }}</textarea></div>
+        </div>
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'crm_task_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

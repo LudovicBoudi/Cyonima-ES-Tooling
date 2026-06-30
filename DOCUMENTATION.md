@@ -31,6 +31,13 @@ Réservé aux membres du staff (`is_staff=True`).
   - Fichiers médias
   - Fichier `version.txt` avec la date
 
+### Web Analytics
+- `/administration/analytiques/` — tableau de bord des visites :
+  - Vues totales et visiteurs uniques (7 et 30 jours)
+  - Graphique d'évolution quotidienne (Chart.js)
+  - Pages les plus visitées
+- Les visites sont enregistrées automatiquement via un middleware (hors pages d'administration et statiques).
+
 ---
 
 ## 3. Budget IT (`/budget/`)
@@ -161,6 +168,33 @@ Documentation collaborative accessible à tous les utilisateurs connectés.
 - **Modification** : toute page peut être éditée (bouton "Modifier").
 - **Suppression** : confirmation avant suppression.
 - **Slugs** : génération automatique à partir du titre avec gestion des doublons.
+
+---
+
+## 8. CRM — Gestion de la Relation Client (`/crm/`)
+
+Module de gestion commerciale avec pipeline de ventes.
+
+### Fonctionnalités
+- **Tableau de bord** : compteurs (sociétés, contacts, affaires), pipeline, montants gagnés/perdus (Chart.js), interactions récentes, tâches à venir et en retard.
+- **Sociétés** : fiche complète (coordonnées, SIRET, secteur), liste avec nombre de contacts et d'affaires, détail avec contacts et affaires liés.
+- **Contacts** : prénom, nom, société, fonction, coordonnées, notes.
+- **Affaires** : pipeline avec étapes (Prospection → Devis → Négociation → Gagné / Perdu), montant, probabilité, date de clôture prévue.
+- **Interactions** : historique des appels, emails, réunions et notes liés à un contact/affaire. Filtrable par contact ou affaire.
+- **Tâches** : todo liées à un contact ou une affaire, avec assignation, échéance, marquage terminé/à faire.
+
+---
+
+## 9. RH — Ressources Humaines (`/rh/`)
+
+Gestion administrative du personnel.
+
+### Fonctionnalités
+- **Tableau de bord** : effectif, actifs, essais, congés en cours, demandes en attente, graphiques (employés par département, contrats par type), anniversaires du mois, dernières demandes de congé.
+- **Employés** : fiche complète (coordonnées, département, poste, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
+- **Départements** : liste avec nombre d'employés, description.
+- **Contrats** : CDI, CDD, stage, alternance, freelance, intérim — avec dates, salaire, poste.
+- **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours.
 
 ---
 

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="flex gap-6">
+    <aside class="w-56 shrink-0">
+        <div class="bg-white rounded-lg shadow p-4 space-y-1 sticky top-24">
+            <h3 class="font-semibold text-gray-700 mb-3 px-3">CRM</h3>
+            <a href="{% url 'crm_dashboard' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'crm_dashboard' %}bg-gray-100 font-medium{% endif %}">Tableau de bord</a>
+            <a href="{% url 'crm_company_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_company' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Sociétés</a>
+            <a href="{% url 'crm_contact_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_contact' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Contacts</a>
+            <a href="{% url 'crm_deal_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_deal' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Affaires</a>
+            <a href="{% url 'crm_interaction_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_interaction' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Interactions</a>
+            <a href="{% url 'crm_task_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_task' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Tâches</a>
+            <hr class="my-2">
+            <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
+        </div>
+    </aside>
+    <div class="flex-1 min-w-0">
+        {% block crm_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

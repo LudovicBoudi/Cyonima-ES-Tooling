@@ -1,0 +1,81 @@
+{% extends 'administration/base_admin.html' %}
+{% block title %}Web Analytics — Administration{% endblock %}
+{% block admin_content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold text-gray-800">Web Analytics</h1>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-blue-700">{{ total_views_7 }}</p>
+            <p class="text-sm text-gray-500">Vues (7j)</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-green-700">{{ unique_visitors_7 }}</p>
+            <p class="text-sm text-gray-500">Visiteurs uniques (7j)</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-blue-700">{{ total_views_30 }}</p>
+            <p class="text-sm text-gray-500">Vues (30j)</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-green-700">{{ unique_visitors_30 }}</p>
+            <p class="text-sm text-gray-500">Visiteurs uniques (30j)</p>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Vues par jour (30 derniers jours)</h2>
+        <canvas id="viewsChart" height="100"></canvas>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Pages les plus visitées (30j)</h2>
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-500 border-b">
+                    <th class="pb-2">Page</th>
+                    <th class="pb-2 text-right">Vues</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in popular_pages %}
+                <tr class="border-b border-gray-100">
+                    <td class="py-2 font-mono text-xs">{{ p.url }}</td>
+                    <td class="py-2 text-right font-semibold">{{ p.count }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="2" class="py-4 text-center text-gray-400">Aucune donnée</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const ctx = document.getElementById('viewsChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for d in views_by_day %}"{{ d.date }}",{% endfor %}],
+        datasets: [{
+            label: 'Vues',
+            data: [{% for d in views_by_day %}{{ d.count }},{% endfor %}],
+            borderColor: '#1a3a6b',
+            backgroundColor: 'rgba(26,58,107,0.1)',
+            fill: true,
+            tension: 0.3,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { maxTicksLimit: 10, font: { size: 10 } } },
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+    }
+});
+</script>
+{% endblock %}

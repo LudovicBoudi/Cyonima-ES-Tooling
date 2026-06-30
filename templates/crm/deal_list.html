@@ -1,0 +1,22 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}Affaires — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Affaires</h1>
+        <a href="{% url 'crm_deal_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle affaire</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Titre</th><th class="pb-2">Société</th><th class="pb-2">Montant</th><th class="pb-2">Prob.</th><th class="pb-2">Étape</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for d in deals %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium">{{ d.title }}</td>
+            <td class="py-2 text-gray-600">{% if d.company %}{{ d.company.name }}{% endif %}</td>
+            <td class="py-2">{{ d.amount|floatformat:0 }} €</td>
+            <td class="py-2">{{ d.probability }}%</td>
+            <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if d.stage == 'gagne' %}bg-green-100 text-green-800{% elif d.stage == 'perdu' %}bg-red-100 text-red-800{% elif d.stage == 'negociation' %}bg-orange-100 text-orange-800{% elif d.stage == 'devis' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">{{ d.get_stage_display }}</span></td>
+            <td class="py-2 text-right"><a href="{% url 'crm_deal_edit' d.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>
+        </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucune affaire</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}

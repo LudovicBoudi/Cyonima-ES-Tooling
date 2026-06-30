@@ -1,5 +1,9 @@
 # Cyonima-ES-Tools
 
+<p align="center">
+  <img src="image.png" alt="Cyonima-ES-Tools screenshot" width="800">
+</p>
+
 Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communication interne et le helpdesk en Français proposé par Cyonima de la communauté RENEGA2.
 
 ## Modules
@@ -12,6 +16,8 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **ALM** | Projets, exigences, tests, tickets (incidents/tâches/FT) | `/projects/` |
 | **Blogs** | Sécurité, direction, communication, IT | `/blog/*/` |
 | **Wiki** | Pages de documentation collaborative | `/wiki/` |
+| **CRM** | Gestion de la relation client (contacts, sociétés, affaires) | `/crm/` |
+| **RH** | Ressources Humaines (employés, contrats, congés) | `/rh/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 
 ## Prérequis
@@ -23,7 +29,7 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 
 ```bash
 # 1. Cloner le dépôt
-git clone <url> && cd Cyonima-ES-Tooling
+git clone https://github.com/LudovicBoudi/Cyonima-ES-Tooling.git && cd Cyonima-ES-Tooling
 
 # 2. Environnement virtuel
 python3 -m venv venv

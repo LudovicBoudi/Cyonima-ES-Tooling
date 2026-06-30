@@ -1,0 +1,111 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}CRM — Tableau de bord{% endblock %}
+{% block crm_content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold text-gray-800">Tableau de bord CRM</h1>
+
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-blue-700">{{ total_companies }}</p>
+            <p class="text-sm text-gray-500">Sociétés</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-green-700">{{ total_contacts }}</p>
+            <p class="text-sm text-gray-500">Contacts</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-amber-600">{{ total_deals }}</p>
+            <p class="text-sm text-gray-500">Affaires</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-purple-700">{{ active_deals }}</p>
+            <p class="text-sm text-gray-500">En cours</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-emerald-700">{{ pipeline_value|floatformat:0 }} €</p>
+            <p class="text-sm text-gray-500">Pipeline</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Affaires par étape</h2>
+            <canvas id="stageChart" height="180"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Montants gagnés / perdus</h2>
+            <canvas id="wonLostChart" height="180"></canvas>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Tâches en retard</h2>
+        {% if overdue_tasks_count %}
+            <p class="text-red-600 font-semibold">{{ overdue_tasks_count }} tâche(s) en retard</p>
+        {% else %}
+            <p class="text-gray-400">Aucune tâche en retard</p>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Interactions récentes</h2>
+            {% for i in recent_interactions %}
+            <div class="py-2 border-b border-gray-100 last:border-0">
+                <p class="text-sm font-medium">{{ i.subject }}</p>
+                <p class="text-xs text-gray-400">{{ i.get_type_display }} — {{ i.contact }} — {{ i.created_at|date:"d/m/Y" }}</p>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm">Aucune interaction</p>
+            {% endfor %}
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Tâches à venir</h2>
+            {% for t in upcoming_tasks %}
+            <div class="py-2 border-b border-gray-100 last:border-0 flex items-center gap-3">
+                <span class="w-2 h-2 rounded-full {% if t.due_date and t.due_date < today %}bg-red-500{% else %}bg-blue-500{% endif %} shrink-0"></span>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium {% if t.completed %}line-through text-gray-400{% endif %}">{{ t.title }}</p>
+                    <p class="text-xs text-gray-400">{% if t.due_date %}{{ t.due_date|date:"d/m/Y" }}{% else %}Sans date{% endif %}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm">Aucune tâche</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+new Chart(document.getElementById('stageChart'), {
+    type: 'bar',
+    data: {
+        labels: [{% for d in deals_by_stage %}"{{ d.label }}",{% endfor %}],
+        datasets: [{
+            label: 'Affaires',
+            data: [{% for d in deals_by_stage %}{{ d.count }},{% endfor %}],
+            backgroundColor: ['#3b82f6','#f59e0b','#f97316','#22c55e','#ef4444'],
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+new Chart(document.getElementById('wonLostChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Gagné ({{ won_amount|floatformat:0 }}€)', 'Perdu ({{ lost_amount|floatformat:0 }}€)'],
+        datasets: [{
+            data: [{{ won_amount }}, {{ lost_amount }}],
+            backgroundColor: ['#22c55e', '#ef4444'],
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

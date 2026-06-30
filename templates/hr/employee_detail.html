@@ -1,0 +1,33 @@
+{% extends 'hr/base_hr.html' %}
+{% block title %}{{ employee }} — RH{% endblock %}
+{% block hr_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-start mb-6">
+        <h1 class="text-xl font-bold">{{ employee.first_name }} {{ employee.last_name }}</h1>
+        <div class="flex gap-2 text-sm">
+            <a href="{% url 'hr_employee_edit' employee.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+            <a href="{% url 'hr_employee_delete' employee.pk %}" class="text-red-600 hover:underline">Supprimer</a>
+            <a href="{% url 'hr_employee_list' %}" class="text-gray-500 hover:underline">← Retour</a>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        <div><span class="text-gray-500">Département :</span> {{ employee.department.name|default:'—' }}</div>
+        <div><span class="text-gray-500">Poste :</span> {{ employee.job_title|default:'—' }}</div>
+        <div><span class="text-gray-500">Email :</span> {{ employee.email|default:'—' }}</div>
+        <div><span class="text-gray-500">Téléphone :</span> {{ employee.phone|default:'—' }}</div>
+        <div><span class="text-gray-500">Portable :</span> {{ employee.mobile|default:'—' }}</div>
+        <div><span class="text-gray-500">Statut :</span> {{ employee.get_status_display }}</div>
+        <div><span class="text-gray-500">Société :</span> {{ employee.company|default:'—' }}</div>
+        <div><span class="text-gray-500">Date d'embauche :</span> {{ employee.hire_date|date:"d/m/Y"|default:'—' }}</div>
+        <div><span class="text-gray-500">Date de naissance :</span> {{ employee.birth_date|date:"d/m/Y"|default:'—' }}</div>
+    </div>
+    {% if employee.address %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4"><span class="text-gray-500">Adresse :</span> {{ employee.address|linebreaks }}</div>{% endif %}
+    {% if employee.emergency_contact %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4"><span class="text-gray-500">Contact urgence :</span> {{ employee.emergency_contact }} ({{ employee.emergency_phone }})</div>{% endif %}
+    {% if employee.notes %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4">{{ employee.notes|linebreaks }}</div>{% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div><h2 class="text-lg font-semibold mb-3">Contrats ({{ contracts|length }})</h2>{% for c in contracts %}<div class="py-2 border-b border-gray-100"><p class="font-medium">{{ c.get_type_display }}</p><p class="text-xs text-gray-400">{{ c.start_date|date:"d/m/Y" }} → {% if c.end_date %}{{ c.end_date|date:"d/m/Y" }}{% else %}En cours{% endif %} — {{ c.salary }} €</p></div>{% empty %}<p class="text-gray-400 text-sm">Aucun contrat</p>{% endfor %}</div>
+        <div><h2 class="text-lg font-semibold mb-3">Congés ({{ leaves|length }})</h2>{% for l in leaves %}<div class="py-2 border-b border-gray-100"><p class="font-medium">{{ l.get_type_display }}</p><p class="text-xs text-gray-400">{{ l.start_date|date:"d/m/Y" }} → {{ l.end_date|date:"d/m/Y" }} <span class="px-1 py-0.5 rounded text-xs {% if l.status == 'valide' %}bg-green-100 text-green-800{% elif l.status == 'refuse' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ l.get_status_display }}</span></p></div>{% empty %}<p class="text-gray-400 text-sm">Aucun congé</p>{% endfor %}</div>
+    </div>
+</div>
+{% endblock %}

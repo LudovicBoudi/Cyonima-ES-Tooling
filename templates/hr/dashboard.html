@@ -1,0 +1,92 @@
+{% extends 'hr/base_hr.html' %}
+{% block title %}RH — Tableau de bord{% endblock %}
+{% block hr_content %}
+<div class="space-y-6">
+    <h1 class="text-2xl font-bold text-gray-800">Tableau de bord RH</h1>
+
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-blue-700">{{ total_employees }}</p>
+            <p class="text-sm text-gray-500">Employés</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-green-700">{{ active_employees }}</p>
+            <p class="text-sm text-gray-500">Actifs</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-amber-600">{{ trial_employees }}</p>
+            <p class="text-sm text-gray-500">Période d'essai</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-purple-700">{{ on_leave }}</p>
+            <p class="text-sm text-gray-500">En congés</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-emerald-700">{{ pending_leaves }}</p>
+            <p class="text-sm text-gray-500">Congés en attente</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Employés par département</h2>
+            <canvas id="deptChart" height="180"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Contrats par type</h2>
+            <canvas id="contractChart" height="180"></canvas>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Anniversaires du mois</h2>
+            {% for e in upcoming_birthdays %}
+            <div class="py-2 border-b border-gray-100">{{ e.first_name }} {{ e.last_name }} — {{ e.birth_date|date:"d F" }}</div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucun anniversaire ce mois</p>{% endfor %}
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">Dernières demandes de congé</h2>
+            {% for l in recent_leaves %}
+            <div class="py-2 border-b border-gray-100 text-sm">
+                <span class="font-medium">{{ l.employee }}</span> — {{ l.get_type_display }}
+                <span class="text-xs text-gray-400">{{ l.start_date|date:"d/m" }} → {{ l.end_date|date:"d/m" }}</span>
+                <span class="px-1.5 py-0.5 rounded text-xs {% if l.status == 'valide' %}bg-green-100 text-green-800{% elif l.status == 'refuse' %}bg-red-100 text-red-800{% elif l.status == 'annule' %}bg-gray-100 text-gray-500{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ l.get_status_display }}</span>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucune demande</p>{% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: {
+        labels: [{% for d in employees_by_dept %}"{{ d.name }}",{% endfor %}],
+        datasets: [{
+            label: 'Employés',
+            data: [{% for d in employees_by_dept %}{{ d.count }},{% endfor %}],
+            backgroundColor: '#3b82f6',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+});
+new Chart(document.getElementById('contractChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for c in contracts_by_type %}"{{ c.label }}",{% endfor %}],
+        datasets: [{
+            data: [{% for c in contracts_by_type %}{{ c.count }},{% endfor %}],
+            backgroundColor: ['#3b82f6','#f59e0b','#22c55e','#ef4444','#8b5cf6','#ec4899'],
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block crm_content %}
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow p-6">
+    <h1 class="text-xl font-semibold mb-6">{{ title }}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="grid grid-cols-2 gap-4">
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Contact *</label><select name="contact" required class="w-full px-3 py-2 border rounded text-sm"><option value="">—</option>{% for c in contacts %}<option value="{{ c.pk }}" {% if interaction and interaction.contact_id == c.pk %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Affaire</label><select name="deal" class="w-full px-3 py-2 border rounded text-sm"><option value="">—</option>{% for d in deals %}<option value="{{ d.pk }}" {% if interaction and interaction.deal_id == d.pk %}selected{% endif %}>{{ d.title }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Type</label><select name="type" class="w-full px-3 py-2 border rounded text-sm">{% for code, label in type_choices %}<option value="{{ code }}" {% if interaction and interaction.type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+            <div><label class="block text-sm font-medium text-gray-700 mb-1">Sujet *</label><input type="text" name="subject" value="{{ interaction.subject|default:'' }}" required class="w-full px-3 py-2 border rounded text-sm"></div>
+            <div class="col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1">Contenu</label><textarea name="content" rows="5" class="w-full px-3 py-2 border rounded text-sm">{{ interaction.content|default:'' }}</textarea></div>
+        </div>
+        <div class="flex gap-3 pt-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'crm_interaction_list' %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

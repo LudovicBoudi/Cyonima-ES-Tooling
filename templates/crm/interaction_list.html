@@ -1,0 +1,35 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}Interactions — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Interactions</h1>
+        <a href="{% url 'crm_interaction_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle interaction</a>
+    </div>
+    <form method="get" class="flex gap-3 mb-4">
+        <select name="contact" class="px-3 py-2 border rounded text-sm"><option value="">Tous les contacts</option>{% for c in contacts %}<option value="{{ c.pk }}" {% if filter_contact == c.pk|stringformat:'s' %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
+        <select name="deal" class="px-3 py-2 border rounded text-sm"><option value="">Toutes les affaires</option>{% for d in deals %}<option value="{{ d.pk }}" {% if filter_deal == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.title }}</option>{% endfor %}</select>
+        <button type="submit" class="px-4 py-2 bg-gray-100 rounded text-sm hover:bg-gray-200">Filtrer</button>
+    </form>
+    <div class="space-y-3">
+        {% for i in interactions %}
+        <div class="py-3 border-b border-gray-100">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="font-medium text-sm">{{ i.subject }}</p>
+                    <p class="text-xs text-gray-400">{{ i.get_type_display }} — {{ i.contact }} {% if i.deal %}— {{ i.deal }}{% endif %} — {{ i.created_by.username }} — {{ i.created_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div class="flex gap-2 text-xs shrink-0">
+                    <a href="{% url 'crm_interaction_edit' i.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+                    <a href="{% url 'crm_interaction_delete' i.pk %}" class="text-red-600 hover:underline">Supprimer</a>
+                </div>
+            </div>
+            {% if i.content %}<p class="text-sm text-gray-600 mt-1">{{ i.content|linebreaks|truncatewords:50 }}</p>{% endif %}
+        </div>
+        {% empty %}
+        <p class="text-gray-400 text-center py-8">Aucune interaction</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

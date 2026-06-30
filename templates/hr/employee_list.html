@@ -1,0 +1,21 @@
+{% extends 'hr/base_hr.html' %}
+{% block title %}Employés — RH{% endblock %}
+{% block hr_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Employés</h1>
+        <a href="{% url 'hr_employee_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvel employé</a>
+    </div>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Nom</th><th class="pb-2">Département</th><th class="pb-2">Poste</th><th class="pb-2">Société</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for e in employees %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium"><a href="{% url 'hr_employee_detail' e.pk %}" class="text-blue-600 hover:underline">{{ e.first_name }} {{ e.last_name }}</a></td>
+            <td class="py-2 text-gray-600">{{ e.department.name|default:'' }}</td>
+            <td class="py-2 text-gray-600">{{ e.job_title }}</td>
+            <td class="py-2 text-gray-600">{{ e.company|default:'' }}</td>
+            <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if e.status == 'actif' %}bg-green-100 text-green-800{% elif e.status == 'essai' %}bg-yellow-100 text-yellow-800{% elif e.status == 'conges' %}bg-blue-100 text-blue-800{% elif e.status == 'sorti' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-600{% endif %}">{{ e.get_status_display }}</span></td>
+            <td class="py-2 text-right"><a href="{% url 'hr_employee_edit' e.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>
+        </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun employé</td></tr>{% endfor %}</tbody>
+    </table>
+</div>
+{% endblock %}
