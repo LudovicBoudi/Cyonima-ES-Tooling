@@ -13,6 +13,7 @@
     <div class="grid grid-cols-2 gap-4 text-sm mb-6">
         <div><span class="text-gray-500">Département :</span> {{ employee.department.name|default:'—' }}</div>
         <div><span class="text-gray-500">Poste :</span> {{ employee.job_title|default:'—' }}</div>
+        <div><span class="text-gray-500">Grade :</span> {% if employee.grade %}{{ employee.grade }} <span class="text-xs text-gray-400">(Ccn. Métallurgie)</span>{% else %}—{% endif %}</div>
         <div><span class="text-gray-500">Email :</span> {{ employee.email|default:'—' }}</div>
         <div><span class="text-gray-500">Téléphone :</span> {{ employee.phone|default:'—' }}</div>
         <div><span class="text-gray-500">Portable :</span> {{ employee.mobile|default:'—' }}</div>
@@ -25,9 +26,142 @@
     {% if employee.emergency_contact %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4"><span class="text-gray-500">Contact urgence :</span> {{ employee.emergency_contact }} ({{ employee.emergency_phone }})</div>{% endif %}
     {% if employee.notes %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4">{{ employee.notes|linebreaks }}</div>{% endif %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div><h2 class="text-lg font-semibold mb-3">Contrats ({{ contracts|length }})</h2>{% for c in contracts %}<div class="py-2 border-b border-gray-100"><p class="font-medium">{{ c.get_type_display }}</p><p class="text-xs text-gray-400">{{ c.start_date|date:"d/m/Y" }} → {% if c.end_date %}{{ c.end_date|date:"d/m/Y" }}{% else %}En cours{% endif %} — {{ c.salary }} €</p></div>{% empty %}<p class="text-gray-400 text-sm">Aucun contrat</p>{% endfor %}</div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div><h2 class="text-lg font-semibold mb-3">Contrats ({{ contracts|length }})</h2>{% for c in contracts %}<div class="py-2 border-b border-gray-100"><p class="font-medium">{{ c.get_type_display }}</p><p class="text-xs text-gray-400">{{ c.start_date|date:"d/m/Y" }} → {% if c.end_date %}{{ c.end_date|date:"d/m/Y" }}{% else %}En cours{% endif %}{% if can_view_salary %} — {{ c.salary }} €{% endif %}</p></div>{% empty %}<p class="text-gray-400 text-sm">Aucun contrat</p>{% endfor %}</div>
         <div><h2 class="text-lg font-semibold mb-3">Congés ({{ leaves|length }})</h2>{% for l in leaves %}<div class="py-2 border-b border-gray-100"><p class="font-medium">{{ l.get_type_display }}</p><p class="text-xs text-gray-400">{{ l.start_date|date:"d/m/Y" }} → {{ l.end_date|date:"d/m/Y" }} <span class="px-1 py-0.5 rounded text-xs {% if l.status == 'valide' %}bg-green-100 text-green-800{% elif l.status == 'refuse' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">{{ l.get_status_display }}</span></p></div>{% empty %}<p class="text-gray-400 text-sm">Aucun congé</p>{% endfor %}</div>
     </div>
+
+    <div class="mb-6">
+        <div class="flex gap-1 border-b border-gray-200 pb-1 mb-4">
+            <button type="button" onclick="switchTab('diplomes')" id="tab_diplomes" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-indigo-600 text-white transition-colors">Diplômes ({{ diplomas|length }})</button>
+            <button type="button" onclick="switchTab('certifications')" id="tab_certifications" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Certifications ({{ certifications|length }})</button>
+            <button type="button" onclick="switchTab('formations')" id="tab_formations" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Formations ({{ trainings|length }})</button>
+            <button type="button" onclick="switchTab('emplois')" id="tab_emplois" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Emplois ({{ employments|length }})</button>
+            <button type="button" onclick="switchTab('cvs')" id="tab_cvs" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">CV ({{ cvs|length }})</button>
+            <button type="button" onclick="switchTab('evaluations')" id="tab_evaluations" class="px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Évaluations ({{ evaluations|length }})</button>
+        </div>
+
+        <div id="panel_diplomes" class="space-y-2">
+            {% if diplomas %}
+                {% for d in diplomas %}
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <p class="font-medium text-sm">{{ d.get_level_display }} — {{ d.name }}</p>
+                    <p class="text-xs text-gray-400">{{ d.school }} — {{ d.year }}</p>
+                    {% if d.file %}<a href="{{ d.file.url }}" target="_blank" class="text-indigo-600 text-xs hover:underline">Voir la copie ↗</a>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucun diplôme</p>
+            {% endif %}
+        </div>
+
+        <div id="panel_certifications" class="space-y-2 hidden">
+            {% if certifications %}
+                {% for c in certifications %}
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <p class="font-medium text-sm">{{ c.name }}</p>
+                    <p class="text-xs text-gray-400">{{ c.company }} — {{ c.year }}</p>
+                    {% if c.file %}<a href="{{ c.file.url }}" target="_blank" class="text-indigo-600 text-xs hover:underline">Voir la copie ↗</a>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucune certification</p>
+            {% endif %}
+        </div>
+
+        <div id="panel_formations" class="space-y-2 hidden">
+            {% if trainings %}
+                {% for t in trainings %}
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <p class="font-medium text-sm">{{ t.name }}</p>
+                    <p class="text-xs text-gray-400">{{ t.organization }} — {{ t.year }}</p>
+                    {% if t.file %}<a href="{{ t.file.url }}" target="_blank" class="text-indigo-600 text-xs hover:underline">Voir l'attestation ↗</a>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucune formation</p>
+            {% endif %}
+        </div>
+
+        <div id="panel_emplois" class="space-y-2 hidden">
+            {% if employments %}
+                {% for e in employments %}
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <p class="font-medium text-sm">{{ e.job_title }} — {{ e.employer }}</p>
+                    <p class="text-xs text-gray-400">{{ e.start_date|date:"d/m/Y" }} → {% if e.end_date %}{{ e.end_date|date:"d/m/Y" }}{% else %}Aujourd'hui{% endif %} <span class="text-xs text-indigo-500">({{ e.duration }})</span></p>
+                    {% if e.description %}<p class="text-xs text-gray-500 mt-1">{{ e.description|truncatewords:30 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucun emploi</p>
+            {% endif %}
+        </div>
+
+        <div id="panel_cvs" class="space-y-2 hidden">
+            {% if cvs %}
+                {% with latest_cv=cvs.first %}
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <iframe src="{% url 'hr_cv_serve' latest_cv.pk %}" class="w-full h-[400px]" style="border:none;"></iframe>
+                    <div class="p-2 text-xs text-gray-400 text-center border-t border-gray-200">
+                        CV déposé le {{ latest_cv.uploaded_at|date:"d/m/Y à H:i" }} ({{ latest_cv.file.size|filesizeformat }})
+                        — <a href="{{ latest_cv.file.url }}" target="_blank" class="text-indigo-600 hover:underline">Télécharger</a>
+                    </div>
+                </div>
+                {% if cvs|length > 1 %}
+                <details class="text-sm">
+                    <summary class="cursor-pointer text-indigo-600 hover:underline">Versions précédentes ({{ cvs|length|add:"-1" }})</summary>
+                    <div class="mt-2 space-y-2">
+                        {% for cv in cvs|slice:"1:" %}
+                        <div class="border border-gray-200 rounded-lg p-3">
+                            <p class="font-medium text-sm"><a href="{{ cv.file.url }}" target="_blank" class="text-indigo-600 hover:underline">CV du {{ cv.uploaded_at|date:"d/m/Y à H:i" }}</a></p>
+                            <p class="text-xs text-gray-400">{{ cv.file.size|filesizeformat }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endif %}
+                {% endwith %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucun CV</p>
+            {% endif %}
+        </div>
+
+        <div id="panel_evaluations" class="space-y-2 hidden">
+            {% if evaluations %}
+                {% for e in evaluations %}
+                <div class="border border-gray-200 rounded-lg p-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-medium text-sm">{{ e.year }}</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs font-bold {% if e.rating <= 1 %}bg-red-100 text-red-800{% elif e.rating <= 3 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">{{ e.rating }}/5</span>
+                    </div>
+                    {% if e.comment %}<p class="text-xs text-gray-600 mt-1">{{ e.comment|linebreaksbr }}</p>{% endif %}
+                    <p class="text-xs text-gray-400 mt-1">Évaluateur : {{ e.evaluator.get_full_name|default:e.evaluator.username }}</p>
+                    {% if can_view_salary %}
+                    <div class="flex gap-2 mt-2 text-xs">
+                        <a href="{% url 'hr_evaluation_edit' e.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+                        <a href="{% url 'hr_evaluation_delete' e.pk %}" class="text-red-600 hover:underline" onclick="return confirm('Supprimer cette évaluation ?')">Supprimer</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucune évaluation</p>
+            {% endif %}
+            {% if can_view_salary %}
+            <a href="{% url 'hr_evaluation_create' employee.pk %}" class="inline-block mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs hover:bg-indigo-700">+ Ajouter une évaluation</a>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<script>
+function switchTab(tab) {
+    ['diplomes','certifications','formations','emplois','cvs','evaluations'].forEach(t => {
+        document.getElementById('panel_' + t).classList.toggle('hidden', t !== tab);
+        document.getElementById('tab_' + t).className = (t === tab)
+            ? 'px-4 py-2 text-sm font-medium rounded-t-lg bg-indigo-600 text-white transition-colors'
+            : 'px-4 py-2 text-sm font-medium rounded-t-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors';
+    });
+}
+</script>
 {% endblock %}

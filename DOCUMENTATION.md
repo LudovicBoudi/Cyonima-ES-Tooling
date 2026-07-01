@@ -26,10 +26,9 @@ Réservé aux membres du staff (`is_staff=True`).
 - **Logo** : téléversement d'un fichier image.
 
 ### Sauvegarde
-- `/administration/sauvegarde/` — génère une archive ZIP contenant :
-  - Export JSON complet de la base (`dumpdata`)
-  - Fichiers médias
-  - Fichier `version.txt` avec la date
+- `/administration/sauvegarde/` — deux actions :
+  - **Télécharger** : génère une archive ZIP contenant un export JSON complet (`dumpdata`), les fichiers médias, et un fichier `version.txt`
+  - **Restaurer** : upload d'un fichier ZIP de sauvegarde — vide la base (`flush`), recharge les données (`loaddata`), et remplace les fichiers médias
 
 ### Web Analytics
 - `/administration/analytiques/` — tableau de bord des visites :
@@ -138,14 +137,15 @@ Vues disponibles :
 
 ## 6. Blogs (`/blog/*/`)
 
-Quatre blogs accessibles selon le rôle :
+Cinq blogs accessibles selon le rôle :
 
-| Blog | URL | Rôle requis |
-|------|-----|-------------|
-| Sécurité | `/blog/securite/` | `securite` ou `admin` |
-| Direction | `/blog/direction/` | `direction` ou `admin` |
-| Communication | `/blog/communication/` | `communication` ou `admin` |
-| IT | `/blog/it/` | `it_manager` ou `admin` |
+| Blog | URL | Rôle écriture | Lecture |
+|------|-----|---------------|---------|
+| Sécurité | `/blog/securite/` | `security_officer` ou `admin` | Tous |
+| Direction | `/blog/direction/` | `direction` ou `admin` | Tous |
+| Communication | `/blog/communication/` | `communication` ou `admin` | Tous |
+| IT | `/blog/it/` | `it_manager` ou `admin` | Tous |
+| Rep. Syndicale | `/blog/representation-syndicale/` | `elus_syndicaux` ou `admin` | Tous |
 
 ### Liste des articles
 - Affichage complet des articles (titre, image à la une, contenu, métadonnées) les uns en dessous des autres.
@@ -191,10 +191,26 @@ Gestion administrative du personnel.
 
 ### Fonctionnalités
 - **Tableau de bord** : effectif, actifs, essais, congés en cours, demandes en attente, graphiques (employés par département, contrats par type), anniversaires du mois, dernières demandes de congé.
-- **Employés** : fiche complète (coordonnées, département, poste, société prestataire, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
+- **Employés** : fiche complète (coordonnées, département, poste, **grade Ccn. Métallurgie A1–I18**, société prestataire, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
 - **Départements** : liste avec nombre d'employés, description.
 - **Contrats** : CDI, CDD, mission, stage, alternance, freelance, intérim — avec dates, salaire, poste. Colorisation par échéance (vert >3mo, jaune 1-3mo, orange <1mo, rouge expiré/semaine). CDI toujours vert.
 - **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours. Calendrier mensuel avec navigation, affichage par initiales colorées. Détection de conflits (chevauchement dans le même département).
+
+### Profil employé (`/rh/profil/`)
+- Page personnelle de l'employé connecté accessible via le menu utilisateur.
+- Six onglets :
+  1. **Diplômes** : niveau (BEPC→Doctorat), nom, école, année, fichier
+  2. **Certifications** : nom, organisme émetteur, année, fichier
+  3. **Formations** : nom, organisme de formation, année, fichier
+  4. **Emplois** : titre, employeur, description (TexteArea), dates, durée calculée automatiquement
+  5. **CV** : upload PDF (validation extension + content-type), visualisation dans un `<iframe>` intégré
+  6. **Évaluations** : année, note (1-5 colorisée : ≤1 rouge, 2-3 jaune, 4-5 vert), commentaire
+
+### Permissions RH
+- **Lecture seule** (tableau de bord, listes, détail) : tous les utilisateurs staff (`@staff_member_required`)
+- **Écriture** (création, modification, suppression, validation) : `hrbp` ou `admin` (`@hrbp_or_admin_required`)
+- **Salaires** : visibles uniquement par `hrbp` et `admin` (masqués pour les autres)
+- Les notes d'évaluation sont saisies par les HRBP ; les employés voient leurs propres évaluations en lecture seule
 
 ---
 
@@ -252,11 +268,13 @@ Pages d'information statiques sur les principales réglementations SSI.
 | **IEC 62443** | Cybersécurité des systèmes industriels et ICS |
 | **ISO 27001** | Management de la sécurité de l'information (SMSI) |
 | **ISO 27032** | Lignes directrices pour la cybersécurité |
+| **Conv. Métallurgie** | Convention Collective Nationale de la Métallurgie — classification A1 à I18, grille SMH, prime d'ancienneté, préavis, protection sociale |
 
 ### Navigation
 - Page d'accueil : grille de toutes les ressources disponibles.
 - Chaque page contient un sommaire avec ancres, un bandeau coloré, et des sections détaillées.
 - Retour facile à la liste via le lien en bas de page.
+- Lien "Ma convention collective" dans le menu utilisateur déroulant pour un accès rapide.
 
 ---
 
@@ -281,13 +299,14 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 | Code rôle | Accès |
 |-----------|-------|
-| `admin` | Tout — accès administration, tous blogs, COMEX, projets |
+| `admin` | Tout — accès administration, tous blogs, COMEX, projets, RH (écriture + salaires) |
 | `it_manager` | Budget IT, Guichet IT, blog IT |
 | `direction` | Blog direction, COMEX |
-| `securite` | Blog sécurité |
+| `security_officer` | Blog sécurité |
 | `communication` | Blog communication |
-| `chef_projet` | Projets ALM |
-| `user` | Accès de base (projets assignés, tickets) |
+| `hrbp` | RH (écriture, validation congés, salaires, évaluations) |
+| `elus_syndicaux` | Blog Rep. Syndicale (écriture) |
+| `user` | Accès de base (navigation, lecture blogs) |
 
 Un utilisateur peut avoir **plusieurs rôles simultanément**.
 

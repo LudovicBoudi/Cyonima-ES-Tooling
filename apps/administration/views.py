@@ -150,19 +150,51 @@ def budget_delete(request, pk):
 
 @admin_required
 def backup(request):
-    if request.method == 'POST':
+    if request.method == 'POST' and request.FILES.get('backup_file'):
+        import json
+        from io import BytesIO
+        from django.core.management import call_command
+
+        backup_file = request.FILES['backup_file']
+        try:
+            with zipfile.ZipFile(backup_file) as zf:
+                if 'db.json' not in zf.namelist():
+                    messages.error(request, "Fichier de sauvegarde invalide : db.json introuvable.")
+                    return redirect('admin_backup')
+
+                db_data = zf.read('db.json').decode('utf-8')
+
+                call_command('flush', interactive=False, verbosity=0)
+
+                from io import StringIO
+                call_command('loaddata', stdin=StringIO(db_data), verbosity=0, format='json')
+
+                if os.path.isdir(settings.MEDIA_ROOT):
+                    import shutil
+                    for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+                        for f in files:
+                            os.remove(os.path.join(root, f))
+
+                    for item in zf.namelist():
+                        if item.startswith('media/') and not item.endswith('/'):
+                            zf.extract(item, settings.BASE_DIR)
+
+                messages.success(request, "Sauvegarde restaurée avec succès.")
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la restauration : {e}")
+        return redirect('admin_backup')
+
+    elif request.method == 'POST':
         from io import BytesIO
         from django.core.management import call_command
         buffer = BytesIO()
         with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
             zf.writestr('version.txt', f"Sauvegarde Cyonima-ES-Tools - {datetime.now().isoformat()}\n")
 
-            # Dump all data
             out = io.StringIO()
             call_command('dumpdata', stdout=out, exclude=['contenttypes', 'sessions', 'admin'])
             zf.writestr('db.json', out.getvalue())
 
-            # Media
             if os.path.isdir(settings.MEDIA_ROOT):
                 for root, dirs, files in os.walk(settings.MEDIA_ROOT):
                     for f in files:

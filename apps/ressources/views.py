@@ -83,6 +83,14 @@ RESSOURCES = [
         'color': 'from-violet-600 to-violet-800',
         'icon': '🌍',
     },
+    {
+        'id': 'convention_metallurgie',
+        'title': 'Conv. Métallurgie',
+        'subtitle': 'Convention Collective Nationale de la Métallurgie',
+        'description': 'Nouvelle convention collective unique IDCC 3248 — classification, grille de salaires, préavis, protection sociale.',
+        'color': 'from-amber-600 to-orange-800',
+        'icon': '🔧',
+    },
 ]
 
 
@@ -139,3 +147,8 @@ def iso_27001(request):
 @login_required
 def iso_27032(request):
     return render(request, 'ressources/iso_27032.html')
+
+
+@login_required
+def convention_metallurgie(request):
+    return render(request, 'ressources/convention_metallurgie.html')

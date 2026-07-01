@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto">
+    <div class="bg-white rounded-xl shadow p-6">
+        <h1 class="text-xl font-bold mb-6">{{ title }}</h1>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Titre du poste</label>
+                <input type="text" name="job_title" value="{{ employment.job_title|default:'' }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Employeur</label>
+                <input type="text" name="employer" value="{{ employment.employer|default:'' }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Description des fonctions</label>
+                <textarea name="description" rows="4" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">{{ employment.description|default:'' }}</textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date de début</label>
+                    <input type="date" name="start_date" value="{{ employment.start_date|date:'Y-m-d'|default:'' }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date de fin <span class="text-gray-400 font-normal">(laisser vide si poste actuel)</span></label>
+                    <input type="date" name="end_date" value="{{ employment.end_date|date:'Y-m-d'|default:'' }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                </div>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-indigo-700">Enregistrer</button>
+                <a href="{% url 'hr_profil' %}" class="text-gray-500 px-4 py-2 text-sm hover:underline">Annuler</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

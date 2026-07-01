@@ -34,6 +34,7 @@ Cyonima-ES-Tooling/
 │   │   ├── dg_blog/
 │   │   ├── blog_com/
 │   │   ├── blog_it/
+│   │   ├── blog_rep/       # Blog Représentation Syndicale
 │   │   └── comex_forum/
 │   ├── wiki/              # Wiki collaboratif
 │   ├── crm/               # CRM (contacts, affaires, interactions)
@@ -98,7 +99,7 @@ Cyonima-ES-Tooling/
 - `Requirement`, `TestScenario`, `TestCampaign`
 
 ### blogs
-- `SecurityArticle`, `DirectionArticle`, `ComArticle`, `ITArticle` — articles de blog avec titre, contenu (HTML via CKEditor), image à la une, pièces jointes
+- `SecurityArticle`, `DirectionArticle`, `ComArticle`, `ITArticle`, `RepSyndicaleArticle` — articles de blog avec titre, contenu (HTML via CKEditor), image à la une, pièces jointes
 - `ComexThread`, `ComexPost` — forum COMEX
 
 ### wiki
@@ -112,10 +113,16 @@ Cyonima-ES-Tooling/
 - `CrmTask` — tâche liée à un contact ou une affaire
 
 ### hr
-- `Employee` — fiche employé (coordonnées, département, poste, statut, dates)
+- `Employee` — fiche employé (coordonnées, département, poste, grade A1–I18, statut, dates, société prestataire)
 - `Department` — département avec responsable
 - `Contract` — contrat (CDI, CDD, stage…) avec dates et salaire
 - `LeaveRequest` — demande de congé avec workflow (demandé → validé / refusé)
+- `Diploma` — diplôme (niveau BEPC→Doctorat, nom, école, année, fichier)
+- `Certification` — certification (nom, organisme émetteur, année, fichier)
+- `Training` — formation (nom, organisme, année, fichier)
+- `Employment` — historique d'emploi (titre, employeur, description, dates, durée calculée)
+- `Cv` — CV (fichier PDF, date d'upload, validation extension + content-type)
+- `Evaluation` — évaluation annuelle (année, note 1-5 colorisée, commentaire, évaluateur)
 
 ### erp
 - `Quotation` — devis, identifiant `DEV-{seq:04d}`, JSONField lignes
@@ -136,7 +143,7 @@ Cyonima-ES-Tooling/
 - `Notification` — notification individuelle
 
 ### ressources
-Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300, IM 900, II 901, PCI DSS, NIS 2)
+Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300, IM 900, II 901, PCI DSS, NIS 2, EBIOS RM, IEC 62443, ISO 27001, ISO 27032, Convention Collective Métallurgie)
 
 ## URLs principales
 
@@ -150,14 +157,16 @@ Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300,
 | `/wiki/` | Wiki collaboratif |
 | `/crm/` | CRM |
 | `/rh/` | Ressources Humaines |
+| `/rh/profil/` | Profil employé (6 onglets : diplômes, certifications, formations, emplois, CV, évaluations) |
 | `/erp/` | ERP (devis, factures) |
 | `/ged/` | GED (documents) |
-| `/ressources/` | Ressources Externes (RGPD, PCI DSS, NIS 2…) |
+| `/ressources/` | Ressources Externes (RGPD, PCI DSS, NIS 2, Conv. Métallurgie…) |
 | `/projects/` | ALM |
 | `/blog/securite/` | Blog sécurité |
 | `/blog/direction/` | Blog direction |
 | `/blog/communication/` | Blog communication |
 | `/blog/it/` | Blog IT |
+| `/blog/representation-syndicale/` | Blog Rep. Syndicale |
 | `/comex/` | Forum COMEX |
 | `/admin/` | Django admin |
 
@@ -209,6 +218,9 @@ Demandée → Validée
 
 - `@login_required` sur toutes les vues
 - `@staff_member_required` sur l'administration
-- Contrôle d'accès aux blogs via `UserProfile.can_write_blog(code_role)`
+- Contrôle d'accès aux blogs via `UserProfile.can_write_blog(code_role)` — admin toujours autorisé
 - Accès aux projets via `Project.user_can_access()`
 - Rôles multiples supportés (ManyToMany)
+- `@hrbp_or_admin_required` décorateur pour les vues d'écriture RH (création, modification, suppression, validation congés)
+- `can_view_salary` variable de contexte : visible uniquement pour `admin` et `hrbp`
+- Blog Rep. Syndicale : écriture par `elus_syndicaux`, lecture par tous

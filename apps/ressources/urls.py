@@ -13,4 +13,5 @@ urlpatterns = [
     path('iec-62443/', views.iec_62443, name='ressources_iec_62443'),
     path('iso-27001/', views.iso_27001, name='ressources_iso_27001'),
     path('iso-27032/', views.iso_27032, name='ressources_iso_27032'),
+    path('convention-metallurgie/', views.convention_metallurgie, name='ressources_convention_metallurgie'),
 ]

@@ -46,6 +46,9 @@ class UserProfile(models.Model):
     def is_admin(self):
         return self.roles.filter(code='admin').exists()
 
+    def has_role(self, code):
+        return self.roles.filter(code=code).exists()
+
     def can_write_blog(self, blog_type):
         user_codes = set(self.roles.values_list('code', flat=True))
         if 'admin' in user_codes:
@@ -56,6 +59,7 @@ class UserProfile(models.Model):
             'communication': ['communication'],
             'it': ['direction'],
             'comex': ['direction'],
+            'rep_syndicale': ['elus_syndicaux'],
         }
         return bool(user_codes & set(permissions.get(blog_type, [])))
 

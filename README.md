@@ -10,17 +10,17 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 
 | Module | Description | Accès |
 |--------|-------------|-------|
-| **Administration** | Gestion des utilisateurs, rôles, configuration, sauvegarde | `/administration/` |
+| **Administration** | Gestion des utilisateurs, rôles, configuration, sauvegarde/restauration | `/administration/` |
 | **Budget IT** | Budgets annuels, DAT, fournisseurs, tâches, tableau de bord | `/budget/` |
 | **Guichet IT** | Tickets d'incidents et expressions de besoins informatiques | `/guichet/` |
 | **ALM** | Projets, exigences, tests, tickets (incidents/tâches/FT) | `/projects/` |
-| **Blogs** | Sécurité, direction, communication, IT | `/blog/*/` |
+| **Blogs** | Sécurité, direction, communication, IT, représentation syndicale | `/blog/*/` |
 | **Wiki** | Pages de documentation collaborative | `/wiki/` |
 | **CRM** | Gestion de la relation client (contacts, sociétés, affaires) | `/crm/` |
-| **RH** | Ressources Humaines (employés, contrats, congés) | `/rh/` |
+| **RH** | Ressources Humaines (employés, contrats, congés, diplômes, formations, CV, évaluations) | `/rh/` |
 | **ERP** | Devis, factures, avoirs, paiements, factures fournisseurs | `/erp/` |
 | **GED** | Gestion électronique de documents (classement, recherche) | `/ged/` |
-| **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2…) | `/ressources/` |
+| **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2, Convention Métallurgie…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 
 ## Prérequis
@@ -65,14 +65,29 @@ Serveur accessible sur `http://127.0.0.1:8080`.
 - Mot de passe : `admin123Admin!`
 - Rôles : `admin` (tous accès), `it_manager` (budget, guichet, blog IT)
 
-## Sauvegarde
+## Sauvegarde / Restauration
 
+### CLI
 ```bash
 python manage.py cyonima_backup
 ```
-
 Génère une archive ZIP (dump JSON + médias) dans le répertoire courant.
-Accès via l'interface : `/administration/sauvegarde/`.
+
+### Interface web
+`/administration/sauvegarde/` — téléchargement d'une sauvegarde et restauration par upload de fichier ZIP.
+
+## Rôles disponibles
+
+| Code | Libellé | Accès principal |
+|------|---------|-----------------|
+| `admin` | Administrateur | Tout — administration, blogs, projets |
+| `it_manager` | Gestionnaire IT | Budget IT, Guichet IT, blog IT |
+| `direction` | Direction générale | Blog direction, COMEX |
+| `security_officer` | Officier de sécurité | Blog sécurité |
+| `communication` | Communication | Blog communication |
+| `hrbp` | HR Business Partner | RH (écriture), salaires |
+| `elus_syndicaux` | Élus Syndicaux | Blog Rep. Syndicale (écriture) |
+| `user` | Utilisateur | Accès de base (lecture, projets assignés) |
 
 ## Technologies
 
@@ -82,4 +97,4 @@ Accès via l'interface : `/administration/sauvegarde/`.
 - Chart.js (graphiques), WeasyPrint (PDF), openpyxl (XLSX)
 - CKEditor 5 (éditeur de texte riche) — blogs et wiki
 - Pillow (traitement d'images), python-magic (détection MIME)
-- Système de rôles multiples (ManyToMany) avec 7 rôles prédéfinis
+- Système de rôles multiples (ManyToMany) avec 8 rôles prédéfinis

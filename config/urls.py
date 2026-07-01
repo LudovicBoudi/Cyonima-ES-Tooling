@@ -26,6 +26,7 @@ urlpatterns = [
     path('blog/direction/', include('apps.blogs.dg_blog.urls')),
     path('blog/communication/', include('apps.blogs.blog_com.urls')),
     path('blog/it/', include('apps.blogs.blog_it.urls')),
+    path('blog/representation-syndicale/', include('apps.blogs.blog_rep.urls')),
     path('comex/', include('apps.blogs.comex_forum.urls')),
     path('', include('apps.core.urls')),
 ]

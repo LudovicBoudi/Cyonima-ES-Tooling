@@ -1,12 +1,38 @@
+from functools import wraps
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import FileResponse
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
 from datetime import timedelta, date as date_cls
 import calendar as cal_mod
-from .models import Employee, Department, Contract, LeaveRequest
+from .models import Employee, Department, Contract, LeaveRequest, Diploma, Certification, Training, Employment, Cv, Evaluation, DIPLOMA_LEVELS
+
+
+def hrbp_or_admin_required(view_func):
+    @wraps(view_func)
+    @login_required
+    def _wrapper(request, *args, **kwargs):
+        if not request.user.is_staff:
+            from django.http import HttpResponseForbidden
+            return HttpResponseForbidden("Accès refusé.")
+        profile = getattr(request.user, 'profile', None)
+        if profile and (profile.is_admin() or profile.has_role('hrbp')):
+            return view_func(request, *args, **kwargs)
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("Accès refusé.")
+    return _wrapper
+
+
+def user_can_view_salary(user):
+    if not user.is_authenticated:
+        return False
+    if not hasattr(user, 'profile'):
+        return False
+    return user.profile.is_admin() or user.profile.has_role('hrbp')
 
 
 @staff_member_required
@@ -68,12 +94,21 @@ def employee_detail(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     contracts = employee.contracts.all()
     leaves = employee.leave_requests.all()
+    diplomas = employee.diplomas.all()
+    certifications = employee.certifications.all()
+    trainings = employee.trainings.all()
+    employments = employee.employments.all()
+    cvs = employee.cvs.all()
+    evaluations = employee.evaluations.all()
     return render(request, 'hr/employee_detail.html', {
         'employee': employee, 'contracts': contracts, 'leaves': leaves,
+        'diplomas': diplomas, 'certifications': certifications, 'trainings': trainings,
+        'employments': employments, 'cvs': cvs, 'evaluations': evaluations,
+        'can_view_salary': user_can_view_salary(request.user),
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def employee_create(request):
     if request.method == 'POST':
         emp = Employee.objects.create(
@@ -84,6 +119,7 @@ def employee_create(request):
             mobile=request.POST.get('mobile', ''),
             department_id=request.POST.get('department') or None,
             job_title=request.POST.get('job_title', ''),
+            grade=request.POST.get('grade', ''),
             hire_date=request.POST.get('hire_date') or None,
             status=request.POST.get('status', 'actif'),
             birth_date=request.POST.get('birth_date') or None,
@@ -100,10 +136,11 @@ def employee_create(request):
     return render(request, 'hr/employee_form.html', {
         'departments': departments, 'title': 'Nouvel employé',
         'status_choices': Employee.STATUS_CHOICES,
+        'grade_choices': Employee._meta.get_field('grade').choices,
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def employee_edit(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == 'POST':
@@ -114,6 +151,7 @@ def employee_edit(request, pk):
         employee.mobile = request.POST.get('mobile', '')
         employee.department_id = request.POST.get('department') or None
         employee.job_title = request.POST.get('job_title', '')
+        employee.grade = request.POST.get('grade', '')
         employee.hire_date = request.POST.get('hire_date') or None
         employee.status = request.POST.get('status', 'actif')
         employee.birth_date = request.POST.get('birth_date') or None
@@ -129,10 +167,11 @@ def employee_edit(request, pk):
     return render(request, 'hr/employee_form.html', {
         'employee': employee, 'departments': departments, 'title': 'Modifier l\'employé',
         'status_choices': Employee.STATUS_CHOICES,
+        'grade_choices': Employee._meta.get_field('grade').choices,
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == 'POST':
@@ -149,7 +188,7 @@ def department_list(request):
     return render(request, 'hr/department_list.html', {'departments': departments})
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def department_create(request):
     if request.method == 'POST':
         dept = Department.objects.create(
@@ -161,7 +200,7 @@ def department_create(request):
     return render(request, 'hr/department_form.html', {'title': 'Nouveau département'})
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def department_edit(request, pk):
     dept = get_object_or_404(Department, pk=pk)
     if request.method == 'POST':
@@ -175,7 +214,7 @@ def department_edit(request, pk):
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def department_delete(request, pk):
     dept = get_object_or_404(Department, pk=pk)
     if request.method == 'POST':
@@ -205,10 +244,10 @@ def contract_list(request):
                 c.row_color = 'yellow'
             else:
                 c.row_color = 'green'
-    return render(request, 'hr/contract_list.html', {'contracts': contracts})
+    return render(request, 'hr/contract_list.html', {'contracts': contracts, 'can_view_salary': user_can_view_salary(request.user)})
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def contract_create(request):
     if request.method == 'POST':
         c = Contract.objects.create(
@@ -230,7 +269,7 @@ def contract_create(request):
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def contract_edit(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == 'POST':
@@ -251,7 +290,7 @@ def contract_edit(request, pk):
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def contract_delete(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == 'POST':
@@ -359,7 +398,7 @@ def leave_list(request):
     return render(request, 'hr/leave_list.html', {'leaves': all_leaves, 'calendar': calendar_data})
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def leave_create(request):
     if request.method == 'POST':
         l = LeaveRequest.objects.create(
@@ -380,7 +419,7 @@ def leave_create(request):
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def leave_edit(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
     if request.method == 'POST':
@@ -400,7 +439,7 @@ def leave_edit(request, pk):
     })
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def leave_delete(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
     if request.method == 'POST':
@@ -410,7 +449,7 @@ def leave_delete(request, pk):
     return render(request, 'hr/leave_confirm_delete.html', {'leave': leave})
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def leave_approve(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
     leave.status = 'valide'
@@ -420,7 +459,7 @@ def leave_approve(request, pk):
     return redirect('hr_leave_list')
 
 
-@staff_member_required
+@hrbp_or_admin_required
 def leave_reject(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
     leave.status = 'refuse'
@@ -428,3 +467,295 @@ def leave_reject(request, pk):
     leave.save()
     messages.success(request, f'Congé {leave} refusé.')
     return redirect('hr_leave_list')
+
+
+@login_required
+def profil(request):
+    employee = Employee.objects.filter(user=request.user).first()
+    if not employee:
+        messages.error(request, "Aucune fiche employ\u00e9 n'est associ\u00e9e \u00e0 votre compte.")
+        return redirect('home')
+    diplomas = employee.diplomas.all()
+    certifications = employee.certifications.all()
+    trainings = employee.trainings.all()
+    employments = employee.employments.all()
+    cvs = employee.cvs.all()
+    evaluations = employee.evaluations.all()
+    return render(request, 'hr/profil.html', {
+        'employee': employee,
+        'diplomas': diplomas,
+        'certifications': certifications,
+        'trainings': trainings,
+        'employments': employments,
+        'cvs': cvs,
+        'evaluations': evaluations,
+    })
+
+
+@login_required
+def diplome_create(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if request.method == 'POST':
+        d = Diploma.objects.create(
+            employee=employee,
+            level=request.POST['level'],
+            name=request.POST['name'],
+            school=request.POST['school'],
+            year=request.POST['year'],
+            file=request.FILES.get('file'),
+        )
+        messages.success(request, f'Dipl\u00f4me "{d.name}" ajout\u00e9.')
+        return redirect('hr_profil')
+    return render(request, 'hr/diplome_form.html', {
+        'diploma_levels': DIPLOMA_LEVELS,
+        'title': 'Ajouter un dipl\u00f4me',
+    })
+
+
+@login_required
+def diplome_edit(request, pk):
+    diploma = get_object_or_404(Diploma, pk=pk, employee__user=request.user)
+    if request.method == 'POST':
+        diploma.level = request.POST['level']
+        diploma.name = request.POST['name']
+        diploma.school = request.POST['school']
+        diploma.year = request.POST['year']
+        if request.FILES.get('file'):
+            diploma.file = request.FILES['file']
+        diploma.save()
+        messages.success(request, f'Dipl\u00f4me "{diploma.name}" modifi\u00e9.')
+        return redirect('hr_profil')
+    return render(request, 'hr/diplome_form.html', {
+        'diploma': diploma,
+        'diploma_levels': DIPLOMA_LEVELS,
+        'title': 'Modifier le dipl\u00f4me',
+    })
+
+
+@login_required
+def diplome_delete(request, pk):
+    diploma = get_object_or_404(Diploma, pk=pk, employee__user=request.user)
+    name = str(diploma)
+    diploma.delete()
+    messages.success(request, f'Dipl\u00f4me "{name}" supprim\u00e9.')
+    return redirect('hr_profil')
+
+
+@login_required
+def certification_create(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if request.method == 'POST':
+        c = Certification.objects.create(
+            employee=employee,
+            name=request.POST['name'],
+            company=request.POST['company'],
+            year=request.POST['year'],
+            file=request.FILES.get('file'),
+        )
+        messages.success(request, f'Certification "{c.name}" ajout\u00e9e.')
+        return redirect('hr_profil')
+    return render(request, 'hr/certification_form.html', {
+        'title': 'Ajouter une certification',
+    })
+
+
+@login_required
+def certification_edit(request, pk):
+    cert = get_object_or_404(Certification, pk=pk, employee__user=request.user)
+    if request.method == 'POST':
+        cert.name = request.POST['name']
+        cert.company = request.POST['company']
+        cert.year = request.POST['year']
+        if request.FILES.get('file'):
+            cert.file = request.FILES['file']
+        cert.save()
+        messages.success(request, f'Certification "{cert.name}" modifi\u00e9e.')
+        return redirect('hr_profil')
+    return render(request, 'hr/certification_form.html', {
+        'certification': cert,
+        'title': 'Modifier la certification',
+    })
+
+
+@login_required
+def certification_delete(request, pk):
+    cert = get_object_or_404(Certification, pk=pk, employee__user=request.user)
+    name = str(cert)
+    cert.delete()
+    messages.success(request, f'Certification "{name}" supprim\u00e9e.')
+    return redirect('hr_profil')
+
+
+@login_required
+def training_create(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if request.method == 'POST':
+        t = Training.objects.create(
+            employee=employee,
+            name=request.POST['name'],
+            organization=request.POST['organization'],
+            year=request.POST['year'],
+            file=request.FILES.get('file'),
+        )
+        messages.success(request, f'Formation "{t.name}" ajout\u00e9e.')
+        return redirect('hr_profil')
+    return render(request, 'hr/training_form.html', {
+        'title': 'Ajouter une formation',
+    })
+
+
+@login_required
+def training_edit(request, pk):
+    training = get_object_or_404(Training, pk=pk, employee__user=request.user)
+    if request.method == 'POST':
+        training.name = request.POST['name']
+        training.organization = request.POST['organization']
+        training.year = request.POST['year']
+        if request.FILES.get('file'):
+            training.file = request.FILES['file']
+        training.save()
+        messages.success(request, f'Formation "{training.name}" modifi\u00e9e.')
+        return redirect('hr_profil')
+    return render(request, 'hr/training_form.html', {
+        'training': training,
+        'title': 'Modifier la formation',
+    })
+
+
+@login_required
+def training_delete(request, pk):
+    training = get_object_or_404(Training, pk=pk, employee__user=request.user)
+    name = str(training)
+    training.delete()
+    messages.success(request, f'Formation "{name}" supprim\u00e9e.')
+    return redirect('hr_profil')
+
+
+@login_required
+def employment_create(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if request.method == 'POST':
+        e = Employment.objects.create(
+            employee=employee,
+            job_title=request.POST['job_title'],
+            employer=request.POST['employer'],
+            description=request.POST.get('description', ''),
+            start_date=request.POST['start_date'],
+            end_date=request.POST.get('end_date') or None,
+        )
+        messages.success(request, f'Emploi "{e.job_title}" ajout\u00e9.')
+        return redirect('hr_profil')
+    return render(request, 'hr/employment_form.html', {
+        'title': 'Ajouter un emploi',
+    })
+
+
+@login_required
+def employment_edit(request, pk):
+    emp = get_object_or_404(Employment, pk=pk, employee__user=request.user)
+    if request.method == 'POST':
+        emp.job_title = request.POST['job_title']
+        emp.employer = request.POST['employer']
+        emp.description = request.POST.get('description', '')
+        emp.start_date = request.POST['start_date']
+        emp.end_date = request.POST.get('end_date') or None
+        emp.save()
+        messages.success(request, f'Emploi "{emp.job_title}" modifi\u00e9.')
+        return redirect('hr_profil')
+    return render(request, 'hr/employment_form.html', {
+        'employment': emp,
+        'title': 'Modifier l\'emploi',
+    })
+
+
+@login_required
+def employment_delete(request, pk):
+    emp = get_object_or_404(Employment, pk=pk, employee__user=request.user)
+    name = str(emp)
+    emp.delete()
+    messages.success(request, f'Emploi "{name}" supprim\u00e9.')
+    return redirect('hr_profil')
+
+
+@login_required
+def cv_upload(request):
+    employee = get_object_or_404(Employee, user=request.user)
+    if request.method == 'POST':
+        f = request.FILES.get('file')
+        if f:
+            if not f.name.lower().endswith('.pdf'):
+                messages.error(request, 'Seuls les fichiers PDF sont accept\u00e9s.')
+                return render(request, 'hr/cv_form.html', {'title': 'Ajouter un CV'})
+            if f.content_type != 'application/pdf':
+                messages.error(request, 'Seuls les fichiers PDF sont accept\u00e9s.')
+                return render(request, 'hr/cv_form.html', {'title': 'Ajouter un CV'})
+            Cv.objects.create(employee=employee, file=f)
+            messages.success(request, 'CV ajout\u00e9.')
+            return redirect('hr_profil')
+    return render(request, 'hr/cv_form.html', {'title': 'Ajouter un CV'})
+
+
+@login_required
+def cv_delete(request, pk):
+    cv = get_object_or_404(Cv, pk=pk, employee__user=request.user)
+    name = str(cv)
+    cv.delete()
+    messages.success(request, f'CV "{name}" supprim\u00e9.')
+    return redirect('hr_profil')
+
+
+@login_required
+@xframe_options_sameorigin
+def cv_serve(request, pk):
+    cv = get_object_or_404(Cv, pk=pk)
+    if not (request.user.is_staff or cv.employee.user == request.user):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden('Acc\u00e8s refus\u00e9.')
+    response = FileResponse(cv.file.open('rb'), content_type='application/pdf')
+    response['Content-Disposition'] = 'inline; filename="{}"'.format(cv.file.name.split('/')[-1])
+    return response
+
+
+@hrbp_or_admin_required
+def evaluation_create(request, employee_pk):
+    employee = get_object_or_404(Employee, pk=employee_pk)
+    if request.method == 'POST':
+        Evaluation.objects.create(
+            employee=employee,
+            evaluator=request.user,
+            year=request.POST.get('year', timezone.now().year),
+            rating=request.POST.get('rating'),
+            comment=request.POST.get('comment', ''),
+        )
+        messages.success(request, 'Évaluation enregistrée.')
+        return redirect('hr_employee_detail', pk=employee_pk)
+    return render(request, 'hr/evaluation_form.html', {
+        'employee': employee,
+        'title': f'Ajouter une évaluation — {employee}',
+    })
+
+
+@hrbp_or_admin_required
+def evaluation_edit(request, pk):
+    eval_obj = get_object_or_404(Evaluation, pk=pk)
+    if request.method == 'POST':
+        eval_obj.year = request.POST.get('year', eval_obj.year)
+        eval_obj.rating = request.POST.get('rating', eval_obj.rating)
+        eval_obj.comment = request.POST.get('comment', '')
+        eval_obj.save()
+        messages.success(request, 'Évaluation modifiée.')
+        return redirect('hr_employee_detail', pk=eval_obj.employee.pk)
+    return render(request, 'hr/evaluation_form.html', {
+        'evaluation': eval_obj,
+        'employee': eval_obj.employee,
+        'title': f'Modifier l\'évaluation {eval_obj.year}',
+    })
+
+
+@hrbp_or_admin_required
+def evaluation_delete(request, pk):
+    eval_obj = get_object_or_404(Evaluation, pk=pk)
+    emp_pk = eval_obj.employee.pk
+    eval_obj.delete()
+    messages.success(request, 'Évaluation supprimée.')
+    return redirect('hr_employee_detail', pk=emp_pk)

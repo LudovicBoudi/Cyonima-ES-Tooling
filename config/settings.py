@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'apps.blogs.dg_blog',
     'apps.blogs.blog_com',
     'apps.blogs.blog_it',
+    'apps.blogs.blog_rep',
     'apps.blogs.comex_forum',
     'apps.notifications',
     'apps.backup',

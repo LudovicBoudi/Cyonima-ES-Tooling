@@ -18,6 +18,7 @@ def home(request):
         {'title': 'Blog Direction', 'description': 'Communications de la direction générale', 'icon': 'images/DG-blog-icon.png', 'url': '/blog/direction/'},
         {'title': 'Blog Communication', 'description': 'Informations et actualités', 'icon': 'images/com-blog-icon.png', 'url': '/blog/communication/'},
         {'title': 'Blog IT', 'description': 'Actualités techniques et IT', 'icon': 'images/IT-blog-icon.png', 'url': '/blog/it/'},
+        {'title': 'Blog Rep. Syndicale', 'description': "Actualités de la représentation syndicale", 'icon': 'images/rep-syndicale-blog-icon.png', 'url': '/blog/representation-syndicale/'},
         {'title': 'Zone COMEX', 'description': "Espace d'échange du comité exécutif", 'icon': 'images/COMEX-exchange-zone-icon.png', 'url': '/comex/'},
     ]
     if request.user.is_staff:
