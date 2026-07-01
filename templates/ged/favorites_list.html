@@ -1,0 +1,25 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}Mes favoris — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">⭐ Mes favoris</h1>
+    {% if favorites %}
+    <div class="grid gap-3">
+        {% for fav in favorites %}
+        <div class="border rounded-lg p-4 flex justify-between items-center">
+            <div>
+                <a href="{% url 'ged_document_detail' fav.document.pk %}" class="font-medium text-blue-700 hover:underline">{{ fav.document.title }}</a>
+                <p class="text-sm text-gray-500">{{ fav.document.registration_number }} — {{ fav.document.filename }} — {{ fav.document.size_display }}</p>
+            </div>
+            <form method="post" action="{% url 'ged_toggle_favorite' fav.document.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="text-sm text-red-500 hover:text-red-700">★ Retirer</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500">Aucun favori pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

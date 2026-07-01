@@ -135,7 +135,12 @@ Cyonima-ES-Tooling/
 
 ### ged
 - `DocumentCategory` — catégorie avec couleur
-- `Document` — titre, fichier, version, tags, compteur téléchargements, numéro `DOC-{year}-{seq:05d}`
+- `Document` — titre, fichier, statut (brouillon/en_relecture/publie/archive), version, tags, texte extrait (`content_text`), compteur téléchargements, `deleted_at` (soft-delete), numéro `DOC-{year}-{seq:05d}`
+- `DocumentVersion` — version sauvegardée avant modification du fichier (file, version_number, notes, uploaded_by, uploaded_at)
+- `SharedLink` — lien de partage public avec token UUID, expiration, actif/inactif
+- `UserFavorite` — favori utilisateur + document (unique_together)
+- `CategorySubscription` — abonnement utilisateur + catégorie (unique_together)
+- `AuditLog` — journal d'audit (document, user, action, details, ip_address, created_at)
 
 ### analytics
 - `PageView` — url, utilisateur, session_key, ip, user_agent, timestamp
@@ -167,7 +172,26 @@ Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300,
 | `/rh/` | Ressources Humaines |
 | `/rh/profil/` | Profil employé (6 onglets : diplômes, certifications, formations, emplois, CV, évaluations) |
 | `/erp/` | ERP (devis, factures) |
-| `/ged/` | GED (documents) |
+| `/ged/` | GED (documents) — liste, catégories, favoris, corbeille, rapport d'audit |
+| `/ged/ajouter/` | Ajouter un document |
+| `/ged/<pk>/` | Détail du document |
+| `/ged/<pk>/modifier/` | Modifier un document |
+| `/ged/<pk>/supprimer/` | Déplacer vers la corbeille |
+| `/ged/<pk>/restaurer/` | Restaurer depuis la corbeille |
+| `/ged/<pk>/supprimer-definitivement/` | Supprimer définitivement |
+| `/ged/<pk>/soumettre/` | Soumettre en relecture |
+| `/ged/<pk>/approuver/` | Approuver / publier |
+| `/ged/<pk>/archiver/` | Archiver |
+| `/ged/<pk>/desarchiver/` | Désarchiver |
+| `/ged/<pk>/telecharger/` | Télécharger |
+| `/ged/<pk>/partager/` | Créer un lien de partage |
+| `/ged/<pk>/favori/` | Ajouter/retirer des favoris |
+| `/ged/partage/<uuid:token>/` | Page publique de partage |
+| `/ged/mes-favoris/` | Liste des favoris |
+| `/ged/corbeille/` | Corbeille |
+| `/ged/rapport-audit/` | Rapport d'audit |
+| `/ged/categories/` | Gestion des catégories (staff) |
+| `/ged/categorie/<pk>/abonner/` | S'abonner/Se désabonner d'une catégorie |
 | `/ressources/` | Ressources Externes (RGPD, PCI DSS, NIS 2, Conv. Métallurgie…) |
 | `/projects/` | ALM |
 | `/blog/securite/` | Blog sécurité |

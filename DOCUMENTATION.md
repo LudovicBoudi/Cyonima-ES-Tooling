@@ -300,16 +300,66 @@ Module de gestion comptable avec devis, factures, avoirs et paiements.
 
 ## 11. GED — Gestion Électronique de Documents (`/ged/`)
 
-Module de classement, recherche et téléchargement de fichiers avec catégories et tags.
+Module de classement, recherche et téléchargement de fichiers avec catégories, tags, workflow de validation et versionnage automatique.
 
-### Fonctionnalités
-- **Catégories** : catégories colorées pour organiser les documents.
-- **Recherche** : champ de recherche plein texte avec filtre par catégorie.
-- **Prévisualisation** : aperçu des images et des PDF directement dans le navigateur.
-- **Téléchargement** : compteur de téléchargements automatique.
-- **Numérotation** : chaque document reçoit un numéro de registre `DOC-{année}-{seq:05d}`.
-- **Tags** : tags libres pour un classement transversal.
-- **Versioning** : champ version pour le suivi des révisions.
+### Catégories
+- **Catégories colorées** : 11 catégories pré-générées (RH, Juridique, Finances, IT, Commercial, Procédures, Formation, Qualité, Direction, Projets, Communication).
+- **Gestion CRUD** par le staff via `/ged/categories/` (lien dans le sidebar).
+- **Filtre** en haut de la liste des documents par catégorie.
+- **Abonnements** 🔔/🔕 : s'abonner à une catégorie directement depuis le sidebar pour suivre les nouveaux documents.
+
+### Recherche
+- **Plein texte** : recherche dans le titre, la description, les tags et le contenu extrait (PDF/DOCX/TXT).
+- **Filtres combinables** : par catégorie, par statut, par favoris (`?fav=1`).
+- **Réindexation** : commande `python3 manage.py ged_reindex` pour réextraire le texte de tous les documents.
+
+### Workflow de validation
+| Statut | Description |
+|--------|-------------|
+| **Brouillon** | Document en cours de rédaction, modifiable |
+| **En relecture** | Soumis pour approbation (bouton "Soumettre") |
+| **Publié** | Approuvé par un membre du staff (bouton "Approuver") |
+| **Archivé** | Document historique, masqué de la liste par défaut |
+
+Actions disponibles : publier, archiver, désarchiver. Seuls les membres du staff peuvent approuver.
+
+### Versionnage automatique
+- À chaque modification du fichier, l'ancien fichier est conservé comme **version précédente** dans `DocumentVersion`.
+- **Historique** visible sur la fiche document : fichier, taille, téléchargeur, date, notes.
+- **Restauration** possible d'une version précédente avec sauvegarde de la version courante au préalable.
+
+### Favoris ⭐
+- Bouton ☆/★ sur chaque fiche document pour l'ajouter/retirer des favoris.
+- Page `/ged/mes-favoris/` listant tous les favoris avec retrait possible.
+- Filtre `?fav=1` dans la liste des documents pour n'afficher que les favoris.
+
+### Corbeille 🗑
+- Suppression → déplacement dans la corbeille (soft-delete avec `deleted_at`).
+- Page `/ged/corbeille/` : liste des documents supprimés avec date.
+- Actions : **Restaurer** (retour dans la liste) ou **Supprimer définitivement** (fichier + base).
+
+### Partage par lien 🔗
+- Génération d'un lien public avec expiration configurable (1/7/30 jours).
+- Page publique `/ged/partage/<uuid:token>/` sans authentification.
+- Téléchargement direct depuis la page de partage.
+- Consultation et révocation des liens actifs depuis la fiche document.
+- Lien expiré → page d'erreur dédiée.
+
+### Rapport d'audit 📋
+- Journalisation de 12 types d'actions : création, modification, suppression, restauration, suppression définitive, soumission, approbation, archivage, désarchivage, restauration de version, partage, téléchargement.
+- Page `/ged/rapport-audit/` : tableau complet avec date, document, action, utilisateur, IP.
+- Mini journal intégré sur chaque fiche document (50 dernières entrées).
+
+### Upload glisser-déposer
+- Zone de dépôt avec Alpine.js : drag & drop ou clic pour sélectionner.
+- Aperçu du nom et de la taille du fichier après sélection.
+- Fonctionne aussi sur le formulaire d'édition.
+
+### Autres fonctionnalités
+- **Numérotation** automatique : `DOC-{année}-{seq:05d}`.
+- **Tags** libres pour un classement transversal.
+- **Prévisualisation** des images et PDF.
+- **Téléchargement** avec compteur automatique.
 
 ---
 

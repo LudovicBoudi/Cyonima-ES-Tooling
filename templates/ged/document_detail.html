@@ -7,23 +7,56 @@
             <h1 class="text-xl font-bold">{{ doc.title }}</h1>
             <p class="text-sm text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</p>
         </div>
-        <div class="flex gap-2">
-            <a href="{% url 'ged_document_download' doc.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">⬇ Télécharger</a>
-            <a href="{% url 'ged_document_edit' doc.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
-            <form method="post" action="{% url 'ged_document_delete' doc.pk %}" onsubmit="return confirm('Supprimer définitivement ?')" class="inline">
-                {% csrf_token %}
-                <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">Supprimer</button>
-            </form>
+        <div class="flex flex-col gap-2 items-end">
+            <div class="flex gap-2">
+                <form method="post" action="{% url 'ged_toggle_favorite' doc.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="px-3 py-1.5 rounded-lg text-sm border {% if is_fav %}bg-yellow-50 border-yellow-300 text-yellow-700{% else %}bg-white border-gray-300 text-gray-600 hover:bg-gray-50{% endif %}">{% if is_fav %}★ Favori{% else %}☆ Favori{% endif %}</button>
+                </form>
+                <a href="{% url 'ged_document_download' doc.pk %}" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">⬇ Télécharger</a>
+                <a href="{% url 'ged_document_edit' doc.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
+                <form method="post" action="{% url 'ged_document_delete' doc.pk %}" onsubmit="return confirm('Déplacer « {{ doc.title }} » dans la corbeille ?')" class="inline">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-600">Supprimer</button>
+                </form>
+            </div>
+            <div class="flex gap-1">
+                {% if doc.status == 'brouillon' %}
+                <form method="post" action="{% url 'ged_document_submit' doc.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-indigo-500 text-white px-3 py-1 rounded text-xs hover:bg-indigo-600">Soumettre en relecture</button>
+                </form>
+                {% elif doc.status == 'en_relecture' and user.is_staff %}
+                <form method="post" action="{% url 'ged_document_approve' doc.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">✅ Approuver & publier</button>
+                </form>
+                {% endif %}
+                {% if doc.status != 'archive' %}
+                <form method="post" action="{% url 'ged_document_archive' doc.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600">Archiver</button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'ged_document_unarchive' doc.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600">Désarchiver</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4 text-sm mb-6">
         <div><span class="text-gray-500">Catégorie :</span> {% if doc.category %}<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ doc.category.color }}"></span>{{ doc.category.name }}{% else %}<span class="text-gray-400">Non classé</span>{% endif %}</div>
+        <div><span class="text-gray-500">Statut :</span> <span class="px-2 py-0.5 rounded text-xs font-medium {% if doc.status == 'publie' %}bg-green-100 text-green-800{% elif doc.status == 'en_relecture' %}bg-yellow-100 text-yellow-800{% elif doc.status == 'archive' %}bg-gray-200 text-gray-600{% else %}bg-blue-100 text-blue-800{% endif %}">{{ doc.get_status_display }}</span></div>
         <div><span class="text-gray-500">Type :</span> {{ doc.file_type|upper }}</div>
         <div><span class="text-gray-500">Version :</span> {{ doc.version }}</div>
         <div><span class="text-gray-500">Téléchargements :</span> {{ doc.download_count }}</div>
         <div><span class="text-gray-500">Ajouté par :</span> {{ doc.created_by.get_full_name|default:doc.created_by.username }}</div>
         <div><span class="text-gray-500">Le :</span> {{ doc.created_at|date:"d/m/Y H:i" }}</div>
+        {% if doc.reviewed_by %}<div><span class="text-gray-500">Approuvé par :</span> {{ doc.reviewed_by.get_full_name|default:doc.reviewed_by.username }}</div>
+        <div><span class="text-gray-500">Le :</span> {{ doc.reviewed_at|date:"d/m/Y H:i" }}</div>{% endif %}
         {% if tags_list %}<div class="col-span-2"><span class="text-gray-500">Tags :</span> {% for tag in tags_list %}<span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs mr-1">{{ tag }}</span>{% endfor %}</div>{% endif %}
     </div>
 
@@ -44,4 +77,79 @@
     </div>
     {% endif %}
 </div>
+
+<div class="bg-white rounded-xl shadow p-5 max-w-3xl mt-6">
+    <h2 class="text-lg font-semibold mb-4">🔗 Partage par lien</h2>
+    <form method="post" action="{% url 'ged_document_share' doc.pk %}" class="flex gap-2 items-center mb-3">
+        {% csrf_token %}
+        <label class="text-sm text-gray-600">Expiration :</label>
+        <select name="days" class="border rounded px-2 py-1 text-sm">
+            <option value="1">1 jour</option>
+            <option value="7" selected>7 jours</option>
+            <option value="30">30 jours</option>
+        </select>
+        <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700">🔗 Générer le lien</button>
+    </form>
+    {% if doc.shared_links.all %}
+    <div class="space-y-2">
+        {% for link in doc.shared_links.all %}
+        <div class="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0 text-sm">
+            <div class="min-w-0 flex-1">
+                {% if link.is_active and not link.is_expired %}
+                <a href="{% url 'ged_shared_document' link.token %}" target="_blank" class="text-blue-600 hover:underline truncate block">{{ request.get_host }}{% url 'ged_shared_document' link.token %}</a>
+                {% else %}
+                <span class="text-gray-400 line-through">{{ request.get_host }}{% url 'ged_shared_document' link.token %}</span>
+                {% endif %}
+                <p class="text-xs text-gray-400">Créé par {{ link.created_by.username }}, expire le {{ link.expires_at|date:"d/m/Y H:i" }}</p>
+            </div>
+            <form method="post" action="{% url 'ged_delete_shared_link' link.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="text-red-500 hover:underline text-xs">Révoquer</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-xs text-gray-400">Aucun lien de partage actif.</p>
+    {% endif %}
+</div>
+
+{% if versions %}
+<div class="bg-white rounded-xl shadow p-5 max-w-3xl mt-6">
+    <h2 class="text-lg font-semibold mb-4">📜 Historique des versions</h2>
+    <div class="space-y-2">
+        {% for v in versions %}
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="text-gray-400">📄</span>
+                <div class="min-w-0">
+                    <p class="font-medium">v{{ v.version_number }}</p>
+                    <p class="text-xs text-gray-400">{{ v.filename }} — {{ v.size_display }} — {{ v.uploaded_by.username }}, {{ v.uploaded_at|date:"d/m/Y H:i" }}</p>
+                    {% if v.notes %}<p class="text-xs text-gray-500 mt-0.5">{{ v.notes }}</p>{% endif %}
+                </div>
+            </div>
+            <form method="post" action="{% url 'ged_version_restore' v.pk %}" onsubmit="return confirm('Restaurer cette version ? Le fichier actuel sera conservé comme version précédente.')" class="shrink-0">
+                {% csrf_token %}
+                <button type="submit" class="text-blue-600 hover:underline text-xs">Restaurer</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if audit_logs %}
+<h2 class="text-lg font-semibold mt-6 mb-3">📋 Journal d'audit</h2>
+<div class="text-sm max-h-48 overflow-y-auto space-y-1">
+    {% for log in audit_logs %}
+    <div class="flex items-center gap-2 py-1 border-b border-gray-50 {% if log.action == 'delete' or log.action == 'permanent_delete' %}text-red-500{% elif log.action == 'approve' %}text-green-600{% elif log.action == 'create' %}text-blue-600{% endif %}">
+        <span class="text-xs text-gray-400 shrink-0">{{ log.created_at|date:"d/m/Y H:i" }}</span>
+        <span class="font-medium shrink-0">{{ log.get_action_display }}</span>
+        <span class="text-gray-500">par</span>
+        <span class="text-gray-700">{{ log.user.username|default:'—' }}</span>
+        {% if log.details %}<span class="text-gray-400 text-xs truncate">— {{ log.details }}</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

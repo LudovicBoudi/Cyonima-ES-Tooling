@@ -1,0 +1,38 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}Rapport d'audit — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">📋 Rapport d'audit</h1>
+    <p class="text-sm text-gray-500 mb-4">{{ logs|length }} entrée(s)</p>
+    {% if logs %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-500 border-b">
+                    <th class="pb-2 pr-4">Date</th>
+                    <th class="pb-2 pr-4">Document</th>
+                    <th class="pb-2 pr-4">Action</th>
+                    <th class="pb-2 pr-4">Utilisateur</th>
+                    <th class="pb-2 pr-4">Détails</th>
+                    <th class="pb-2">IP</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr class="border-b hover:bg-gray-50 {% if log.action == 'delete' or log.action == 'permanent_delete' %}text-red-600{% elif log.action == 'approve' %}text-green-600{% elif log.action == 'create' %}text-blue-600{% endif %}">
+                    <td class="py-2 pr-4 whitespace-nowrap">{{ log.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="py-2 pr-4"><a href="{% url 'ged_document_detail' log.document.pk %}" class="hover:underline">{{ log.document.title }}</a></td>
+                    <td class="py-2 pr-4">{{ log.get_action_display }}</td>
+                    <td class="py-2 pr-4">{% if log.user %}{{ log.user.username }}{% else %}—{% endif %}</td>
+                    <td class="py-2 pr-4 text-gray-500">{{ log.details }}</td>
+                    <td class="py-2 text-gray-400 text-xs">{{ log.ip_address|default:'—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-500">Aucune entrée pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

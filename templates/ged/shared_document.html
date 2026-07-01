@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}{{ doc.title }} — Document partagé{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto py-8 px-4">
+    <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex items-center gap-2 mb-4">
+            <a href="{% url 'ged_shared_document' link.token %}" class="text-gray-400 hover:text-gray-600">← Retour</a>
+            <span class="text-gray-300">|</span>
+            <p class="text-xs text-gray-400">Document partagé par {{ link.created_by.get_full_name|default:link.created_by.username }}</p>
+        </div>
+        <h1 class="text-xl font-bold mb-2">{{ doc.title }}</h1>
+        <p class="text-sm text-gray-400 mb-4">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</p>
+        {% if doc.description %}<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4">{{ doc.description }}</p>{% endif %}
+        <a href="{% url 'ged_shared_document' link.token %}?download=1" class="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-700 inline-block">⬇ Télécharger</a>
+        {% if tags_list %}
+        <div class="mt-4">{% for tag in tags_list %}<span class="inline-block bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs mr-1">{{ tag }}</span>{% endfor %}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -19,7 +19,7 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **CRM** | Gestion de la relation client (contacts, sociétés, affaires) | `/crm/` |
 | **RH** | Ressources Humaines (employés, contrats, congés, diplômes, formations, CV, évaluations) | `/rh/` |
 | **ERP** | Devis, factures, avoirs, paiements, factures fournisseurs | `/erp/` |
-| **GED** | Gestion électronique de documents (classement, recherche) | `/ged/` |
+| **GED** | Gestion électronique de documents (catégories, workflow validation, versionnage, favoris, corbeille, partage, audit) | `/ged/` |
 | **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2, Convention Métallurgie…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 

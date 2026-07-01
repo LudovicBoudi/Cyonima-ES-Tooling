@@ -1,0 +1,30 @@
+{% extends 'ged/base_ged.html' %}
+{% load static %}
+{% block title %}Catégories — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold">📂 Catégories</h1>
+        <a href="{% url 'ged_category_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle catégorie</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for cat in categories %}
+        <div class="border rounded-lg p-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span class="w-4 h-4 rounded-full shrink-0" style="background:{{ cat.color }}"></span>
+                <div>
+                    <p class="font-medium text-sm">{{ cat.name }}</p>
+                    <p class="text-xs text-gray-400">{{ cat.documents.count }} document(s)</p>
+                </div>
+            </div>
+            <div class="flex gap-2 text-xs">
+                <a href="{% url 'ged_category_edit' cat.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+                <a href="{% url 'ged_category_delete' cat.pk %}" class="text-red-600 hover:underline">Supprimer</a>
+            </div>
+        </div>
+        {% empty %}
+        <p class="col-span-full text-gray-400 text-sm py-8 text-center">Aucune catégorie</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

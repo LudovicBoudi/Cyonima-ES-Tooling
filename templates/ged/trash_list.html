@@ -1,0 +1,42 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}Corbeille — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">🗑 Corbeille</h1>
+    {% if documents %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-gray-500 border-b">
+                    <th class="pb-2">Titre</th>
+                    <th class="pb-2">Catégorie</th>
+                    <th class="pb-2">Supprimé le</th>
+                    <th class="pb-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doc in documents %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-2">{{ doc.title }}</td>
+                    <td class="py-2">{% if doc.category %}<span class="text-xs px-2 py-0.5 rounded-full" style="background:{{ doc.category.color }}20; color:{{ doc.category.color }}">{{ doc.category.name }}</span>{% endif %}</td>
+                    <td class="py-2 text-gray-500">{{ doc.deleted_at|date:"d/m/Y H:i" }}</td>
+                    <td class="py-2 flex gap-2">
+                        <form method="post" action="{% url 'ged_document_restore' doc.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-green-600 hover:underline text-xs font-medium">↩ Restaurer</button>
+                        </form>
+                        <form method="post" action="{% url 'ged_document_permanent_delete' doc.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-red-600 hover:underline text-xs font-medium" onclick="return confirm('Supprimer définitivement « {{ doc.title }} » ? Cette action est irréversible.')">🗑 Supprimer définitivement</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-500">La corbeille est vide.</p>
+    {% endif %}
+</div>
+{% endblock %}

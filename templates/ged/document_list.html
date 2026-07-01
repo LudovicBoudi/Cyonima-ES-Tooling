@@ -7,10 +7,23 @@
         <a href="{% url 'ged_document_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">+ Ajouter</a>
     </div>
 
-    <form method="get" class="flex gap-2 mb-4">
-        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher..." class="flex-1 border rounded-lg px-3 py-2 text-sm">
-        <button type="submit" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">Rechercher</button>
-        {% if q or cat %}<a href="{% url 'ged_document_list' %}" class="text-gray-500 px-3 py-2 text-sm">✕ Effacer</a>{% endif %}
+    <form method="get" class="flex gap-2 mb-4 flex-wrap">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher..." class="flex-1 min-w-[150px] border rounded-lg px-3 py-2 text-sm">
+        <select name="cat" class="border rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Toutes les catégories</option>
+            {% for c in categories %}
+            <option value="{{ c.pk }}" {% if cat == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="status" class="border rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Tous (sauf archivés)</option>
+            <option value="brouillon" {% if filter_status == 'brouillon' %}selected{% endif %}>Brouillon</option>
+            <option value="en_relecture" {% if filter_status == 'en_relecture' %}selected{% endif %}>En relecture</option>
+            <option value="publie" {% if filter_status == 'publie' %}selected{% endif %}>Publié</option>
+            <option value="archive" {% if filter_status == 'archive' %}selected{% endif %}>Archivé</option>
+        </select>
+        <button type="submit" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-300">Filtrer</button>
+        {% if q or cat or filter_status %}<a href="{% url 'ged_document_list' %}" class="text-gray-500 px-3 py-2 text-sm hover:underline">✕ Effacer</a>{% endif %}
     </form>
 
     {% regroup documents by category as docs_by_cat %}
@@ -26,7 +39,10 @@
                     <div class="flex items-center gap-3 min-w-0">
                         <span class="text-gray-400 text-lg">📄</span>
                         <div class="min-w-0">
-                            <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate block">{{ doc.title }}</a>
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate">{{ doc.title }}</a>
+                                <span class="px-1.5 py-0.5 rounded text-xs font-medium {% if doc.status == 'publie' %}bg-green-100 text-green-700{% elif doc.status == 'en_relecture' %}bg-yellow-100 text-yellow-700{% elif doc.status == 'archive' %}bg-gray-200 text-gray-500{% else %}bg-blue-100 text-blue-700{% endif %}">{{ doc.get_status_display }}</span>
+                            </div>
                             <span class="text-xs text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</span>
                         </div>
                     </div>
@@ -48,7 +64,10 @@
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="text-gray-400 text-lg">📄</span>
                     <div class="min-w-0">
-                        <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate block">{{ doc.title }}</a>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'ged_document_detail' doc.pk %}" class="font-medium hover:text-blue-700 truncate">{{ doc.title }}</a>
+                            <span class="px-1.5 py-0.5 rounded text-xs font-medium {% if doc.status == 'publie' %}bg-green-100 text-green-700{% elif doc.status == 'en_relecture' %}bg-yellow-100 text-yellow-700{% elif doc.status == 'archive' %}bg-gray-200 text-gray-500{% else %}bg-blue-100 text-blue-700{% endif %}">{{ doc.get_status_display }}</span>
+                        </div>
                         <span class="text-xs text-gray-400">{{ doc.registration_number }} — {{ doc.filename }} — {{ doc.size_display }} — v{{ doc.version }}</span>
                     </div>
                 </div>
