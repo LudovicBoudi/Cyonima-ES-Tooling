@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import FileExtensionValidator
 
 
 class Company(models.Model):
@@ -78,6 +79,22 @@ class Deal(models.Model):
         return self.title
 
 
+class DealStageLog(models.Model):
+    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='stage_logs')
+    from_stage = models.CharField('Étape précédente', max_length=20, blank=True)
+    to_stage = models.CharField('Nouvelle étape', max_length=20)
+    changed_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    changed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Historique d\'étape'
+        verbose_name_plural = 'Historique des étapes'
+        ordering = ['-changed_at']
+
+    def __str__(self):
+        return f'{self.deal.title}: {self.from_stage or "-"} → {self.to_stage}'
+
+
 class Interaction(models.Model):
     TYPE_CHOICES = [
         ('appel', 'Appel'),
@@ -110,6 +127,8 @@ class CrmTask(models.Model):
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks', verbose_name='Contact')
     deal = models.ForeignKey(Deal, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks', verbose_name='Affaire')
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='crm_tasks', verbose_name='Assigné à')
+    reminder_date = models.DateTimeField('Rappel', null=True, blank=True)
+    reminder_sent = models.BooleanField('Rappel envoyé', default=False)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False, related_name='created_crm_tasks')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -121,3 +140,30 @@ class CrmTask(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class CrmAttachment(models.Model):
+    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, null=True, blank=True, related_name='attachments')
+    interaction = models.ForeignKey(Interaction, on_delete=models.CASCADE, null=True, blank=True, related_name='attachments')
+    file = models.FileField('Fichier', upload_to='crm/attachments/%Y/%m/')
+    filename = models.CharField('Nom du fichier', max_length=255, editable=False)
+    file_size = models.PositiveIntegerField('Taille (octets)', editable=False, default=0)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Pièce jointe'
+        verbose_name_plural = 'Pièces jointes'
+        ordering = ['-uploaded_at']
+
+    def save(self, *args, **kwargs):
+        if self.file and not self.filename:
+            self.filename = self.file.name.split('/')[-1]
+            try:
+                self.file_size = self.file.size
+            except Exception:
+                self.file_size = 0
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.filename

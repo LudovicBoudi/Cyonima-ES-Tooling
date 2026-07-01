@@ -7,10 +7,13 @@
         <h1 class="text-xl font-bold">Interactions</h1>
         <a href="{% url 'crm_interaction_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle interaction</a>
     </div>
-    <form method="get" class="flex gap-3 mb-4">
+    <form method="get" class="flex gap-2 mb-4 flex-wrap">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher par sujet…" class="flex-1 min-w-[150px] px-3 py-2 border rounded text-sm">
+        <select name="type" class="px-3 py-2 border rounded text-sm"><option value="">Tous les types</option>{% for code, label in type_choices %}<option value="{{ code }}" {% if filter_type == code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
         <select name="contact" class="px-3 py-2 border rounded text-sm"><option value="">Tous les contacts</option>{% for c in contacts %}<option value="{{ c.pk }}" {% if filter_contact == c.pk|stringformat:'s' %}selected{% endif %}>{{ c }}</option>{% endfor %}</select>
         <select name="deal" class="px-3 py-2 border rounded text-sm"><option value="">Toutes les affaires</option>{% for d in deals %}<option value="{{ d.pk }}" {% if filter_deal == d.pk|stringformat:'s' %}selected{% endif %}>{{ d.title }}</option>{% endfor %}</select>
         <button type="submit" class="px-4 py-2 bg-gray-100 rounded text-sm hover:bg-gray-200">Filtrer</button>
+        {% if q or filter_type or filter_contact or filter_deal %}<a href="{% url 'crm_interaction_list' %}" class="px-3 py-2 text-sm text-gray-500 hover:underline">Réinitialiser</a>{% endif %}
     </form>
     <div class="space-y-3">
         {% for i in interactions %}

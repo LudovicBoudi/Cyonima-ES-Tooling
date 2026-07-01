@@ -110,7 +110,9 @@ Cyonima-ES-Tooling/
 - `Contact` — contact rattaché à une société
 - `Deal` — affaire avec pipeline (prospection → devis → négociation → gagné/perdu)
 - `Interaction` — historique d'appels, emails, réunions, notes
-- `CrmTask` — tâche liée à un contact ou une affaire
+- `CrmTask` — tâche liée à un contact ou une affaire, avec `reminder_date` (DateTimeField) et `reminder_sent` (BooleanField) — migration `crm/0002`
+- `DealStageLog` — historique des changements d'étape (`from_stage`, `to_stage`, `changed_by`, `changed_at`) — migration `crm/0003`
+- `CrmAttachment` — pièce jointe liée à `Deal` et `Interaction` — migration `crm/0004`
 
 ### hr
 - `Employee` — fiche employé (coordonnées, département, poste, grade A1–I18, statut, dates, société prestataire)
@@ -125,7 +127,7 @@ Cyonima-ES-Tooling/
 - `Evaluation` — évaluation annuelle (année, note 1-5 colorisée, commentaire, évaluateur)
 
 ### erp
-- `Quotation` — devis, identifiant `DEV-{seq:04d}`, JSONField lignes
+- `Quotation` — devis, identifiant `DEV-{seq:04d}`, JSONField lignes, + `deal` ForeignKey vers Deal (migration `erp/0002`)
 - `Invoice` — facture, identifiant `FACT-{seq:04d}`, JSONField lignes
 - `CreditNote` — avoir, identifiant `AVOIR-{seq:04d}`, JSONField lignes
 - `SupplierInvoice` — facture fournisseur, identifiant `FACF-{seq:04d}`, JSONField lignes
@@ -155,7 +157,13 @@ Pas de modèle — pages statiques servies par templates Django (RGPD, IGI 1300,
 | `/budget/` | Budget IT |
 | `/guichet/` | Guichet IT |
 | `/wiki/` | Wiki collaboratif |
-| `/crm/` | CRM |
+| `/crm/` | CRM (dashboard, sociétés, contacts, affaires, interactions, tâches) |
+| `/crm/exporter/societes/` | Export CSV sociétés |
+| `/crm/exporter/contacts/` | Export CSV contacts |
+| `/crm/exporter/affaires/` | Export CSV affaires |
+| `/crm/importer/` | Import CSV sociétés/contacts |
+| `/crm/pj/<pk>/` | Serve attachment |
+| `/crm/pj/<pk>/supprimer/` | Delete attachment |
 | `/rh/` | Ressources Humaines |
 | `/rh/profil/` | Profil employé (6 onglets : diplômes, certifications, formations, emplois, CV, évaluations) |
 | `/erp/` | ERP (devis, factures) |
@@ -196,6 +204,18 @@ Nouveau → En cours → Résolu → Fermé
 ### Guichet IT — EBI
 ```
 Nouveau → En étude → Validé → Réalisé → Fermé
+```
+
+### CRM Pipeline (Deal)
+```
+Prospection → Devis → Négociation → Gagné
+                                   → Perdu
+```
+Les changements d'étape sont journalisés dans `DealStageLog` (depuis le détail affaire et le Kanban drag & drop).
+
+### CRM → ERP
+```
+Deal → « Créer un devis » → Quotation (avec lien deal)
 ```
 
 ### ERP

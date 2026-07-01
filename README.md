@@ -98,3 +98,5 @@ Génère une archive ZIP (dump JSON + médias) dans le répertoire courant.
 - CKEditor 5 (éditeur de texte riche) — blogs et wiki
 - Pillow (traitement d'images), python-magic (détection MIME)
 - Système de rôles multiples (ManyToMany) avec 8 rôles prédéfinis
+- Export CSV (BOM-prefixed UTF-8), import CSV avec auto-détection de format
+- Diagrammes Chart.js : barres, donuts, courbes (dual axis count + amount)

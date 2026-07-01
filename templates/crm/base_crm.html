@@ -8,9 +8,11 @@
             <a href="{% url 'crm_company_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_company' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Sociétés</a>
             <a href="{% url 'crm_contact_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_contact' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Contacts</a>
             <a href="{% url 'crm_deal_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_deal' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Affaires</a>
+            <a href="{% url 'crm_deal_kanban' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'crm_deal_kanban' %}bg-gray-100 font-medium{% endif %}">📊 Pipeline Kanban</a>
             <a href="{% url 'crm_interaction_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_interaction' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Interactions</a>
             <a href="{% url 'crm_task_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_task' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Tâches</a>
             <hr class="my-2">
+            <a href="{% url 'crm_import_csv' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100 {% if request.resolver_match.url_name == 'crm_import_csv' %}bg-gray-100 font-medium{% endif %}">📥 Importer CSV</a>
             <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
         </div>
     </aside>

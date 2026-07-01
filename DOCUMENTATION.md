@@ -175,13 +175,75 @@ Documentation collaborative accessible à tous les utilisateurs connectés.
 
 Module de gestion commerciale avec pipeline de ventes.
 
-### Fonctionnalités
-- **Tableau de bord** : compteurs (sociétés, contacts, affaires), pipeline, montants gagnés/perdus (Chart.js), interactions récentes, tâches à venir et en retard.
-- **Sociétés** : fiche complète (coordonnées, SIRET, secteur), liste avec nombre de contacts et d'affaires, détail avec contacts et affaires liés.
-- **Contacts** : prénom, nom, société, fonction, coordonnées, notes.
-- **Affaires** : pipeline avec étapes (Prospection → Devis → Négociation → Gagné / Perdu), montant, probabilité, date de clôture prévue.
-- **Interactions** : historique des appels, emails, réunions et notes liés à un contact/affaire. Filtrable par contact ou affaire.
-- **Tâches** : todo liées à un contact ou une affaire, avec assignation, échéance, marquage terminé/à faire.
+### Tableau de bord enrichi (`/crm/dashboard/`)
+- **7 indicateurs KPI** : sociétés, contacts, affaires, affaires actives, valeur du pipeline, interactions, tâches.
+- **3 graphiques Chart.js** :
+  - Barres : répartition des affaires par étape.
+  - Donut : montant total par étape.
+  - Donut : affaires gagnées / perdues.
+- **Courbe d'évolution mensuelle** (dual axis) : nombre d'affaires et montant cumulé par mois.
+- **Top 5 affaires** par montant, taux de conversion (gagné / total clôturé).
+- **Boutons d'action rapide** : nouvelle société, nouveau contact, nouvelle affaire, nouvelle interaction, nouvelle tâche.
+
+### Sociétés
+- Fiche complète (coordonnées, SIRET, secteur).
+- Liste avec nombre de contacts et d'affaires, bouton d'export CSV.
+- Détail avec contacts et affaires liés.
+
+### Contacts
+- Prénom, nom, société, fonction, coordonnées, notes.
+- Liste avec bouton d'export CSV.
+
+### Affaires (Deals)
+- Pipeline avec étapes : Prospection → Devis → Négociation → Gagné / Perdu.
+- Montant, probabilité, date de clôture prévue.
+- **Page détail enrichie** : historique des changements d'étape, pièces jointes (upload/visualisation/suppression), timeline d'activité, création de devis ERP.
+- Les titres dans la liste des affaires sont des liens vers la page de détail.
+- Bouton d'export CSV sur la liste.
+
+### Interactions
+- Historique des appels, emails, réunions et notes liés à un contact/affaire.
+- Filtrable par contact ou affaire.
+
+### Tâches (CrmTask)
+- Todo liées à un contact ou une affaire, avec assignation, échéance (colorisée), marquage terminé/à faire.
+- **Rappels** : `reminder_date` et `reminder_sent` sur chaque tâche, affichés dans le tableau.
+- Création : `/taches/creer/`
+- Modification : `/taches/<pk>/modifier/`
+
+### Pièces jointes (Attachments)
+- Modèle `CrmAttachment` lié aux affaires et interactions.
+- Upload sur la page détail d'une affaire.
+- Visualisation et suppression inline via `serve_attachment` et `delete_attachment`.
+- URLs : `/crm/pj/<pk>/` et `/crm/pj/<pk>/supprimer/`
+
+### Export CSV
+- Pages d'export dédiées : `/crm/exporter/societes/`, `/crm/exporter/contacts/`, `/crm/exporter/affaires/`
+- Boutons CSV sur les listes sociétés, contacts et affaires.
+- Fichiers générés en UTF-8 avec BOM pour compatibilité Excel.
+
+### Import CSV
+- Vue `import_csv` à l'URL `/crm/importer/`
+- Un seul fichier peut contenir des sociétés et des contacts — auto-détection du format par les en-têtes CSV.
+- Template avec exemples de format affichés.
+- Lien dans la barre latérale CRM.
+
+### CRM → ERP (Devis)
+- Le modèle `Quotation` (ERP) possède un champ `deal` (ForeignKey) — migration `erp/0002`.
+- Un bouton "Créer un devis" sur la page détail d'une affaire appelle la vue `deal_create_quotation`.
+- Le devis créé affiche un lien vers l'affaire source.
+
+### Migrations CRM appliquées
+| Migration | Contenu |
+|-----------|---------|
+| `crm/0002_add_reminder_to_task` | Champs `reminder_date` (DateTimeField) et `reminder_sent` (BooleanField) sur `CrmTask` |
+| `crm/0003_add_stage_log` | Modèle `DealStageLog` (from_stage, to_stage, changed_by, changed_at) |
+| `crm/0004_add_attachment` | Modèle `CrmAttachment` lié à Deal et Interaction |
+
+### ERP migration appliquée
+| Migration | Contenu |
+|-----------|---------|
+| `erp/0002_add_deal_to_quotation` | Champ `deal` (ForeignKey) sur `Quotation` |
 
 ---
 

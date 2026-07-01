@@ -21,6 +21,7 @@
     <div class="grid grid-cols-2 gap-4 text-sm mb-6">
         <div><span class="text-gray-500">Société :</span> <span class="font-medium">{{ q.company|default:'-' }}</span></div>
         <div><span class="text-gray-500">Contact :</span> <span class="font-medium">{{ q.contact|default:'-' }}</span></div>
+        {% if q.deal %}<div><span class="text-gray-500">Affaire CRM :</span> <a href="{% url 'crm_deal_detail' q.deal.pk %}" class="text-blue-600 hover:underline">{{ q.deal.title }}</a></div>{% endif %}
         <div><span class="text-gray-500">Statut :</span> <span class="px-2 py-0.5 rounded text-xs font-medium {% if q.status == 'accepte' %}bg-green-200 text-green-800{% elif q.status == 'refuse' %}bg-red-200 text-red-800{% elif q.status == 'envoye' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ q.get_status_display }}</span></div>
         <div><span class="text-gray-500">Valable jusqu'au :</span> <span class="font-medium">{{ q.valid_until|date:"d/m/Y"|default:'-' }}</span></div>
     </div>

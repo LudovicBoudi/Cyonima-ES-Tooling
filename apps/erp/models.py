@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from apps.crm.models import Company, Contact
+from apps.crm.models import Company, Contact, Deal
 from apps.budget.providers.models import Provider
 
 
@@ -23,6 +23,7 @@ class Quotation(models.Model):
     number = models.CharField('Numéro', max_length=50, unique=True, editable=False)
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations', verbose_name='Société')
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations', verbose_name='Contact')
+    deal = models.ForeignKey(Deal, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations', verbose_name='Affaire CRM')
     date = models.DateField('Date', auto_now_add=True)
     valid_until = models.DateField('Valable jusqu\'au', null=True, blank=True)
     status = models.CharField('Statut', max_length=20, choices=STATUS_CHOICES, default='brouillon')

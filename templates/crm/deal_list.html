@@ -5,12 +5,29 @@
 <div class="bg-white rounded-xl shadow p-6">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-bold">Affaires</h1>
-        <a href="{% url 'crm_deal_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle affaire</a>
+        <div class="flex gap-2">
+            <a href="{% url 'crm_deal_kanban' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">📊 Kanban</a>
+            <a href="{% url 'crm_export_deals' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50">📥 CSV</a>
+            <a href="{% url 'crm_deal_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle affaire</a>
+        </div>
     </div>
+    <form method="get" class="mb-4 flex gap-2 flex-wrap">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher par titre…" class="flex-1 min-w-[150px] px-3 py-2 border rounded text-sm">
+        <select name="stage" class="px-3 py-2 border rounded text-sm">
+            <option value="">Toutes les étapes</option>
+            {% for code, label in stage_choices %}<option value="{{ code }}" {% if filter_stage == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select name="company" class="px-3 py-2 border rounded text-sm">
+            <option value="">Toutes les sociétés</option>
+            {% for c in all_companies %}<option value="{{ c.pk }}" {% if filter_company == c.pk|stringformat:'s' %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-200">Filtrer</button>
+        {% if q or filter_stage or filter_company %}<a href="{% url 'crm_deal_list' %}" class="px-3 py-2 text-sm text-gray-500 hover:underline">Réinitialiser</a>{% endif %}
+    </form>
     <table class="w-full text-sm">
         <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Titre</th><th class="pb-2">Société</th><th class="pb-2">Montant</th><th class="pb-2">Prob.</th><th class="pb-2">Étape</th><th class="pb-2"></th></tr></thead>
         <tbody>{% for d in deals %}<tr class="border-b border-gray-100 hover:bg-gray-50">
-            <td class="py-2 font-medium">{{ d.title }}</td>
+             <td class="py-2 font-medium"><a href="{% url 'crm_deal_detail' d.pk %}" class="text-blue-600 hover:underline">{{ d.title }}</a></td>
             <td class="py-2 text-gray-600">{% if d.company %}{{ d.company.name }}{% endif %}</td>
             <td class="py-2">{{ d.amount|floatformat:0 }} €</td>
             <td class="py-2">{{ d.probability }}%</td>

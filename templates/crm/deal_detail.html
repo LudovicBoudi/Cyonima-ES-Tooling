@@ -1,0 +1,105 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}{{ deal.title }} — Affaires — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-xl font-bold">{{ deal.title }}</h1>
+            <p class="text-sm text-gray-400 mt-1">
+                {% if deal.company %}{{ deal.company.name }} — {% endif %}
+                {{ deal.get_stage_display }} — {{ deal.amount|floatformat:0 }} € — {{ deal.probability }}%
+            </p>
+        </div>
+        <div class="flex gap-2 text-sm">
+            <a href="{% url 'crm_deal_create_quotation' deal.pk %}" class="text-green-600 hover:underline">📄 Créer un devis</a>
+            <a href="{% url 'crm_deal_edit' deal.pk %}" class="text-amber-600 hover:underline">Modifier</a>
+            <a href="{% url 'crm_deal_delete' deal.pk %}" class="text-red-600 hover:underline">Supprimer</a>
+            <a href="{% url 'crm_deal_list' %}" class="text-gray-500 hover:underline">← Retour</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        <div><span class="text-gray-500">Société :</span> {% if deal.company %}{{ deal.company.name }}{% else %}—{% endif %}</div>
+        <div><span class="text-gray-500">Contact :</span> {% if deal.contact %}{{ deal.contact }}{% else %}—{% endif %}</div>
+        <div><span class="text-gray-500">Montant :</span> {{ deal.amount|floatformat:2 }} €</div>
+        <div><span class="text-gray-500">Probabilité :</span> {{ deal.probability }}%</div>
+        <div><span class="text-gray-500">Étape :</span> <span class="px-2 py-0.5 rounded text-xs font-medium {% if deal.stage == 'gagne' %}bg-green-100 text-green-800{% elif deal.stage == 'perdu' %}bg-red-100 text-red-800{% elif deal.stage == 'negociation' %}bg-orange-100 text-orange-800{% elif deal.stage == 'devis' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">{{ deal.get_stage_display }}</span></div>
+        <div><span class="text-gray-500">Clôture prévue :</span> {{ deal.expected_close_date|date:"d/m/Y"|default:'—' }}</div>
+    </div>
+    {% if deal.description %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-4">{{ deal.description|linebreaks }}</div>{% endif %}
+</div>
+
+{% if stage_logs %}
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">🔄 Historique des étapes</h2>
+    <div class="space-y-2 text-sm">
+        {% for log in stage_logs %}
+        <div class="flex gap-2 items-center">
+            <span class="text-gray-500">{{ log.changed_at|date:"d/m/Y H:i" }}</span>
+            <span class="text-gray-400">→</span>
+            <span class="font-medium">{{ log.get_to_stage_display }}</span>
+            <span class="text-gray-400">par {{ log.changed_by.username }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">📎 Pièces jointes</h2>
+    <form method="post" action="{% url 'crm_deal_upload_attachment' deal.pk %}" enctype="multipart/form-data" class="flex gap-2 mb-3">
+        {% csrf_token %}
+        <input type="file" name="file" required class="text-sm border rounded px-2 py-1">
+        <button type="submit" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm hover:bg-blue-700">Ajouter</button>
+    </form>
+    {% for att in attachments %}
+    <div class="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0 text-sm">
+        <div class="flex items-center gap-2">
+            <span>📄</span>
+            <a href="{% url 'crm_serve_attachment' att.pk %}" target="_blank" class="text-blue-600 hover:underline">{{ att.filename }}</a>
+            <span class="text-xs text-gray-400">— {{ att.uploaded_by.username }}, {{ att.uploaded_at|date:"d/m/Y" }}</span>
+        </div>
+        <form method="post" action="{% url 'crm_delete_attachment' att.pk %}" onsubmit="return confirm('Supprimer {{ att.filename }} ?')">
+            {% csrf_token %}
+            <button type="submit" class="text-red-500 hover:underline text-xs">Supprimer</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="text-gray-400 text-sm">Aucune pièce jointe</p>
+    {% endfor %}
+</div>
+
+<div class="bg-white rounded-xl shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">📋 Activité</h2>
+    <div class="space-y-4">
+        {% for item in interactions %}
+        <div class="flex gap-3 text-sm">
+            <div class="shrink-0 mt-0.5">
+                {% if item.type == 'appel' %}🔵{% elif item.type == 'email' %}📧{% elif item.type == 'reunion' %}🤝{% else %}📝{% endif %}
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="font-medium">{{ item.subject }}</p>
+                <p class="text-xs text-gray-400">{{ item.get_type_display }} — {{ item.contact }} — {{ item.created_by.username }} — {{ item.created_at|date:"d/m/Y H:i" }}</p>
+                {% if item.content %}<p class="text-gray-600 mt-1">{{ item.content|linebreaks|truncatewords:30 }}</p>{% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-400 text-sm">Aucune interaction</p>
+        {% endfor %}
+
+        <hr class="my-2">
+
+        {% for t in tasks %}
+        <div class="flex gap-3 text-sm">
+            <div class="shrink-0 mt-0.5">{% if t.completed %}✅{% else %}⬜{% endif %}</div>
+            <div class="min-w-0 flex-1">
+                <p class="font-medium {% if t.completed %}line-through text-gray-400{% endif %}">{{ t.title }}</p>
+                <p class="text-xs text-gray-400">{% if t.assigned_to %}{{ t.assigned_to.username }} — {% endif %}{{ t.due_date|date:"d/m/Y"|default:'Sans date' }}</p>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-400 text-sm">Aucune tâche</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

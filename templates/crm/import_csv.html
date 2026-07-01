@@ -1,0 +1,64 @@
+{% extends 'crm/base_crm.html' %}
+{% load static %}
+{% block title %}Import CSV — CRM{% endblock %}
+{% block crm_content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow p-6 mb-6">
+        <h1 class="text-xl font-bold mb-4">📥 Import CSV</h1>
+        <p class="text-sm text-gray-500 mb-6">Importez des sociétés et/ou des contacts depuis un fichier CSV (UTF-8).</p>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Fichier CSV</label>
+                <input type="file" name="csv_file" accept=".csv" required class="w-full px-3 py-2 border rounded text-sm">
+            </div>
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Importer</button>
+        </form>
+
+        {% if results.companies or results.contacts %}
+        <div class="mt-6 p-4 bg-green-50 rounded-lg text-sm">
+            <p class="font-semibold text-green-800">✅ Import terminé</p>
+            <ul class="mt-2 space-y-1 text-green-700">
+                {% if results.companies %}<li>{{ results.companies }} société(s) importée(s)</li>{% endif %}
+                {% if results.contacts %}<li>{{ results.contacts }} contact(s) importé(s)</li>{% endif %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if results.errors %}
+        <div class="mt-4 p-4 bg-red-50 rounded-lg text-sm">
+            <p class="font-semibold text-red-800">⚠️ Erreurs</p>
+            <ul class="mt-2 space-y-1 text-red-700 list-disc list-inside">
+                {% for e in results.errors %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">📋 Format attendu</h2>
+        <div class="grid grid-cols-2 gap-6 text-sm">
+            <div>
+                <h3 class="font-medium mb-2">Sociétés</h3>
+                <code class="block bg-gray-50 p-3 rounded text-xs leading-relaxed">
+Nom,Secteur,Adresse,Code postal,Ville,Pays,Téléphone,Email,Site web,SIRET<br>
+Ma société,Informatique,1 rue de Paris,75001,Paris,France,0102030405,contact@exemple.fr,https://exemple.fr,12345678900001
+                </code>
+            </div>
+            <div>
+                <h3 class="font-medium mb-2">Contacts</h3>
+                <code class="block bg-gray-50 p-3 rounded text-xs leading-relaxed">
+Prénom,Nom,Email,Téléphone,Portable,Fonction,Société<br>
+Jean,Dupont,jean@exemple.fr,0102030405,0601020304,Directeur,Ma société
+                </code>
+            </div>
+        </div>
+        <p class="text-xs text-gray-400 mt-4">💡 Les deux formats peuvent coexister dans le même fichier. Les sociétés sont rattachées automatiquement aux contacts via le champ "Société".</p>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'crm_company_list' %}" class="text-sm text-gray-500 hover:underline">← Retour aux sociétés</a>
+    </div>
+</div>
+{% endblock %}

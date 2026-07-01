@@ -3,9 +3,16 @@
 {% block title %}CRM — Tableau de bord{% endblock %}
 {% block crm_content %}
 <div class="space-y-6">
-    <h1 class="text-2xl font-bold text-gray-800">Tableau de bord CRM</h1>
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-800">Tableau de bord CRM</h1>
+        <div class="flex gap-2 text-sm">
+            <a href="{% url 'crm_company_create' %}" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ Société</a>
+            <a href="{% url 'crm_contact_create' %}" class="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700">+ Contact</a>
+            <a href="{% url 'crm_deal_create' %}" class="px-3 py-1.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700">+ Affaire</a>
+    </div>
+</div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-7 gap-4">
         <div class="bg-white rounded-xl shadow p-4 text-center">
             <p class="text-3xl font-bold text-blue-700">{{ total_companies }}</p>
             <p class="text-sm text-gray-500">Sociétés</p>
@@ -26,31 +33,89 @@
             <p class="text-3xl font-bold text-emerald-700">{{ pipeline_value|floatformat:0 }} €</p>
             <p class="text-sm text-gray-500">Pipeline</p>
         </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-indigo-600">{{ total_interactions }}</p>
+            <p class="text-sm text-gray-500">Interactions</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-pink-600">{{ total_tasks }}</p>
+            <p class="text-sm text-gray-500">Tâches</p>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold mb-4">Affaires par étape</h2>
+            <h2 class="text-lg font-semibold mb-4">📊 Affaires par étape</h2>
             <canvas id="stageChart" height="180"></canvas>
         </div>
         <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold mb-4">Montants gagnés / perdus</h2>
+            <h2 class="text-lg font-semibold mb-4">💰 Montants par étape</h2>
+            <canvas id="amountChart" height="180"></canvas>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">📈 Gagné / Perdu</h2>
             <canvas id="wonLostChart" height="180"></canvas>
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow p-6">
-        <h2 class="text-lg font-semibold mb-4">Tâches en retard</h2>
-        {% if overdue_tasks_count %}
-            <p class="text-red-600 font-semibold">{{ overdue_tasks_count }} tâche(s) en retard</p>
-        {% else %}
-            <p class="text-gray-400">Aucune tâche en retard</p>
-        {% endif %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">📅 Évolution mensuelle</h2>
+            {% if month_labels %}
+            <canvas id="monthChart" height="200"></canvas>
+            {% else %}
+            <p class="text-gray-400 text-sm">Pas assez de données</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">🏆 Top affaires</h2>
+            {% for d in top_deals %}
+            <div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                <div class="min-w-0">
+                    <a href="{% url 'crm_deal_detail' d.pk %}" class="text-sm font-medium text-blue-600 hover:underline">{{ d.title }}</a>
+                    <p class="text-xs text-gray-400">{{ d.company.name|default:'-' }} — {{ d.get_stage_display }}</p>
+                </div>
+                <span class="text-sm font-semibold text-gray-700">{{ d.amount|floatformat:0 }} €</span>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-sm">Aucune affaire</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold">🔄 Taux de conversion</h2>
+                <span class="text-2xl font-bold {% if conversion_rate >= 50 %}text-green-600{% else %}text-amber-600{% endif %}">{{ conversion_rate }}%</span>
+            </div>
+            <div class="flex gap-4 text-sm">
+                <div><span class="text-green-600 font-semibold">{{ won_count }}</span> gagnées</div>
+                <div><span class="text-red-600 font-semibold">{{ lost_count }}</span> perdues</div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">⏰ Tâches en retard</h2>
+            {% if overdue_tasks_count %}
+            <p class="text-red-600 font-semibold text-2xl">{{ overdue_tasks_count }}</p>
+            <p class="text-sm text-gray-500">tâche(s) en retard</p>
+            {% else %}
+            <p class="text-gray-400">✅ Aucune tâche en retard</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-semibold mb-4">📊 Résumé</h2>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-gray-500">Montant gagné</span><span class="font-semibold text-green-600">{{ won_amount|floatformat:0 }} €</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Montant perdu</span><span class="font-semibold text-red-600">{{ lost_amount|floatformat:0 }} €</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Affaires en cours</span><span class="font-semibold">{{ active_deals }}</span></div>
+            </div>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold mb-4">Interactions récentes</h2>
+            <h2 class="text-lg font-semibold mb-4">💬 Interactions récentes</h2>
             {% for i in recent_interactions %}
             <div class="py-2 border-b border-gray-100 last:border-0">
                 <p class="text-sm font-medium">{{ i.subject }}</p>
@@ -61,7 +126,7 @@
             {% endfor %}
         </div>
         <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-semibold mb-4">Tâches à venir</h2>
+            <h2 class="text-lg font-semibold mb-4">📋 Tâches à venir</h2>
             {% for t in upcoming_tasks %}
             <div class="py-2 border-b border-gray-100 last:border-0 flex items-center gap-3">
                 <span class="w-2 h-2 rounded-full {% if t.due_date and t.due_date < today %}bg-red-500{% else %}bg-blue-500{% endif %} shrink-0"></span>
@@ -96,6 +161,17 @@ new Chart(document.getElementById('stageChart'), {
         scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
     }
 });
+new Chart(document.getElementById('amountChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for s in stage_amounts %}"{{ s.label }}",{% endfor %}],
+        datasets: [{
+            data: [{% for s in stage_amounts %}{{ s.amount }},{% endfor %}],
+            backgroundColor: ['#3b82f6','#f59e0b','#f97316','#22c55e','#ef4444'],
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
 new Chart(document.getElementById('wonLostChart'), {
     type: 'doughnut',
     data: {
@@ -107,5 +183,38 @@ new Chart(document.getElementById('wonLostChart'), {
     },
     options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
 });
+{% if month_labels %}
+new Chart(document.getElementById('monthChart'), {
+    type: 'line',
+    data: {
+        labels: [{% for m in month_labels %}"{{ m }}",{% endfor %}],
+        datasets: [{
+            label: 'Créées',
+            data: [{% for c in month_counts %}{{ c }},{% endfor %}],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y',
+        }, {
+            label: 'Montant (k€)',
+            data: [{% for a in month_amounts %}{{ a|floatformat:0 }},{% endfor %}],
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245,158,11,0.1)',
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y1',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 }, position: 'left' },
+            y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false } }
+        }
+    }
+});
+{% endif %}
 </script>
 {% endblock %}

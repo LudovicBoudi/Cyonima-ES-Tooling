@@ -21,7 +21,7 @@
     </div>
     {% if company.notes %}<div class="text-sm text-gray-700 bg-gray-50 p-3 rounded mb-6">{{ company.notes|linebreaks }}</div>{% endif %}
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div>
             <h2 class="text-lg font-semibold mb-3">Contacts ({{ contacts|length }})</h2>
             {% for c in contacts %}
@@ -36,10 +36,38 @@
             {% for d in deals %}
             <div class="py-2 border-b border-gray-100">
                 <p class="font-medium">{{ d.title }}</p>
-                <p class="text-xs text-gray-400">{{ d.get_stage_display }} — {{ d.amount }} €</p>
+                <p class="text-xs text-gray-400"><a href="{% url 'crm_deal_detail' d.pk %}" class="text-blue-600 hover:underline">{{ d.get_stage_display }}</a> — {{ d.amount }} €</p>
             </div>
             {% empty %}<p class="text-gray-400 text-sm">Aucune affaire</p>{% endfor %}
         </div>
+    </div>
+
+    <h2 class="text-lg font-semibold mb-3 border-t pt-4">📋 Timeline d'activité</h2>
+    <div class="space-y-3">
+        {% for i in timeline_interactions %}
+        <div class="flex gap-3 text-sm">
+            <div class="shrink-0 mt-0.5">
+                {% if i.type == 'appel' %}🔵{% elif i.type == 'email' %}📧{% elif i.type == 'reunion' %}🤝{% else %}📝{% endif %}
+            </div>
+            <div class="min-w-0 flex-1">
+                <p class="font-medium">{{ i.subject }}</p>
+                <p class="text-xs text-gray-400">{{ i.get_type_display }} — {{ i.contact }} — {{ i.created_by.username }} — {{ i.created_at|date:"d/m/Y H:i" }}</p>
+                {% if i.content %}<p class="text-gray-600 mt-1">{{ i.content|truncatewords:30 }}</p>{% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-400 text-sm">Aucune interaction récente</p>
+        {% endfor %}
+
+        {% for t in timeline_tasks %}
+        <div class="flex gap-3 text-sm">
+            <div class="shrink-0 mt-0.5">{% if t.completed %}✅{% else %}⬜{% endif %}</div>
+            <div class="min-w-0 flex-1">
+                <p class="font-medium {% if t.completed %}line-through text-gray-400{% endif %}">{{ t.title }}</p>
+                <p class="text-xs text-gray-400">{% if t.due_date %}Échéance : {{ t.due_date|date:"d/m/Y" }}{% endif %}</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

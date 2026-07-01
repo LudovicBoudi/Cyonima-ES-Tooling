@@ -1,0 +1,99 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}Kanban — Affaires — CRM{% endblock %}
+{% block crm_content %}
+<div class="mb-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold">Pipeline des affaires</h1>
+    <div class="flex gap-2 text-sm">
+        <a href="{% url 'crm_deal_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg hover:bg-blue-800">Nouvelle affaire</a>
+        <a href="{% url 'crm_deal_list' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Vue liste</a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="kanban">
+    {% for col in columns %}
+    <div>
+        <div class="bg-gray-50 rounded-xl p-3">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-sm text-gray-700">
+                    {% if col.code == 'prospection' %}🔍
+                    {% elif col.code == 'devis' %}📄
+                    {% elif col.code == 'negociation' %}🤝
+                    {% elif col.code == 'gagne' %}✅
+                    {% elif col.code == 'perdu' %}❌{% endif %}
+                    {{ col.label }}
+                </h3>
+                <span class="bg-gray-200 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">{{ col.deals|length }}</span>
+            </div>
+            <div class="space-y-2 min-h-[200px] kanban-col" data-stage="{{ col.code }}">
+                {% for d in col.deals %}
+                <div class="bg-white rounded-lg shadow-sm p-3 kanban-card" draggable="true" data-id="{{ d.pk }}">
+                    <div class="flex justify-between items-start">
+                        <strong class="text-sm text-gray-800 leading-tight">{{ d.title }}</strong>
+                        <a href="{% url 'crm_deal_edit' d.pk %}" class="text-gray-400 hover:text-amber-600 text-xs shrink-0 ml-1">✎</a>
+                    </div>
+                    {% if d.company %}
+                    <p class="text-xs text-gray-500 mt-1">{{ d.company.name }}</p>
+                    {% endif %}
+                    <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+                        <span class="text-xs font-semibold {% if d.stage == 'gagne' %}text-green-700{% elif d.stage == 'perdu' %}text-red-600{% else %}text-gray-700{% endif %}">{{ d.amount|floatformat:0 }} €</span>
+                        <span class="text-xs text-gray-400">{{ d.probability }}%</span>
+                    </div>
+                    {% if d.expected_close_date %}
+                    <p class="text-xs text-gray-400 mt-1">Clôture : {{ d.expected_close_date|date:"d/m/Y" }}</p>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p class="text-xs text-gray-400 text-center py-6">Aucune</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.kanban-card { cursor: grab; border-left: 4px solid #e5e7eb; }
+.kanban-card:active { cursor: grabbing; opacity: 0.7; }
+.kanban-card[data-stage="prospection"] { border-left-color: #3b82f6; }
+.kanban-card[data-stage="devis"] { border-left-color: #f59e0b; }
+.kanban-card[data-stage="negociation"] { border-left-color: #f97316; }
+.kanban-card[data-stage="gagne"] { border-left-color: #22c55e; }
+.kanban-card[data-stage="perdu"] { border-left-color: #ef4444; }
+.kanban-col { min-height: 200px; }
+.kanban-col.drag-over { background-color: rgba(59, 130, 246, 0.08); border-radius: 0.5rem; }
+</style>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+document.querySelectorAll('.kanban-card').forEach(card => {
+    card.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', card.dataset.id);
+        card.classList.add('opacity-40');
+    });
+    card.addEventListener('dragend', e => {
+        card.classList.remove('opacity-40');
+        document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+    });
+});
+document.querySelectorAll('.kanban-col').forEach(col => {
+    col.addEventListener('dragover', e => { e.preventDefault(); col.classList.add('drag-over'); });
+    col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+    col.addEventListener('drop', e => {
+        e.preventDefault();
+        col.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text/plain');
+        const newStage = col.dataset.stage;
+        const url = "{% url 'crm_deal_update_stage' pk=99999 %}".replace('99999', id);
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+            body: JSON.stringify({ stage: newStage })
+        })
+        .then(r => r.json())
+        .then(data => { if (data.ok) location.reload(); });
+    });
+});
+</script>
+{% endblock %}
