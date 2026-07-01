@@ -10,6 +10,7 @@
             <a href="{% url 'erp_creditnote_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_creditnote' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Avoirs</a>
             <a href="{% url 'erp_supplier_invoice_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_supplier_invoice' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Factures fournisseurs</a>
             <a href="{% url 'erp_payment_create' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'erp_payment_create' %}bg-gray-100 font-medium{% endif %}">Enregistrer un paiement</a>
+            <a href="{% url 'erp_product_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_product' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">📦 Catalogue produits</a>
             <hr class="my-2">
             <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
         </div>

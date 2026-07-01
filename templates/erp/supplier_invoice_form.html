@@ -34,6 +34,16 @@
         </div>
         <div>
             <label class="block text-sm font-medium text-gray-700">Lignes</label>
+            {% if products %}
+            <div class="flex gap-2 mb-2">
+                <select id="product-select" class="border rounded-lg px-3 py-1.5 text-sm flex-1" onchange="insertProduct()">
+                    <option value="">→ Insérer un produit du catalogue</option>
+                    {% for p in products %}
+                    <option value="{{ p.name }}|{{ p.unit_price }}|{{ p.vat_rate }}">{{ p.name }} — {{ p.unit_price }} € (TVA {{ p.vat_rate }}%)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
             <div id="lines-container" class="space-y-2"></div>
             <button type="button" onclick="addLine()" class="text-sm text-blue-600 hover:underline mt-2">+ Ajouter une ligne</button>
             <textarea name="lines_json" id="lines_json" class="hidden"></textarea>
@@ -77,5 +87,13 @@ function saveLines() {
 }
 lines.forEach(l => addLine(l.description, l.quantity, l.unit_price, l.vat_rate));
 if (!lines.length) addLine();
+function insertProduct() {
+    const sel = document.getElementById('product-select');
+    if (!sel.value) return;
+    const [name, price, vat] = sel.value.split('|');
+    addLine(name, 1, price, vat);
+    saveLines();
+    sel.value = '';
+}
 </script>
 {% endblock %}

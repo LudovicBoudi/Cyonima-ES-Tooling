@@ -1,11 +1,23 @@
 {% extends 'erp/base_erp.html' %}
-{% block title %}Factures clients — ERP{% endblock %}
+{% block title %}Factures — ERP{% endblock %}
 {% block erp_content %}
 <div class="bg-white rounded-xl shadow p-5">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-bold">Factures clients</h1>
         <a href="{% url 'erp_invoice_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle facture</a>
     </div>
+    <form method="get" class="flex gap-2 mb-4">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher par n°, société..." class="border rounded-lg px-3 py-1.5 text-sm w-64">
+        <select name="status" class="border rounded-lg px-3 py-1.5 text-sm">
+            <option value="">Tous les statuts</option>
+            {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if filter_status == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-700">Filtrer</button>
+        {% if q or filter_status %}<a href="{% url 'erp_invoice_list' %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>{% endif %}
+        <a href="{% url 'erp_export_invoices_csv' %}" class="text-green-700 px-3 py-1.5 text-sm hover:underline ml-auto">⬇ CSV</a>
+    </form>
     <table class="w-full text-sm">
         <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N°</th><th class="pb-2">Société</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
         <tbody>{% for inv in invoices %}<tr class="border-b border-gray-100 hover:bg-gray-50">
@@ -18,5 +30,12 @@
             <td class="py-2 text-right"><a href="{% url 'erp_invoice_detail' inv.pk %}" class="text-blue-600 hover:underline text-xs">Voir</a></td>
         </tr>{% empty %}<tr><td colspan="7" class="py-8 text-center text-gray-400">Aucune facture</td></tr>{% endfor %}</tbody>
     </table>
+    {% if invoices.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 mt-4 text-sm">
+        {% if invoices.has_previous %}<a href="?page={{ invoices.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ invoices.number }}/{{ invoices.paginator.num_pages }}</span>
+        {% if invoices.has_next %}<a href="?page={{ invoices.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

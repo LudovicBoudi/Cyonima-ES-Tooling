@@ -6,18 +6,36 @@
         <h1 class="text-xl font-bold">Factures fournisseurs</h1>
         <a href="{% url 'erp_supplier_invoice_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle facture fournisseur</a>
     </div>
+    <form method="get" class="flex gap-2 mb-4">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher par n°, fournisseur..." class="border rounded-lg px-3 py-1.5 text-sm w-64">
+        <select name="status" class="border rounded-lg px-3 py-1.5 text-sm">
+            <option value="">Tous les statuts</option>
+            {% for code, label in status_choices %}
+            <option value="{{ code }}" {% if filter_status == code %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-700">Filtrer</button>
+        {% if q or filter_status %}<a href="{% url 'erp_supplier_invoice_list' %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>{% endif %}
+        <a href="{% url 'erp_export_supplier_invoices_csv' %}" class="text-green-700 px-3 py-1.5 text-sm hover:underline ml-auto">⬇ CSV</a>
+    </form>
     <table class="w-full text-sm">
-        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N° interne</th><th class="pb-2">N° fournisseur</th><th class="pb-2">Fournisseur</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N° interne</th><th class="pb-2">N° fournisseur</th><th class="pb-2">Fournisseur</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th></tr></thead>
         <tbody>{% for inv in invoices %}<tr class="border-b border-gray-100 hover:bg-gray-50">
             <td class="py-2 font-medium">{{ inv.internal_number }}</td>
-            <td class="py-2">{{ inv.number|default:'-' }}</td>
+            <td class="py-2 text-gray-500">{{ inv.number|default:'-' }}</td>
             <td class="py-2">{{ inv.provider|default:'-' }}</td>
             <td class="py-2 text-gray-600">{{ inv.date|date:"d/m/Y" }}</td>
             <td class="py-2">{{ inv.total_ttc }} €</td>
             <td class="py-2">{{ inv.paid_amount }} €</td>
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if inv.status == 'payee' %}bg-green-200 text-green-800{% elif inv.status == 'enregistree' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ inv.get_status_display }}</span></td>
-            <td class="py-2 text-right flex gap-2 text-xs justify-end"><a href="{% url 'erp_supplier_invoice_edit' inv.pk %}" class="text-amber-600 hover:underline">Modifier</a><a href="{% url 'erp_supplier_invoice_delete' inv.pk %}" class="text-red-600 hover:underline">Supprimer</a></td>
-        </tr>{% empty %}<tr><td colspan="8" class="py-8 text-center text-gray-400">Aucune facture fournisseur</td></tr>{% endfor %}</tbody>
+        </tr>{% empty %}<tr><td colspan="7" class="py-8 text-center text-gray-400">Aucune facture fournisseur</td></tr>{% endfor %}</tbody>
     </table>
+    {% if invoices.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 mt-4 text-sm">
+        {% if invoices.has_previous %}<a href="?page={{ invoices.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ invoices.number }}/{{ invoices.paginator.num_pages }}</span>
+        {% if invoices.has_next %}<a href="?page={{ invoices.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

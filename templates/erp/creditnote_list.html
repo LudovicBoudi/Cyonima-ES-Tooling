@@ -6,16 +6,29 @@
         <h1 class="text-xl font-bold">Avoirs</h1>
         <a href="{% url 'erp_creditnote_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvel avoir</a>
     </div>
+    <form method="get" class="flex gap-2 mb-4">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher par n°, société..." class="border rounded-lg px-3 py-1.5 text-sm w-64">
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-gray-700">Filtrer</button>
+        {% if q %}<a href="{% url 'erp_creditnote_list' %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>{% endif %}
+        <a href="{% url 'erp_export_creditnotes_csv' %}" class="text-green-700 px-3 py-1.5 text-sm hover:underline ml-auto">⬇ CSV</a>
+    </form>
     <table class="w-full text-sm">
         <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N°</th><th class="pb-2">Société</th><th class="pb-2">Facture liée</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2"></th></tr></thead>
-        <tbody>{% for cn in notes %}<tr class="border-b border-gray-100 hover:bg-gray-50">
-            <td class="py-2 font-medium">{{ cn.number }}</td>
-            <td class="py-2">{{ cn.company|default:'-' }}</td>
-            <td class="py-2">{{ cn.invoice.number|default:'-' }}</td>
-            <td class="py-2 text-gray-600">{{ cn.date|date:"d/m/Y" }}</td>
-            <td class="py-2">{{ cn.total_ttc }} €</td>
-            <td class="py-2"><form method="post" action="{% url 'erp_creditnote_delete' cn.pk %}" onsubmit="return confirm('Supprimer ?')" class="inline">{% csrf_token %}<button class="text-red-600 hover:underline text-xs">Supprimer</button></form></td>
+        <tbody>{% for n in notes %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium">{{ n.number }}</td>
+            <td class="py-2">{{ n.company|default:'-' }}</td>
+            <td class="py-2">{{ n.invoice.number|default:'-' }}</td>
+            <td class="py-2 text-gray-600">{{ n.date|date:"d/m/Y" }}</td>
+            <td class="py-2">{{ n.total_ttc }} €</td>
+            <td class="py-2 text-right"><a href="{% url 'erp_invoice_detail' n.invoice.pk %}" class="text-blue-600 hover:underline text-xs">Voir facture</a></td>
         </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun avoir</td></tr>{% endfor %}</tbody>
     </table>
+    {% if notes.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 mt-4 text-sm">
+        {% if notes.has_previous %}<a href="?page={{ notes.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ notes.number }}/{{ notes.paginator.num_pages }}</span>
+        {% if notes.has_next %}<a href="?page={{ notes.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from decimal import Decimal
 from apps.crm.models import Company, Contact, Deal
 from apps.budget.providers.models import Provider
 
@@ -11,6 +13,25 @@ def _next_number(prefix, model_cls):
     else:
         seq = 1
     return f'{prefix}-{seq:04d}'
+
+
+class Product(models.Model):
+    name = models.CharField('Nom', max_length=200)
+    description = models.TextField('Description', blank=True)
+    unit_price = models.DecimalField('Prix unitaire HT', max_digits=10, decimal_places=2)
+    vat_rate = models.DecimalField('Taux TVA (%)', max_digits=4, decimal_places=1, default=20)
+    category = models.CharField('Catégorie', max_length=100, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Produit'
+        verbose_name_plural = 'Produits'
+        ordering = ['name']
+
+    def __str__(self):
+        return f'{self.name} — {self.unit_price} €'
 
 
 class Quotation(models.Model):

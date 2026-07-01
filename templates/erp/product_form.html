@@ -1,0 +1,36 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}{% if product %}Modifier {{ product.name }}{% else %}Nouveau produit{% endif %} — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5 max-w-lg">
+    <h1 class="text-xl font-bold mb-4">{% if product %}Modifier : {{ product.name }}{% else %}Nouveau produit{% endif %}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Nom *</label>
+            <input type="text" name="name" value="{{ product.name|default:'' }}" required class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea name="description" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm">{{ product.description|default:'' }}</textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Prix unitaire HT *</label>
+                <input type="number" step="0.01" name="unit_price" value="{{ product.unit_price|default:'' }}" required class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">TVA (%)</label>
+                <input type="number" step="0.1" name="vat_rate" value="{{ product.vat_rate|default:'20' }}" class="w-full border rounded-lg px-3 py-2 text-sm">
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Catégorie</label>
+            <input type="text" name="category" value="{{ product.category|default:'' }}" placeholder="ex: Logiciel, Conseil, Matériel" class="w-full border rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-blue-800">Enregistrer</button>
+            <a href="{% url 'erp_product_list' %}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

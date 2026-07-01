@@ -11,6 +11,7 @@
             {% if q.status == 'brouillon' or q.status == 'accepte' %}
             <a href="{% url 'erp_quotation_convert' q.pk %}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Convertir en facture</a>
             {% endif %}
+            <a href="{% url 'erp_quotation_pdf' q.pk %}" target="_blank" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">PDF</a>
             <a href="{% url 'erp_quotation_edit' q.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
             <form method="post" action="{% url 'erp_quotation_delete' q.pk %}" onsubmit="return confirm('Supprimer ce devis ?')" class="inline">
                 {% csrf_token %}

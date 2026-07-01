@@ -4,25 +4,60 @@
 <div class="space-y-6">
     <h1 class="text-xl font-bold">Tableau de bord ERP</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-xl shadow p-5">
-            <p class="text-sm text-gray-500">CA mensuel</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">CA mensuel</p>
             <p class="text-2xl font-bold text-green-700">{{ ca_mensuel }} €</p>
         </div>
-        <div class="bg-white rounded-xl shadow p-5">
-            <p class="text-sm text-gray-500">CA trimestriel</p>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">CA trimestriel</p>
             <p class="text-2xl font-bold text-blue-700">{{ ca_trimestriel }} €</p>
         </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">CA annuel</p>
+            <p class="text-2xl font-bold text-indigo-700">{{ ca_annuel }} €</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Taux conversion devis</p>
+            <p class="text-2xl font-bold text-purple-700">{{ conversion_rate }}%</p>
+            <p class="text-xs text-gray-400">{{ accepted_quotations }}/{{ total_quotations }} acceptés</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Impayés clients</p>
+            <p class="text-2xl font-bold text-red-700">{{ unpaid_count }}</p>
+            <p class="text-xs text-gray-400">{{ unpaid_total }} €</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Factures fournisseurs</p>
+            <p class="text-2xl font-bold text-orange-700">{{ supplier_unpaid_count }}</p>
+            <p class="text-xs text-gray-400">{{ supplier_unpaid_total }} €</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow p-5 lg:col-span-2">
+            <h2 class="font-semibold mb-3">Évolution mensuelle (CA)</h2>
+            <canvas id="evolutionChart" height="200"></canvas>
+        </div>
         <div class="bg-white rounded-xl shadow p-5">
-            <p class="text-sm text-gray-500">Impayés clients</p>
-            <p class="text-2xl font-bold text-red-700">{{ unpaid_count }} ({{ unpaid_total }} €)</p>
+            <h2 class="font-semibold mb-3">Factures par statut</h2>
+            <canvas id="statusChart" height="200"></canvas>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white rounded-xl shadow p-5">
-            <h2 class="font-semibold mb-3">Factures par statut</h2>
-            <canvas id="statusChart" height="180"></canvas>
+            <h2 class="font-semibold mb-3">Top 5 clients (CA)</h2>
+            <div class="space-y-2 text-sm">
+                {% for c in top_clients %}
+                <div class="flex justify-between items-center p-2 rounded hover:bg-gray-50">
+                    <span class="font-medium">{{ c.company__name|default:'Client inconnu' }}</span>
+                    <span class="text-gray-600">{{ c.total_ca }} €</span>
+                </div>
+                {% empty %}
+                <p class="text-gray-400">Aucune donnée</p>
+                {% endfor %}
+            </div>
         </div>
         <div class="bg-white rounded-xl shadow p-5">
             <h2 class="font-semibold mb-3">Derniers devis</h2>
@@ -36,7 +71,11 @@
                 <p class="text-gray-400">Aucun devis</p>
                 {% endfor %}
             </div>
-            <a href="{% url 'erp_quotation_create' %}" class="inline-block mt-3 text-sm text-blue-600 hover:underline">Nouveau devis</a>
+            <div class="flex gap-2 mt-3">
+                <a href="{% url 'erp_quotation_create' %}" class="text-sm text-blue-600 hover:underline">Nouveau devis</a>
+                <a href="{% url 'erp_invoice_create' %}" class="text-sm text-blue-600 hover:underline">Nouvelle facture</a>
+                <a href="{% url 'erp_payment_create' %}" class="text-sm text-blue-600 hover:underline">Paiement</a>
+            </div>
         </div>
     </div>
 </div>
@@ -54,6 +93,38 @@ new Chart(document.getElementById('statusChart'), {
         }]
     },
     options: { plugins: { legend: { position: 'bottom' } }, responsive: true }
+});
+new Chart(document.getElementById('evolutionChart'), {
+    type: 'line',
+    data: {
+        labels: [{% for m in monthly_data %}'{{ m.month }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'CA (€)',
+            data: [{% for m in monthly_data %}{{ m.total }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.1)',
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y',
+        },{
+            label: 'Factures',
+            data: [{% for m in monthly_data %}{{ m.count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59,130,246,0.1)',
+            fill: true,
+            tension: 0.3,
+            yAxisID: 'y1',
+        }]
+    },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+            y: { type: 'linear', display: true, position: 'left', beginAtZero: true, title: { display: true, text: 'CA (€)' } },
+            y1: { type: 'linear', display: true, position: 'right', beginAtZero: true, grid: { drawOnChartArea: false }, title: { display: true, text: 'Nb factures' } },
+        }
+    }
 });
 </script>
 {% endblock %}

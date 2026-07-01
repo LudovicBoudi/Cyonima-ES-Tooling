@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: A4;
+        margin: 2cm;
+        @bottom-center {
+            content: "Page " counter(page) " / " counter(pages);
+            font-size: 9px;
+            color: #999;
+        }
+    }
+    body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 11px; color: #222; line-height: 1.5; }
+    .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 30px; }
+    .title { font-size: 22px; font-weight: bold; color: #1a3a6b; margin: 0; }
+    .subtitle { font-size: 12px; color: #666; margin: 0; }
+    .info { width: 100%; margin-bottom: 25px; }
+    .info td { padding: 3px 8px; vertical-align: top; }
+    .info td:first-child { color: #888; width: 130px; }
+    table.items { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    table.items th { background: #1a3a6b; color: #fff; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; }
+    table.items td { padding: 7px 10px; border-bottom: 1px solid #e5e7eb; }
+    table.items tr:nth-child(even) td { background: #f9fafb; }
+    .totals { text-align: right; margin-bottom: 30px; }
+    .totals p { margin: 2px 0; }
+    .totals .grand-total { font-size: 16px; font-weight: bold; color: #1a3a6b; }
+    .notes { background: #f3f4f6; padding: 12px; border-radius: 4px; margin-bottom: 30px; }
+    .footer { border-top: 1px solid #d1d5db; padding-top: 10px; font-size: 9px; color: #999; text-align: center; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-gray { background: #f3f4f6; color: #6b7280; }
+</style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1 class="title">{{ doc.number }}</h1>
+            <p class="subtitle">{{ doc_type }} — {{ doc.date|date:"d/m/Y" }}</p>
+        </div>
+        <div style="text-align:right">
+            <p style="font-size:18px;font-weight:bold;color:#1a3a6b;margin:0">Cyonima-ES-Tools</p>
+            <p style="font-size:10px;color:#666;margin:0">Généré le {% now "d/m/Y" %}</p>
+        </div>
+    </div>
+
+    {% if doc.company %}
+    <div style="margin-bottom:20px">
+        <p style="color:#888;font-size:10px;margin:0 0 2px 0">Clients</p>
+        <p style="font-weight:bold;margin:0">{{ doc.company }}</p>
+        {% if doc.contact %}<p style="margin:0;font-size:10px">{{ doc.contact }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    <table class="info">
+        <tr><td>Statut</td><td><span class="badge {% if doc.status == 'accepte' or doc.status == 'payee' %}badge-green{% elif doc.status == 'refuse' or doc.status == 'impayee' %}badge-red{% elif doc.status == 'envoye' or doc.status == 'emise' %}badge-blue{% else %}badge-gray{% endif %}">{{ doc.get_status_display }}</span></td></tr>
+        {% if doc.valid_until %}<tr><td>Valable jusqu'au</td><td>{{ doc.valid_until|date:"d/m/Y" }}</td></tr>{% endif %}
+        {% if doc.due_date %}<tr><td>Échéance</td><td>{{ doc.due_date|date:"d/m/Y" }}</td></tr>{% endif %}
+    </table>
+
+    <table class="items">
+        <thead>
+            <tr><th style="width:50%">Description</th><th style="width:10%">Qté</th><th style="width:15%">P.U. HT</th><th style="width:10%">TVA</th><th style="width:15%;text-align:right">Total HT</th></tr>
+        </thead>
+        <tbody>
+            {% for l in doc.lines %}
+            <tr>
+                <td>{{ l.description }}</td>
+                <td>{{ l.quantity }}</td>
+                <td>{{ l.unit_price }} €</td>
+                <td>{{ l.vat_rate|default:20 }}%</td>
+                <td style="text-align:right">{% widthratio l.quantity 1 l.unit_price %} €</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <p>Total HT : <strong>{{ doc.total_ht }} €</strong></p>
+        <p>TVA : <strong>{{ doc.total_tva }} €</strong></p>
+        <p class="grand-total">Total TTC : {{ doc.total_ttc }} €</p>
+        {% if show_payments %}
+        <p>Payé : <strong>{{ doc.paid_amount }} €</strong></p>
+        {% if doc.remaining > 0 %}<p style="color:#dc2626">Reste dû : <strong>{{ doc.remaining }} €</strong></p>{% endif %}
+        {% endif %}
+    </div>
+
+    {% if doc.notes %}
+    <div class="notes">
+        <strong>Notes :</strong><br>{{ doc.notes }}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        Cyonima-ES-Tools — Document généré automatiquement
+    </div>
+</body>
+</html>
