@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.alm.tickets',
     'apps.alm.journal',
     'apps.alm.reports',
+    'apps.alm.repositories',
     'apps.blogs.sec_blog',
     'apps.blogs.dg_blog',
     'apps.blogs.blog_com',

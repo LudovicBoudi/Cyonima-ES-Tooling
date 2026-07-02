@@ -1,0 +1,57 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}{{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+{% if error %}<div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">{{ error }}</div>{% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h1 class="text-xl font-bold">{{ repo.name }}</h1>
+            {% if repo.description %}<p class="text-sm text-gray-500">{{ repo.description }}</p>{% endif %}
+        </div>
+        <div class="flex gap-2">
+            {% if valid %}
+            <form method="post" action="{% url 'repo_pull' project.id repo.id %}">{% csrf_token %}<button type="submit" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">Pull</button></form>
+            <form method="post" action="{% url 'repo_fetch' project.id repo.id %}">{% csrf_token %}<button type="submit" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">Fetch</button></form>
+            {% endif %}
+            <a href="{% url 'repo_delete' project.id repo.id %}" class="px-3 py-1.5 border rounded text-sm text-red-600 hover:bg-red-50">Supprimer</a>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+        <div><span class="text-gray-500">URL :</span> {{ repo.url|default:"-" }}</div>
+        <div><span class="text-gray-500">Chemin :</span> {{ repo.local_path|default:"-" }}</div>
+        <div><span class="text-gray-500">Branche :</span> {{ repo.branch }}</div>
+        <div><span class="text-gray-500">État :</span> {% if valid %}<span class="text-green-600">✓ Valide</span>{% else %}<span class="text-red-500">✗ Non cloné ou invalide</span>{% endif %}</div>
+    </div>
+</div>
+
+{% if valid %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="font-semibold text-sm mb-2">🌿 Branches</h3>
+        <ul class="text-sm space-y-1 max-h-48 overflow-y-auto">
+            {% for b in branches %}<li class="truncate"><a href="{% url 'repo_tree' project.id repo.id %}?ref={{ b }}" class="text-blue-600 hover:underline">{{ b }}</a></li>{% empty %}<li class="text-gray-400">Aucune</li>{% endfor %}
+        </ul>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="font-semibold text-sm mb-2">🏷️ Tags</h3>
+        <ul class="text-sm space-y-1 max-h-48 overflow-y-auto">
+            {% for t in tags %}<li class="truncate"><a href="{% url 'repo_tree' project.id repo.id %}?ref={{ t }}" class="text-blue-600 hover:underline">{{ t }}</a></li>{% empty %}<li class="text-gray-400">Aucun</li>{% endfor %}
+        </ul>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+        <h3 class="font-semibold text-sm mb-2">⏱️ Commits récents</h3>
+        <ul class="text-sm space-y-1 max-h-48 overflow-y-auto">
+            {% for c in recent_commits %}<li class="truncate"><a href="{% url 'repo_commit_detail' project.id repo.id c.hash %}" class="text-blue-600 hover:underline">{{ c.short_hash }}</a> {{ c.message|truncatechars:40 }}</li>{% empty %}<li class="text-gray-400">Aucun</li>{% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="flex gap-2">
+    <a href="{% url 'repo_commits' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Voir tous les commits</a>
+    <a href="{% url 'repo_tree' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Parcourir les fichiers</a>
+    <a href="{% url 'repo_contributors' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Contributeurs</a>
+    <a href="{% url 'repo_list' project.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">← Retour</a>
+</div>
+{% endblock %}

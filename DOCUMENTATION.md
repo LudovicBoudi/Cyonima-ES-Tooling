@@ -153,6 +153,7 @@ Vues disponibles :
 - **Import CSV** : colonnes `titre`, `type`, `description`, `assigne` (username), `echeance` (YYYY-MM-DD).
 - **Notifications automatiques** : lors de l'assignation, du changement de statut (pour la personne assignée).
 - **Échéances** : commande `notify_deadlines` pour notifier les tickets à échéance J+2.
+- **Liaison commit de clôture** : lors du passage au statut "cloture", possibilité de saisir un hash de commit Git et un dépôt associé. Le commit lié s'affiche dans le détail du ticket avec un lien vers sa page de détail dans le dépôt. La liaison peut aussi être faite ou retirée depuis l'édition du ticket ou directement sur la page détail.
 
 ### Sprints
 - Modèle Sprint (nom, description, dates début/fin, actif/inactif).
@@ -173,6 +174,18 @@ Vues disponibles :
 
 ### Rapports
 - **Rapport temps** : heures passées par utilisateur et type de ticket (`/rapports/temps/`).
+
+### Dépôts Git
+- Module intégrant le suivi de dépôts git distants directement depuis l'interface ALM.
+- **Liste** : tous les dépôts du projet, avec statut valide/invalide.
+- **Création** : URL distante (clone automatique) ou chemin local si déjà cloné.
+- **Détail** : infos du dépôt, branches, tags, commits récents, actions Pull/Fetch.
+- **Commits** : historique avec filtre par branche et chemin de dossier.
+- **Détail commit** : message, auteur, diff des fichiers modifiés.
+- **Arborescence** : navigation dans les fichiers/dossiers du dépôt, par branche/tag.
+- **Contenu fichier** : affichage avec breadcrumb de navigation.
+- **Contributeurs** : classement par nombre de commits avec barre de progression proportionnelle.
+- **Suppression** : supprime le modèle (ne touche pas au disque).
 
 ### Notifications
 - Module transverse avec cloche 🔔 dans la barre de navigation (badge avec compteur de notifications non lues).

@@ -1,0 +1,22 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}{{ current_path }} - {{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex items-center gap-2 mb-4">
+        <h1 class="text-xl font-bold">{{ current_path|default:repo.name }}</h1>
+        <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">{{ lang|upper|default:"" }}</span>
+    </div>
+
+    <nav class="text-sm text-gray-500 mb-4">
+        <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}" class="text-blue-600 hover:underline">{{ repo.name }}</a>
+        {% for b in breadcrumbs %}
+        / <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}&path={{ b.path }}" class="text-blue-600 hover:underline">{{ b.name }}</a>
+        {% endfor %}
+    </nav>
+
+    <pre class="text-xs font-mono bg-gray-50 rounded p-4 overflow-x-auto whitespace-pre-wrap border">{{ content }}</pre>
+</div>
+<div class="mt-4">
+    <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}&path={{ current_path|default:''|rjust:1|cut:'/' }}" class="text-sm text-blue-600 hover:underline">← Retour</a>
+</div>
+{% endblock %}

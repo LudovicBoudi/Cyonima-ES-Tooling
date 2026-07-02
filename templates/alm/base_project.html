@@ -16,6 +16,7 @@
             <a href="{% url 'journal_list' project.id %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'journal' in request.resolver_match.url_name and 'audit' not in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Journal</a>
             <a href="{% url 'audit_log_list' project.id %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'audit' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Audit</a>
             <a href="{% url 'time_report' project.id %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'time_report' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Rapport temps</a>
+            <a href="{% url 'repo_list' project.id %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'repo' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Dépôts Git</a>
             <hr class="my-2">
             <a href="{% url 'project_list' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Retour projets</a>
         </div>

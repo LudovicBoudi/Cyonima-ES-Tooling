@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from apps.alm.projects.models import Project
+from apps.alm.repositories.models import Repository
 
 
 class Ticket(models.Model):
@@ -41,18 +42,29 @@ class Ticket(models.Model):
         'ft': 'FT',
     }
 
+    STATUS_CHOICES = [
+        ('nouveau', 'Nouveau'),
+        ('assigne', 'Assigné'),
+        ('en_cours', 'En cours'),
+        ('valide', 'Validé'),
+        ('a_clore', 'À clore'),
+        ('cloture', 'Clôturé'),
+    ]
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='tickets')
     ticket_type = models.CharField(max_length=20, choices=TICKET_TYPES, verbose_name='Type')
     number = models.IntegerField(editable=False, verbose_name='Numéro')
     title = models.CharField(max_length=255, verbose_name='Titre')
     description = models.TextField(blank=True, verbose_name='Description')
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_tickets')
-    status = models.CharField(max_length=20, default='nouveau', verbose_name='Statut')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='nouveau', verbose_name='Statut')
     start_date = models.DateField(null=True, blank=True, verbose_name='Date début')
     due_date = models.DateField(null=True, blank=True, verbose_name='Date échéance')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_tickets')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    closing_repository = models.ForeignKey(Repository, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Dépôt de clôture')
+    closing_commit_hash = models.CharField(max_length=64, blank=True, verbose_name='Hash du commit de clôture')
 
     class Meta:
         verbose_name = 'Ticket'

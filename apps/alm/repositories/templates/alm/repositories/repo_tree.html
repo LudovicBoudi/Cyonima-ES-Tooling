@@ -1,0 +1,48 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Fichiers - {{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+{% if error %}<div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">{{ error }}</div>{% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Fichiers — {{ repo.name }}</h1>
+        <div class="flex gap-2 items-center">
+            <form method="get" class="flex gap-2 items-center">
+                <select name="ref" onchange="this.form.submit()" class="border rounded px-2 py-1 text-sm">
+                    {% for b in branches %}<option value="{{ b }}" {% if b == current_ref %}selected{% endif %}>{{ b }}</option>{% endfor %}
+                </select>
+                {% if current_path %}<input type="hidden" name="path" value="{{ current_path }}">{% endif %}
+                <a href="{% url 'repo_commits' project.id repo.id %}?branch={{ current_ref }}" class="text-sm text-blue-600 hover:underline">Commits</a>
+            </form>
+        </div>
+    </div>
+
+    {% if current_commit %}
+    <div class="text-xs text-gray-400 mb-4">Dernier commit : {{ current_commit.short_hash }} — {{ current_commit.message|truncatechars:60 }} — {{ current_commit.date }}</div>
+    {% endif %}
+
+    <nav class="text-sm text-gray-500 mb-4">
+        <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}" class="text-blue-600 hover:underline">{{ repo.name }}</a>
+        {% for b in breadcrumbs %}
+        / <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}&path={{ b.path }}" class="text-blue-600 hover:underline">{{ b.name }}</a>
+        {% endfor %}
+    </nav>
+
+    <div class="border rounded text-sm">
+        {% for item in items %}
+        <div class="px-4 py-2 border-b last:border-b-0 hover:bg-gray-50 flex items-center gap-3">
+            {% if item.is_dir %}
+            <span class="text-amber-500">📁</span>
+            <a href="{% url 'repo_tree' project.id repo.id %}?ref={{ current_ref }}&path={{ item.path }}" class="text-blue-600 hover:underline font-medium">{{ item.name }}/</a>
+            {% else %}
+            <span class="text-gray-400">📄</span>
+            <a href="{% url 'repo_file' project.id repo.id %}?ref={{ current_ref }}&path={{ item.path }}" class="text-blue-600 hover:underline">{{ item.name }}</a>
+            {% endif %}
+        </div>
+        {% empty %}
+        <div class="px-4 py-8 text-center text-gray-500">Dossier vide</div>
+        {% endfor %}
+    </div>
+</div>
+<a href="{% url 'repo_detail' project.id repo.id %}" class="text-sm text-blue-600 hover:underline">← Retour au dépôt</a>
+{% endblock %}

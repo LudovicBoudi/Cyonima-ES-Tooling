@@ -31,6 +31,19 @@
     {% endif %}
 </div>
 
+{% if ticket.closing_commit_hash %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-3">🔗 Commit de clôture</h2>
+    <div class="flex items-center gap-3 text-sm">
+        <span class="font-mono bg-gray-100 px-2 py-1 rounded">{{ ticket.closing_commit_hash|truncatechars:12 }}</span>
+        {% if ticket.closing_repository %}
+        <a href="{% url 'repo_commit_detail' project.id ticket.closing_repository.id ticket.closing_commit_hash %}" class="text-blue-600 hover:underline">Voir dans {{ ticket.closing_repository.name }}</a>
+        {% endif %}
+        <form method="post" class="inline">{% csrf_token %}<button name="unlink_commit" class="text-red-500 hover:underline text-xs">Retirer</button></form>
+    </div>
+</div>
+{% endif %}
+
 {% if transitions %}
 <div class="bg-white rounded-lg shadow p-6 mb-6">
     <h2 class="text-lg font-semibold mb-4">Transition</h2>
@@ -38,7 +51,7 @@
         {% csrf_token %}
         <div class="flex gap-3 items-end">
             <div class="flex-1">
-                <select name="transition" class="w-full px-3 py-2 border rounded text-sm">
+                <select name="transition" id="id_transition" class="w-full px-3 py-2 border rounded text-sm" onchange="toggleCommitFields(this)">
                     {% for s in transitions %}
                     <option value="{{ s }}">{{ s }}</option>
                     {% endfor %}
@@ -50,10 +63,50 @@
             </div>
             <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Appliquer</button>
         </div>
+        <div id="commit_fields" class="hidden space-y-2 border rounded p-3 bg-gray-50">
+            <p class="text-xs text-gray-500 font-medium">🔗 Lier un commit de clôture</p>
+            <div class="flex gap-3">
+                <select name="closing_repository" class="flex-1 px-3 py-2 border rounded text-sm">
+                    <option value="">— Aucun dépôt —</option>
+                    {% for r in repos %}
+                    <option value="{{ r.id }}">{{ r.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="closing_commit_hash" placeholder="Hash du commit" class="flex-1 px-3 py-2 border rounded text-sm font-mono">
+            </div>
+        </div>
         <textarea name="comment" placeholder="Commentaire (optionnel)" rows="2" class="w-full px-3 py-2 border rounded text-sm"></textarea>
     </form>
 </div>
 {% endif %}
+
+{% if not transitions or ticket.closing_commit_hash == '' %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-3">🔗 Lier un commit</h2>
+    <form method="post" class="flex gap-3 items-end">
+        {% csrf_token %}
+        <div class="flex-1">
+            <select name="closing_repository" class="w-full px-3 py-2 border rounded text-sm">
+                <option value="">— Aucun dépôt —</option>
+                {% for r in repos %}
+                <option value="{{ r.id }}" {% if ticket.closing_repository_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex-[2]">
+            <input type="text" name="closing_commit_hash" value="{{ ticket.closing_commit_hash }}" placeholder="Hash du commit" class="w-full px-3 py-2 border rounded text-sm font-mono">
+        </div>
+        <button type="submit" name="link_commit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Lier</button>
+    </form>
+</div>
+{% endif %}
+
+<script>
+function toggleCommitFields(sel) {
+    var el = document.getElementById('commit_fields');
+    if (el) el.classList.toggle('hidden', sel.value !== 'cloture');
+}
+</script>
 
 <div class="bg-white rounded-lg shadow p-6">
     <h2 class="text-lg font-semibold mb-4">Historique</h2>

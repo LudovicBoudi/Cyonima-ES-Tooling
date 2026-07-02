@@ -6,6 +6,7 @@ from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from .models import Ticket, TicketLog, Sprint
+from apps.alm.repositories.models import Repository
 from apps.alm.projects.models import Project
 from apps.alm.projects.views import can_access_project
 from apps.alm.journal.utils import log_audit
@@ -92,6 +93,13 @@ def ticket_detail(request, project_id, ticket_id):
             hours_spent=hours if hours else None,
         )
         ticket.status = new_status
+        if new_status == 'cloture':
+            repo_id = request.POST.get('closing_repository')
+            commit_hash = request.POST.get('closing_commit_hash', '').strip()
+            if commit_hash:
+                ticket.closing_commit_hash = commit_hash
+                if repo_id:
+                    ticket.closing_repository_id = repo_id
         ticket.save()
         log_audit(project, request.user, 'status_change', ticket.get_ticket_type_display(), ticket.id,
                   f"Ticket {ticket.get_formatted_number()} : {old_status} → {new_status}",
@@ -99,10 +107,28 @@ def ticket_detail(request, project_id, ticket_id):
         notify_ticket_status_changed(ticket, old_status, new_status, request.user)
         messages.success(request, f"Statut mis à jour : {ticket.get_status_display()}")
         return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
+    if request.method == 'POST' and request.POST.get('link_commit'):
+        repo_id = request.POST.get('closing_repository')
+        commit_hash = request.POST.get('closing_commit_hash', '').strip()
+        if commit_hash:
+            ticket.closing_commit_hash = commit_hash
+            ticket.closing_repository_id = repo_id or None
+            ticket.save()
+            messages.success(request, "Commit lié au ticket.")
+        else:
+            messages.error(request, "Hash du commit requis.")
+        return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
+    if request.method == 'POST' and request.POST.get('unlink_commit'):
+        ticket.closing_commit_hash = ''
+        ticket.closing_repository = None
+        ticket.save()
+        messages.success(request, "Lien commit retiré.")
+        return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
     logs = ticket.logs.select_related('user').all()
     transitions = ticket.get_available_statuses()
+    repos = project.repositories.all()
     return render(request, 'alm/tickets/ticket_detail.html', {
-        'project': project, 'ticket': ticket, 'logs': logs, 'transitions': transitions
+        'project': project, 'ticket': ticket, 'logs': logs, 'transitions': transitions, 'repos': repos,
     })
 
 
@@ -207,6 +233,11 @@ def ticket_edit(request, project_id, ticket_id):
         ticket.assigned_to_id = request.POST.get('assigned_to') or None
         ticket.start_date = request.POST.get('start_date') or None
         ticket.due_date = request.POST.get('due_date') or None
+        repo_id = request.POST.get('closing_repository')
+        commit_hash = request.POST.get('closing_commit_hash', '').strip()
+        if commit_hash:
+            ticket.closing_commit_hash = commit_hash
+            ticket.closing_repository_id = repo_id or None
         ticket.save()
         log_audit(project, request.user, 'update', ticket.get_ticket_type_display(), ticket.id,
                   f"Ticket {ticket.get_formatted_number()} modifié : {ticket.title}")
@@ -214,8 +245,9 @@ def ticket_edit(request, project_id, ticket_id):
             notify_ticket_assigned(ticket, ticket.assigned_to, request.user)
         messages.success(request, "Ticket modifié.")
         return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
+    repos = project.repositories.all()
     return render(request, 'alm/tickets/ticket_form.html', {
-        'project': project, 'ticket': ticket, 'members': members, 'title': 'Modifier ticket',
+        'project': project, 'ticket': ticket, 'members': members, 'title': 'Modifier ticket', 'repos': repos,
     })
 
 

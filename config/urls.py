@@ -14,6 +14,7 @@ urlpatterns = [
     path('projects/', include('apps.alm.tickets.urls')),
     path('projects/', include('apps.alm.journal.urls')),
     path('projects/', include('apps.alm.reports.urls')),
+    path('projects/', include('apps.alm.repositories.urls')),
     path('budget/', include('apps.budget.urls')),
     path('guichet/', include('apps.budget.guichet.urls')),
     path('wiki/', include('apps.wiki.urls')),

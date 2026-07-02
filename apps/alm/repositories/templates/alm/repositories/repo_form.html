@@ -1,0 +1,35 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}{{ title }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-6">{{ title }}</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+            <input type="text" name="name" value="{{ repo.name|default:'' }}" required class="w-full px-3 py-2 border rounded text-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="description" rows="2" class="w-full px-3 py-2 border rounded text-sm">{{ repo.description|default:'' }}</textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">URL distante (ex: https://github.com/user/repo.git)</label>
+            <input type="text" name="url" value="{{ repo.url|default:'' }}" class="w-full px-3 py-2 border rounded text-sm" placeholder="https://github.com/user/repo.git">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Chemin local (si déjà cloné)</label>
+            <input type="text" name="local_path" value="{{ repo.local_path|default:'' }}" class="w-full px-3 py-2 border rounded text-sm" placeholder="/home/user/projet">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Branche par défaut</label>
+            <input type="text" name="branch" value="{{ repo.branch|default:'main' }}" class="w-full px-3 py-2 border rounded text-sm">
+        </div>
+        <p class="text-xs text-gray-400">Si une URL distante est fournie sans chemin local, le dépôt sera cloné automatiquement.</p>
+        <div class="flex gap-3">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Créer</button>
+            <a href="{% url 'repo_list' project.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

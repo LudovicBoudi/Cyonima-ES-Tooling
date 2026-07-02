@@ -1,0 +1,32 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Dépôts Git - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Dépôts Git</h1>
+        <a href="{% url 'repo_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Ajouter un dépôt</a>
+    </div>
+    <div class="divide-y">
+        {% for r in repos %}
+        <div class="px-6 py-4 flex items-center gap-4">
+            <div class="flex-1">
+                <a href="{% url 'repo_detail' project.id r.id %}" class="font-medium hover:text-[#1a3a6b]">{{ r.name }}</a>
+                {% if r.description %}<div class="text-xs text-gray-500">{{ r.description }}</div>{% endif %}
+                <div class="text-xs text-gray-400 mt-1">
+                    {% if r.url %}<span class="mr-3">🔗 {{ r.url }}</span>{% endif %}
+                    {% if r.is_valid %}<span class="text-green-600">✓ valide</span>{% else %}<span class="text-red-500">✗ invalide</span>{% endif %}
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <a href="{% url 'repo_detail' project.id r.id %}" class="text-sm text-blue-600 hover:underline">Détail</a>
+                <a href="{% url 'repo_tree' project.id r.id %}" class="text-sm text-blue-600 hover:underline">Fichiers</a>
+                <a href="{% url 'repo_commits' project.id r.id %}" class="text-sm text-blue-600 hover:underline">Commits</a>
+                <a href="{% url 'repo_delete' project.id r.id %}" class="text-sm text-red-600 hover:underline">Suppr.</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="px-6 py-8 text-center text-gray-500">Aucun dépôt configuré</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

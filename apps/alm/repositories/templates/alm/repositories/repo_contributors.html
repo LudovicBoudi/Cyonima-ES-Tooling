@@ -1,0 +1,52 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Contributeurs - {{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+{% if error %}<div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">{{ error }}</div>{% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">Contributeurs — {{ repo.name }}</h1>
+        <span class="text-sm text-gray-500">{{ total }} commit{% if total > 1 %}s{% endif %} au total</span>
+    </div>
+    {% if valid %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b text-left text-gray-500">
+                    <th class="pb-2 font-medium">Contributeur</th>
+                    <th class="pb-2 font-medium">Email</th>
+                    <th class="pb-2 font-medium text-right">Commits</th>
+                    <th class="pb-2 font-medium w-48">Part</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in contributors %}
+                <tr class="border-b last:border-b-0 hover:bg-gray-50">
+                    <td class="py-2.5 font-medium">{{ c.name }}</td>
+                    <td class="py-2.5 text-gray-500">{{ c.email }}</td>
+                    <td class="py-2.5 text-right font-mono">{{ c.count }}</td>
+                    <td class="py-2.5">
+                        {% widthratio c.count total 100 as pct %}
+                        <div class="flex items-center gap-2">
+                            <div class="bg-gray-100 rounded-full h-2 flex-1">
+                                <div class="bg-[#1a3a6b] rounded-full h-2" style="width: {{ pct }}%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500 w-8 text-right">{{ pct }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="py-8 text-center text-gray-500">Aucun contributeur trouvé</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="py-8 text-center text-gray-500">Dépôt non cloné ou invalide</div>
+    {% endif %}
+</div>
+<div class="flex gap-2">
+    <a href="{% url 'repo_detail' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">← Retour au dépôt</a>
+    <a href="{% url 'repo_commits' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Commits</a>
+</div>
+{% endblock %}

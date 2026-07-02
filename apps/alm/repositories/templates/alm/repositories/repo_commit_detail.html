@@ -1,0 +1,30 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Commit {{ commit.short_hash }} - {{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+{% if error %}<div class="bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">{{ error }}</div>{% endif %}
+
+{% if commit %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="mb-4">
+        <div class="flex items-center gap-2 mb-1">
+            <span class="font-mono text-sm bg-gray-100 px-2 py-0.5 rounded">{{ commit.short_hash }}</span>
+            <span class="text-gray-400 text-xs">{{ commit.date }}</span>
+        </div>
+        <h1 class="text-lg font-semibold">{{ commit.message }}</h1>
+        <div class="text-sm text-gray-500 mt-1">
+            {{ commit.author }} &lt;{{ commit.author_email }}&gt;
+        </div>
+    </div>
+    {% if commit.body %}
+    <div class="text-sm text-gray-700 border-t pt-4 whitespace-pre-wrap">{{ commit.body }}</div>
+    {% endif %}
+</div>
+
+<div class="bg-white rounded-lg shadow p-6">
+    <h2 class="font-semibold mb-3">Fichiers modifiés</h2>
+    <pre class="text-xs font-mono bg-gray-50 rounded p-3 overflow-x-auto">{{ commit.diff_stat }}</pre>
+</div>
+{% endif %}
+
+<a href="{% url 'repo_commits' project.id repo.id %}?branch={{ request.GET.branch|default:repo.branch }}" class="mt-4 inline-block text-sm text-blue-600 hover:underline">← Retour aux commits</a>
+{% endblock %}

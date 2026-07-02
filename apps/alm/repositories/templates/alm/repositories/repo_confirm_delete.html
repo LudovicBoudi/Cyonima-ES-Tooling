@@ -1,0 +1,15 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Supprimer {{ repo.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="max-w-lg mx-auto bg-white rounded-lg shadow p-6 text-center">
+    <h1 class="text-lg font-semibold mb-2">Supprimer le dépôt « {{ repo.name }} » ?</h1>
+    <p class="text-sm text-gray-500 mb-6">Cette action est irréversible. Le dépôt ne sera pas supprimé du disque.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="flex justify-center gap-3">
+            <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700">Supprimer</button>
+            <a href="{% url 'repo_detail' project.id repo.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
