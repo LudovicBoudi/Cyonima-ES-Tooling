@@ -1,10 +1,10 @@
 import json
+from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from apps.budget.dat.models import DATLine
 from apps.budget.budgets.models import BudgetYear
-from datetime import datetime
 
 
 @login_required
@@ -13,6 +13,9 @@ def dashboard(request):
     selected_year = request.GET.get('year')
     if not selected_year and years:
         selected_year = str(years[0])
+    elif not selected_year:
+        from django.utils import timezone
+        selected_year = str(timezone.now().year)
 
     category_labels = [
         ('licences', 'Licences'), ('maintenance', 'Maintenance'),
@@ -24,20 +27,19 @@ def dashboard(request):
     budget_data = []
     if selected_year:
         year_int = int(selected_year)
-        for bt_code, bt_label in [('investment', 'Investissement'), ('fonctionnement', 'Fonctionnement')]:
-            try:
-                budget_obj = BudgetYear.objects.get(year=year_int, budget_type=bt_code)
-                allocated = float(budget_obj.amount)
-            except BudgetYear.DoesNotExist:
-                allocated = 0
+        budgets = {b.budget_type: float(b.amount) for b in BudgetYear.objects.filter(year=year_int)}
+        cat_sums = {}
+        for row in DATLine.objects.filter(dat__year=year_int).values('budget_type', 'budget_category').annotate(s=Sum('global_price')):
+            key = (row['budget_type'], row['budget_category'])
+            cat_sums[key] = float(row['s'] or 0)
 
+        for bt_code, bt_label in [('investment', 'Investissement'), ('fonctionnement', 'Fonctionnement')]:
+            allocated = budgets.get(bt_code, 0)
             consumed_vals = []
             consumed_alerts = []
             total_consumed = 0
             for cat_code, cat_label in category_labels:
-                val = float(DATLine.objects.filter(
-                    dat__year=year_int, budget_type=bt_code, budget_category=cat_code
-                ).aggregate(s=Sum('global_price'))['s'] or 0)
+                val = cat_sums.get((bt_code, cat_code), 0)
                 consumed_vals.append(val)
                 pct = round(val / allocated * 100, 1) if allocated else 0
                 if pct >= 100:
@@ -67,26 +69,24 @@ def dashboard(request):
                 'remaining_json': json.dumps([total_consumed, remaining]),
             })
 
-    # Multi-year evolution
     evolution_labels = []
     evolution_invest_alloc = []
     evolution_invest_cons = []
     evolution_run_alloc = []
     evolution_run_cons = []
+    all_budgets = {b.year: {} for b in BudgetYear.objects.filter(year__in=years)}
+    for b in BudgetYear.objects.filter(year__in=years):
+        all_budgets.setdefault(b.year, {})[b.budget_type] = float(b.amount)
+    all_cons = {}
+    for row in DATLine.objects.values('dat__year', 'budget_type').annotate(s=Sum('global_price')):
+        all_cons[(row['dat__year'], row['budget_type'])] = float(row['s'] or 0)
+
     for y in reversed(sorted(years)):
         evolution_labels.append(str(y))
-        for bt_code, alloc_list, cons_list in [
-            ('investment', evolution_invest_alloc, evolution_invest_cons),
-            ('fonctionnement', evolution_run_alloc, evolution_run_cons),
-        ]:
-            try:
-                alloc_list.append(float(BudgetYear.objects.get(year=y, budget_type=bt_code).amount))
-            except BudgetYear.DoesNotExist:
-                alloc_list.append(0)
-            consumed = float(DATLine.objects.filter(
-                dat__year=y, budget_type=bt_code
-            ).aggregate(s=Sum('global_price'))['s'] or 0)
-            cons_list.append(consumed)
+        evolution_invest_alloc.append(all_budgets.get(y, {}).get('investment', 0))
+        evolution_invest_cons.append(all_cons.get((y, 'investment'), 0))
+        evolution_run_alloc.append(all_budgets.get(y, {}).get('fonctionnement', 0))
+        evolution_run_cons.append(all_cons.get((y, 'fonctionnement'), 0))
 
     return render(request, 'budget/dashboard.html', {
         'budget_data': budget_data,

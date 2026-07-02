@@ -14,7 +14,7 @@
         <a href="{{ tile.url }}" class="group h-full">
             <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col items-center text-center hover:-translate-y-1 h-full">
                 <div class="w-20 h-20 mb-4 flex items-center justify-center shrink-0">
-                    <img src="{% static tile.icon %}?v=1" alt="{{ tile.title }}" class="max-w-full max-h-full">
+                    <img src="{% static tile.icon %}" alt="{{ tile.title }}" loading="lazy" class="max-w-full max-h-full">
                 </div>
                 <h2 class="text-lg font-semibold text-gray-800 group-hover:text-[#1a3a6b] transition-colors">{{ tile.title }}</h2>
                 <p class="text-sm text-gray-500 mt-auto pt-2">{{ tile.description }}</p>

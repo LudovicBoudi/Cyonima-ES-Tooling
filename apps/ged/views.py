@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
@@ -159,7 +160,11 @@ def document_permanent_delete(request, pk):
         doc.delete()
         messages.success(request, f'"{title}" supprimé définitivement.')
         return redirect('ged_trash_list')
-    return render(request, 'ged/confirm_delete.html', {'obj': doc, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids, 'title': 'Supprimer définitivement', 'permanent': True})
+    return render(request, 'ged/confirm_delete.html', {
+        'obj': doc, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids,
+        'title': 'Supprimer définitivement', 'permanent': True,
+        'cancel_url': reverse('ged_document_detail', args=[doc.pk]),
+    })
 
 
 @login_required
@@ -291,12 +296,17 @@ def category_delete(request, pk):
     cat = get_object_or_404(DocumentCategory, pk=pk)
     categories = DocumentCategory.objects.all()
     subscribed_cat_ids = list(CategorySubscription.objects.filter(user=request.user).values_list('category_id', flat=True)) if request.user.is_authenticated else []
+    affected_count = cat.documents.filter(deleted_at__isnull=True).count()
     if request.method == 'POST':
         name = cat.name
         cat.delete()
-        messages.success(request, f'Catégorie "{name}" supprimée.')
+        messages.success(request, f'Catégorie "{name}" supprimée ({affected_count} document(s) impacté(s)).')
         return redirect('ged_category_list')
-    return render(request, 'ged/confirm_delete.html', {'obj': cat, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids})
+    return render(request, 'ged/confirm_delete.html', {
+        'obj': cat, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids,
+        'cancel_url': reverse('ged_category_list'),
+        'affected_count': affected_count,
+    })
 
 
 @login_required

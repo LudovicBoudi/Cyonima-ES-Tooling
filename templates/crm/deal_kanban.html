@@ -10,6 +10,7 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="kanban">
+    {% csrf_token %}
     {% for col in columns %}
     <div>
         <div class="bg-gray-50 rounded-xl p-3">
@@ -35,7 +36,7 @@
                     <p class="text-xs text-gray-500 mt-1">{{ d.company.name }}</p>
                     {% endif %}
                     <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
-                        <span class="text-xs font-semibold {% if d.stage == 'gagne' %}text-green-700{% elif d.stage == 'perdu' %}text-red-600{% else %}text-gray-700{% endif %}">{{ d.amount|floatformat:0 }} €</span>
+                        <span class="text-xs font-semibold {% if d.stage == 'gagne' %}text-green-700{% elif d.stage == 'perdu' %}text-red-600{% else %}text-gray-700{% endif %}">{{ d.amount|format_money }} €</span>
                         <span class="text-xs text-gray-400">{{ d.probability }}%</span>
                     </div>
                     {% if d.expected_close_date %}

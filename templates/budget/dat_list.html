@@ -46,7 +46,7 @@
                         {{ dat.get_status_display }}
                     </span>
                 </td>
-                <td class="px-4 py-3 text-right font-medium">{{ dat.total_cost|floatformat:2 }} €</td>
+                <td class="px-4 py-3 text-right font-medium">{{ dat.total_cost|format_money }} €</td>
                 <td class="px-4 py-3">{{ dat.created_date|date:"d/m/Y" }}</td>
                 <td class="px-4 py-3 text-right">
                     <a href="{% url 'dat_detail' dat.pk %}" class="text-blue-600 hover:underline">Détail</a>

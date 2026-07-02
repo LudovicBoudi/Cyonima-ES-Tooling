@@ -1,35 +1,42 @@
-{% extends 'base.html' %}
-{% block title %}Wiki - {{ site_config.site_name }}{% endblock %}
-{% block content %}
-<div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-bold text-gray-800">Wiki</h1>
-    <a href="{% url 'wiki_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle page</a>
-</div>
-<div class="bg-white rounded-xl shadow-md overflow-hidden">
-    <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-600">
-            <tr>
-                <th class="text-left px-4 py-3">Titre</th>
-                <th class="text-left px-4 py-3">Créé par</th>
-                <th class="text-left px-4 py-3">Mis à jour</th>
-                <th class="text-right px-4 py-3"></th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-            {% for p in pages %}
-            <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-medium"><a href="{% url 'wiki_detail' p.slug %}" class="text-blue-600 hover:underline">{{ p.title }}</a></td>
-                <td class="px-4 py-3 text-gray-500">{{ p.created_by.username }}</td>
-                <td class="px-4 py-3 text-gray-400 text-xs">{{ p.updated_at|date:"d/m/Y H:i" }}</td>
-                <td class="px-4 py-3 text-right space-x-2">
-                    <a href="{% url 'wiki_edit' p.slug %}" class="text-blue-600 hover:underline text-sm">Modifier</a>
-                    <a href="{% url 'wiki_delete' p.slug %}" class="text-red-600 hover:underline text-sm">Supprimer</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="4" class="px-4 py-8 text-center text-gray-400">Aucune page</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% extends 'wiki/base_wiki.html' %}
+
+{% block title %}Wiki — {{ site_config.site_name }}{% endblock %}
+
+{% block wiki_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            {% if q %}Résultats pour « {{ q }} »{% else %}Toutes les pages{% endif %}
+        </h1>
+        <span class="text-sm text-gray-400">{{ pages|length }} page{{ pages|length|pluralize }}</span>
+    </div>
+
+    {% if pages %}
+    <div class="divide-y">
+        {% for p in pages %}
+        <div class="py-3 flex items-center justify-between hover:bg-gray-50 px-2 -mx-2 rounded">
+            <div class="min-w-0">
+                <a href="{% url 'wiki_detail' p.slug %}" class="text-blue-600 hover:underline font-medium">{{ p.title }}</a>
+                <div class="text-xs text-gray-400 mt-0.5">
+                    {{ p.created_by.username }} — mis à jour le {{ p.updated_at|date:"d/m/Y" }}
+                </div>
+            </div>
+            <div class="flex gap-2 text-xs shrink-0">
+                <a href="{% url 'wiki_edit' p.slug %}" class="text-gray-400 hover:text-blue-600">Modifier</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-gray-400">
+        {% if q %}
+            <p class="text-lg mb-2">🔍 Aucun résultat pour « {{ q }} »</p>
+            <a href="{% url 'wiki_list' %}" class="text-blue-600 hover:underline text-sm">Voir toutes les pages</a>
+        {% else %}
+            <p class="text-lg mb-2">📝 Le wiki est vide</p>
+            <a href="{% url 'wiki_create' %}" class="text-blue-600 hover:underline text-sm">Créer la première page</a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

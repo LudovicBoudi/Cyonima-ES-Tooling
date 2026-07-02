@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
+from decimal import Decimal
 
 
 class Company(models.Model):
@@ -61,7 +62,7 @@ class Deal(models.Model):
     title = models.CharField('Titre', max_length=255)
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True, blank=True, related_name='deals', verbose_name='Société')
     contact = models.ForeignKey(Contact, on_delete=models.SET_NULL, null=True, blank=True, related_name='deals', verbose_name='Contact')
-    amount = models.DecimalField('Montant', max_digits=12, decimal_places=2, default=0)
+    amount = models.DecimalField('Montant', max_digits=12, decimal_places=2, default=Decimal('0.00'))
     probability = models.PositiveSmallIntegerField('Probabilité (%)', default=0)
     stage = models.CharField('Étape', max_length=20, choices=STAGE_CHOICES, default='prospection')
     expected_close_date = models.DateField('Date de clôture prévue', null=True, blank=True)

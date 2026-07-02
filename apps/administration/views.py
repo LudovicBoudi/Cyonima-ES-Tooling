@@ -12,6 +12,7 @@ from apps.budget.dat.models import DAT
 from apps.budget.todo.models import TodoItem
 from django.http import HttpResponse
 from django.conf import settings
+from django.db import transaction
 import os
 import zipfile
 import io
@@ -164,6 +165,7 @@ def backup(request):
 
                 db_data = zf.read('db.json').decode('utf-8')
 
+            with transaction.atomic():
                 call_command('flush', interactive=False, verbosity=0)
 
                 from io import StringIO

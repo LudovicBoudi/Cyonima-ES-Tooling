@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
+from django.template.loader import render_to_string
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from .models import DAT, DATLine
 from apps.budget.providers.models import Provider
 
@@ -31,10 +34,28 @@ def dat_detail(request, pk):
     return render(request, 'budget/dat_detail.html', {'dat': dat})
 
 
+def _safe_int(val, default=1):
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return default
+
+
+def _safe_float(val, default=0):
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return default
+
+
 @login_required
 def dat_create(request):
     if request.method == 'POST':
         provider_id = request.POST.get('provider')
+        if not provider_id:
+            messages.error(request, "Un fournisseur est requis.")
+            providers = Provider.objects.all()
+            return render(request, 'budget/dat_form.html', {'providers': providers})
         provider = get_object_or_404(Provider, pk=provider_id)
         dat = DAT.objects.create(
             provider=provider,
@@ -56,8 +77,8 @@ def dat_create(request):
                     dat=dat, product=product,
                     reference=refs[i] if i < len(refs) else '',
                     unit=units[i] if i < len(units) else 'U',
-                    quantity=int(quantities[i]) if i < len(quantities) else 1,
-                    unit_price=float(prices[i]) if i < len(prices) else 0,
+                    quantity=_safe_int(quantities[i] if i < len(quantities) else '', 1),
+                    unit_price=_safe_float(prices[i] if i < len(prices) else '', 0),
                     budget_type=btypes[i] if i < len(btypes) else 'investment',
                     budget_category=bcats[i] if i < len(bcats) else 'pc',
                 )
@@ -95,8 +116,8 @@ def dat_update(request, pk):
                     dat=dat, product=product,
                     reference=refs[i] if i < len(refs) else '',
                     unit=units[i] if i < len(units) else 'U',
-                    quantity=int(quantities[i]) if i < len(quantities) else 1,
-                    unit_price=float(prices[i]) if i < len(prices) else 0,
+                    quantity=_safe_int(quantities[i] if i < len(quantities) else '', 1),
+                    unit_price=_safe_float(prices[i] if i < len(prices) else '', 0),
                     budget_type=btypes[i] if i < len(btypes) else 'investment',
                     budget_category=bcats[i] if i < len(bcats) else 'pc',
                 )
@@ -182,8 +203,14 @@ def dat_duplicate(request, pk):
         return redirect('dat_detail', pk=new_dat.pk)
     return redirect('dat_detail', pk=pk)
 
-
 # --- Exports ---
+
+def _safe_csv(val):
+    s = str(val)
+    if s and s[0] in ('=', '+', '-', '@'):
+        return "'" + s
+    return s
+
 
 @login_required
 def dat_export_csv(request, pk):
@@ -232,8 +259,6 @@ def dat_export_csv(request, pk):
 @login_required
 def dat_export_xlsx(request, pk):
     dat = get_object_or_404(DAT.objects.prefetch_related('lines'), pk=pk)
-    from openpyxl import Workbook
-    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     wb = Workbook()
     ws = wb.active
     ws.title = f'DAT {dat.display_id()}'
@@ -303,7 +328,6 @@ def dat_export_xlsx(request, pk):
 @login_required
 def dat_export_pdf(request, pk):
     from weasyprint import HTML
-    from django.template.loader import render_to_string
     dat = get_object_or_404(DAT.objects.prefetch_related('lines').select_related('provider'), pk=pk)
     html = render_to_string('budget/dat_pdf.html', {'dat': dat})
     pdf = HTML(string=html).write_pdf()

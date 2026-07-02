@@ -612,14 +612,10 @@ def interaction_upload_attachment(request, pk):
 
 @login_required
 def serve_attachment(request, pk):
+    from django.http import FileResponse
     att = get_object_or_404(CrmAttachment, pk=pk)
-    from wsgiref.util import FileWrapper
-    import mimetypes
-    wrapper = FileWrapper(att.file.open('rb'))
-    content_type, _ = mimetypes.guess_type(att.filename)
-    response = HttpResponse(wrapper, content_type=content_type or 'application/octet-stream')
+    response = FileResponse(att.file.open('rb'), content_type='application/octet-stream')
     response['Content-Disposition'] = f'inline; filename="{att.filename}"'
-    response['Content-Length'] = att.file_size
     return response
 
 
@@ -630,8 +626,9 @@ def delete_attachment(request, pk):
         att.file.delete(False)
         att.delete()
         messages.success(request, f'Fichier "{att.filename}" supprimé.')
-    referer = request.META.get('HTTP_REFERER', '/crm/')
-    return redirect(referer)
+    if att.deal_id:
+        return redirect('crm_deal_detail', pk=att.deal_id)
+    return redirect('crm_interaction_list')
 
 
 @login_required
@@ -651,7 +648,7 @@ def import_csv(request):
         if not has_company_headers and not has_contact_headers:
             messages.error(request, 'Format non reconnu. Utilisez le modèle CSV (sociétés ou contacts).')
             return render(request, 'crm/import_csv.html', {'results': results})
-        for row in reader:
+        for row_num, row in enumerate(reader, 1):
             try:
                 if has_company_headers and row.get('Nom', '').strip():
                     Company.objects.create(
@@ -683,7 +680,7 @@ def import_csv(request):
                     )
                     results['contacts'] += 1
             except Exception as e:
-                results['errors'].append(f'Ligne {reader.line_num}: {e}')
+                results['errors'].append(f'Ligne {row_num}: {e}')
         total = results['companies'] + results['contacts']
         if total:
             messages.success(request, f'{total} enregistrement(s) importé(s) avec succès.')

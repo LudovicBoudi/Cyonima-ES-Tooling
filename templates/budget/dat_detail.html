@@ -92,8 +92,8 @@
                 <td class="px-4 py-3 text-gray-500">{{ line.reference|default:"—" }}</td>
                 <td class="px-4 py-3 text-center">{{ line.get_unit_display }}</td>
                 <td class="px-4 py-3 text-center">{{ line.quantity }}</td>
-                <td class="px-4 py-3 text-right">{{ line.unit_price|floatformat:2 }}</td>
-                <td class="px-4 py-3 text-right font-medium">{{ line.global_price|floatformat:2 }}</td>
+                <td class="px-4 py-3 text-right">{{ line.unit_price|format_money }}</td>
+                <td class="px-4 py-3 text-right font-medium">{{ line.global_price|format_money }}</td>
                 <td class="px-4 py-3">{{ line.get_budget_type_display }}</td>
                 <td class="px-4 py-3">{{ line.get_budget_category_display }}</td>
             </tr>
@@ -102,7 +102,7 @@
         <tfoot class="bg-gray-50 font-semibold">
             <tr>
                 <td colspan="5" class="px-4 py-3 text-right">Total</td>
-                <td class="px-4 py-3 text-right">{{ dat.total_cost|floatformat:2 }} €</td>
+                <td class="px-4 py-3 text-right">{{ dat.total_cost|format_money }} €</td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>
@@ -120,7 +120,7 @@
                 <span class="text-sm font-medium text-gray-700">{{ key.1 }}</span>
                 <span class="text-xs text-gray-400 ml-2">({{ key.0 }})</span>
             </div>
-            <span class="font-semibold">{{ amount|floatformat:2 }} €</span>
+            <span class="font-semibold">{{ amount|format_money }} €</span>
         </div>
         {% endfor %}
     </div>

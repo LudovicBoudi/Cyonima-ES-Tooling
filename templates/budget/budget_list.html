@@ -22,7 +22,7 @@
             <tr class="hover:bg-gray-50">
                 <td class="px-4 py-3 font-medium">{{ b.year }}</td>
                 <td class="px-4 py-3">{{ b.get_budget_type_display }}</td>
-                <td class="px-4 py-3 text-right font-medium">{{ b.amount|floatformat:2 }} €</td>
+                <td class="px-4 py-3 text-right font-medium">{{ b.amount|format_money }} €</td>
                 <td class="px-4 py-3 text-right space-x-2">
                     <a href="{% url 'budget_edit' b.pk %}" class="text-blue-600 hover:underline text-sm">Modifier</a>
                     <a href="{% url 'budget_delete' b.pk %}" class="text-red-600 hover:underline text-sm">Supprimer</a>

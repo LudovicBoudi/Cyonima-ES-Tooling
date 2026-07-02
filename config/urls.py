@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
 from apps.blogs import views as blog_views
 
 urlpatterns = [
@@ -33,6 +34,7 @@ urlpatterns = [
     path('blog/representation-syndicale/', include('apps.blogs.blog_rep.urls')),
     path('comex/', include('apps.blogs.comex_forum.urls')),
     path('', include('apps.core.urls')),
+    path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 ]
 
 if settings.DEBUG:

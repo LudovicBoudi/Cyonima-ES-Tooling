@@ -569,12 +569,30 @@ def supplier_invoice_delete(request, pk):
 @login_required
 def payment_create(request):
     if request.method == 'POST':
+        from decimal import Decimal, InvalidOperation
+        try:
+            amount = Decimal(request.POST.get('amount', '0'))
+        except (InvalidOperation, ValueError):
+            messages.error(request, 'Montant invalide.')
+            return redirect('erp_dashboard')
+        invoice_id = request.POST.get('invoice') or None
+        supplier_invoice_id = request.POST.get('supplier_invoice') or None
+        if invoice_id:
+            inv = Invoice.objects.filter(pk=invoice_id).first()
+            if inv and amount > inv.remaining():
+                messages.error(request, f'Le paiement ({amount}€) dépasse le montant restant dû ({inv.remaining()}€).')
+                return redirect('erp_payment_create')
+        if supplier_invoice_id:
+            sinv = SupplierInvoice.objects.filter(pk=supplier_invoice_id).first()
+            if sinv and amount > sinv.remaining():
+                messages.error(request, f'Le paiement ({amount}€) dépasse le montant restant dû ({sinv.remaining()}€).')
+                return redirect('erp_payment_create')
         p = Payment.objects.create(
             date=request.POST.get('date') or timezone.now().date(),
-            amount=request.POST.get('amount', 0),
+            amount=amount,
             method=request.POST.get('method', 'virement'),
-            invoice_id=request.POST.get('invoice') or None,
-            supplier_invoice_id=request.POST.get('supplier_invoice') or None,
+            invoice_id=invoice_id,
+            supplier_invoice_id=supplier_invoice_id,
             notes=request.POST.get('notes', ''),
             created_by=request.user,
         )

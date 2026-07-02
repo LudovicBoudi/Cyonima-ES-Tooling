@@ -39,7 +39,7 @@
                 <select id="product-select" class="border rounded-lg px-3 py-1.5 text-sm flex-1" onchange="insertProduct()">
                     <option value="">→ Insérer un produit du catalogue</option>
                     {% for p in products %}
-                    <option value="{{ p.name }}|{{ p.unit_price }}|{{ p.vat_rate }}">{{ p.name }} — {{ p.unit_price }} € (TVA {{ p.vat_rate }}%)</option>
+                    <option value="{{ p.name }}|{{ p.unit_price }}|{{ p.vat_rate }}">{{ p.name }} — {{ p.unit_price|format_money }} € (TVA {{ p.vat_rate }}%)</option>
                     {% endfor %}
                 </select>
             </div>
@@ -58,8 +58,9 @@
         </div>
     </form>
 </div>
+{{ invoice.lines|json_script:"erp-lines" }}
 <script>
-const lines = {{ invoice.lines|safe|default:'[]' }};
+const lines = JSON.parse(document.getElementById('erp-lines').textContent);
 function addLine(desc, qty, price, vat) {
     const div = document.createElement('div');
     div.className = 'flex gap-2 items-end';

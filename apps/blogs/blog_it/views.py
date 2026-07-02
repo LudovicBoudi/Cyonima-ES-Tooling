@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from .models import ITArticle, ITArticleAttachment
 from apps.notifications.utils import create_notification
+from apps.core.sanitizer import sanitize_html
 
 
 def can_write(user):
@@ -56,7 +57,7 @@ def article_create(request):
     if request.method == 'POST':
         article = ITArticle.objects.create(
             title=request.POST['title'],
-            content=request.POST['content'],
+            content=sanitize_html(request.POST['content']),
             image=request.FILES.get('image'),
             created_by=request.user,
         )
@@ -93,7 +94,7 @@ def article_edit(request, article_id):
         return redirect('it_blog_detail', article_id=article.id)
     if request.method == 'POST':
         article.title = request.POST['title']
-        article.content = request.POST['content']
+        article.content = sanitize_html(request.POST['content'])
         if request.FILES.get('image'):
             article.image = request.FILES['image']
         article.save()

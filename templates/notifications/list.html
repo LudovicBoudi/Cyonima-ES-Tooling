@@ -10,7 +10,7 @@
                 <button type="submit" class="bg-gray-600 text-white px-3 py-1.5 rounded text-sm">Filtrer</button>
             </form>
             {% if unread_count %}
-            <a href="?mark_read=1" class="text-sm text-blue-600 hover:underline py-1.5">Tout marquer comme lu</a>
+            <form method="post" class="inline">{% csrf_token %}<button type="submit" name="mark_read" value="1" class="text-sm text-blue-600 hover:underline py-1.5">Tout marquer comme lu</button></form>
             {% endif %}
         </div>
     </div>

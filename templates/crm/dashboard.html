@@ -30,7 +30,7 @@
             <p class="text-sm text-gray-500">En cours</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
-            <p class="text-3xl font-bold text-emerald-700">{{ pipeline_value|floatformat:0 }} €</p>
+            <p class="text-3xl font-bold text-emerald-700">{{ pipeline_value|format_money }} €</p>
             <p class="text-sm text-gray-500">Pipeline</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
@@ -75,7 +75,7 @@
                     <a href="{% url 'crm_deal_detail' d.pk %}" class="text-sm font-medium text-blue-600 hover:underline">{{ d.title }}</a>
                     <p class="text-xs text-gray-400">{{ d.company.name|default:'-' }} — {{ d.get_stage_display }}</p>
                 </div>
-                <span class="text-sm font-semibold text-gray-700">{{ d.amount|floatformat:0 }} €</span>
+                <span class="text-sm font-semibold text-gray-700">{{ d.amount|format_money }} €</span>
             </div>
             {% empty %}
             <p class="text-gray-400 text-sm">Aucune affaire</p>
@@ -106,8 +106,8 @@
         <div class="bg-white rounded-xl shadow p-6">
             <h2 class="text-lg font-semibold mb-4">📊 Résumé</h2>
             <div class="space-y-2 text-sm">
-                <div class="flex justify-between"><span class="text-gray-500">Montant gagné</span><span class="font-semibold text-green-600">{{ won_amount|floatformat:0 }} €</span></div>
-                <div class="flex justify-between"><span class="text-gray-500">Montant perdu</span><span class="font-semibold text-red-600">{{ lost_amount|floatformat:0 }} €</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Montant gagné</span><span class="font-semibold text-green-600">{{ won_amount|format_money }} €</span></div>
+                <div class="flex justify-between"><span class="text-gray-500">Montant perdu</span><span class="font-semibold text-red-600">{{ lost_amount|format_money }} €</span></div>
                 <div class="flex justify-between"><span class="text-gray-500">Affaires en cours</span><span class="font-semibold">{{ active_deals }}</span></div>
             </div>
         </div>
@@ -175,7 +175,7 @@ new Chart(document.getElementById('amountChart'), {
 new Chart(document.getElementById('wonLostChart'), {
     type: 'doughnut',
     data: {
-        labels: ['Gagné ({{ won_amount|floatformat:0 }}€)', 'Perdu ({{ lost_amount|floatformat:0 }}€)'],
+        labels: ['Gagné ({{ won_amount|format_money }}€)', 'Perdu ({{ lost_amount|format_money }}€)'],
         datasets: [{
             data: [{{ won_amount }}, {{ lost_amount }}],
             backgroundColor: ['#22c55e', '#ef4444'],
@@ -198,7 +198,7 @@ new Chart(document.getElementById('monthChart'), {
             yAxisID: 'y',
         }, {
             label: 'Montant (k€)',
-            data: [{% for a in month_amounts %}{{ a|floatformat:0 }},{% endfor %}],
+            data: [{% for a in month_amounts %}{{ a|format_money }},{% endfor %}],
             borderColor: '#f59e0b',
             backgroundColor: 'rgba(245,158,11,0.1)',
             fill: true,

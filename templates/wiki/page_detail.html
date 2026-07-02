@@ -1,26 +1,48 @@
-{% extends 'base.html' %}
-{% block title %}{{ page.title }} - Wiki{% endblock %}
-{% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-xl shadow-md p-6">
-        <div class="flex justify-between items-start mb-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">{{ page.title }}</h1>
-                <p class="text-xs text-gray-400 mt-1">
-                    Créé par {{ page.created_by.username }} le {{ page.created_at|date:"d/m/Y" }}
-                    {% if page.updated_by and page.updated_at != page.created_at %}
-                    — Mis à jour par {{ page.updated_by.username }} le {{ page.updated_at|date:"d/m/Y H:i" }}
-                    {% endif %}
-                </p>
-            </div>
-            <div class="flex gap-2 shrink-0">
-                <a href="{% url 'wiki_edit' page.slug %}" class="text-blue-600 hover:underline text-sm">Modifier</a>
-                <a href="{% url 'wiki_list' %}" class="text-gray-500 hover:underline text-sm">← Toutes les pages</a>
-            </div>
+{% extends 'wiki/base_wiki.html' %}
+
+{% block title %}{{ page.title }} — Wiki{% endblock %}
+
+{% block wiki_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <nav class="text-xs text-gray-400 mb-4 flex items-center gap-2">
+        <a href="{% url 'wiki_list' %}" class="hover:text-blue-600">Wiki</a>
+        <span>/</span>
+        <span class="text-gray-600 font-medium truncate">{{ page.title }}</span>
+    </nav>
+
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">{{ page.title }}</h1>
+            <p class="text-xs text-gray-400 mt-1">
+                Dernière modification par {{ page.updated_by.username|default:page.created_by.username }}
+                le {{ page.updated_at|date:"d/m/Y à H:i" }}
+            </p>
         </div>
-        <div class="text-gray-700 leading-relaxed break-words overflow-hidden border-t pt-4 wiki-content">
-            {{ page.content|safe }}
+        <div class="flex gap-2 text-sm shrink-0">
+            <a href="{% url 'wiki_edit' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50">✏️ Modifier</a>
+            <a href="{% url 'wiki_delete' page.slug %}" class="px-3 py-1.5 border rounded text-red-600 hover:bg-red-50">🗑 Supprimer</a>
         </div>
+    </div>
+
+    {% if toc %}
+    <div class="bg-gray-50 rounded-lg p-4 mb-6 border">
+        <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Sommaire</p>
+        <ul class="space-y-1">
+            {% for item in toc %}
+            <li class="text-sm">
+                <a href="#{{ item.id }}" class="text-blue-600 hover:underline">{{ item.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="text-gray-700 leading-relaxed wiki-content">
+        {{ page.content|safe }}
+    </div>
+
+    <div class="mt-8 pt-4 border-t text-xs text-gray-400">
+        Créé par {{ page.created_by.username }} le {{ page.created_at|date:"d/m/Y" }}
     </div>
 </div>
 {% endblock %}

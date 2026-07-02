@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}{{ title|default:"Wiki" }} - {{ site_config.site_name }}{% endblock %}
+{% block content %}
+<div class="flex gap-6">
+    <aside class="w-64 shrink-0">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden sticky top-20">
+            <div class="bg-[#1a3a6b] text-white px-4 py-3 font-semibold text-sm">📖 Wiki</div>
+            <div class="p-3">
+                <form method="get" action="{% url 'wiki_list' %}" class="mb-3">
+                    <div class="flex gap-1">
+                        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher…" class="flex-1 px-2 py-1.5 border rounded text-xs">
+                        <button type="submit" class="bg-gray-600 text-white px-2 py-1.5 rounded text-xs">🔍</button>
+                    </div>
+                </form>
+                <a href="{% url 'wiki_create' %}" class="block w-full text-center bg-[#1a3a6b] text-white px-3 py-2 rounded text-sm hover:bg-[#142b52] mb-3">
+                    + Nouvelle page
+                </a>
+                <hr class="mb-3 border-gray-100">
+                <p class="text-xs font-semibold text-gray-500 uppercase px-1 mb-2">Toutes les pages</p>
+                <div class="space-y-0.5 max-h-[60vh] overflow-y-auto">
+                    {% for p in all_pages %}
+                    <a href="{% url 'wiki_detail' p.slug %}" class="block px-2 py-1.5 rounded text-sm hover:bg-gray-100 {% if page and p.pk == page.pk %}bg-blue-50 text-[#1a3a6b] font-medium{% else %}text-gray-600{% endif %}">
+                        {{ p.title }}
+                    </a>
+                    {% empty %}
+                    <p class="text-xs text-gray-400 px-2 py-3">Aucune page</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </aside>
+    <div class="flex-1 min-w-0">
+        {% block wiki_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.wiki-content h2 { font-size: 1.5rem; font-weight: 700; color: #1a3a6b; margin-top: 2rem; margin-bottom: 0.75rem; padding-bottom: 0.25rem; border-bottom: 2px solid #e5e7eb; }
+.wiki-content h3 { font-size: 1.25rem; font-weight: 600; color: #374151; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.wiki-content h4 { font-size: 1.1rem; font-weight: 600; color: #4b5563; margin-top: 1.25rem; margin-bottom: 0.5rem; }
+.wiki-content p { margin-bottom: 1rem; line-height: 1.75; }
+.wiki-content ul, .wiki-content ol { margin-bottom: 1rem; padding-left: 1.5rem; }
+.wiki-content li { margin-bottom: 0.25rem; }
+.wiki-content blockquote { border-left: 4px solid #1a3a6b; padding: 0.5rem 1rem; margin: 1rem 0; background: #f8fafc; color: #475569; font-style: italic; }
+.wiki-content pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; font-size: 0.875rem; }
+.wiki-content code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 0.25rem; font-size: 0.875rem; }
+.wiki-content pre code { background: transparent; padding: 0; }
+.wiki-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+.wiki-content th, .wiki-content td { border: 1px solid #e5e7eb; padding: 0.5rem 0.75rem; text-align: left; }
+.wiki-content th { background: #f9fafb; font-weight: 600; }
+.wiki-content a { color: #2563eb; text-decoration: underline; }
+.wiki-content a:hover { color: #1d4ed8; }
+.wiki-content img { max-width: 100%; border-radius: 0.5rem; }
+</style>
+{% endblock %}

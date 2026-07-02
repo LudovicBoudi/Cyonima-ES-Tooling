@@ -24,7 +24,7 @@
             <td class="py-2 font-medium">{{ q.number }}</td>
             <td class="py-2">{{ q.company|default:'-' }}</td>
             <td class="py-2 text-gray-600">{{ q.date|date:"d/m/Y" }}</td>
-            <td class="py-2">{{ q.total_ttc }} €</td>
+            <td class="py-2">{{ q.total_ttc|format_money }} €</td>
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if q.status == 'accepte' %}bg-green-200 text-green-800{% elif q.status == 'refuse' %}bg-red-200 text-red-800{% elif q.status == 'envoye' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ q.get_status_display }}</span></td>
             <td class="py-2 text-right"><a href="{% url 'erp_quotation_detail' q.pk %}" class="text-blue-600 hover:underline text-xs">Voir</a></td>
         </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun devis</td></tr>{% endfor %}</tbody>

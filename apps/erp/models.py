@@ -1,30 +1,37 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from collections import OrderedDict
 from apps.crm.models import Company, Contact, Deal
 from apps.budget.providers.models import Provider
 
 
 def _next_number(prefix, model_cls):
-    last = model_cls.objects.filter(number__startswith=prefix).order_by('number').last()
-    if last and '-' in last.number:
-        seq = int(last.number.split('-')[-1]) + 1
-    else:
-        seq = 1
-    return f'{prefix}-{seq:04d}'
+    with transaction.atomic():
+        last = model_cls.objects.select_for_update().filter(number__startswith=prefix).order_by('number').last()
+        if last and '-' in last.number:
+            seq = int(last.number.split('-')[-1]) + 1
+        else:
+            seq = 1
+        return f'{prefix}-{seq:04d}'
+
+TWO_PLACES = Decimal('0.01')
+
+
+def _quantize(val):
+    return Decimal(str(val)).quantize(TWO_PLACES, rounding=ROUND_HALF_UP)
 
 
 def vat_breakdown(lines):
     rates = OrderedDict()
     for l in lines:
-        ht = l.get('quantity', 0) * l.get('unit_price', 0)
-        rate = float(l.get('vat_rate', 20))
+        ht = Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+        rate = Decimal(str(l.get('vat_rate', 20)))
         if rate not in rates:
-            rates[rate] = {'ht': 0, 'vat': 0}
+            rates[rate] = {'ht': Decimal('0'), 'vat': Decimal('0')}
         rates[rate]['ht'] += ht
-        rates[rate]['vat'] += ht * rate / 100
+        rates[rate]['vat'] += ht * rate / Decimal('100')
     return rates
 
 
@@ -78,18 +85,21 @@ class Quotation(models.Model):
         super().save(*args, **kwargs)
 
     def total_ht(self):
-        return sum(l.get('quantity', 0) * l.get('unit_price', 0) for l in self.lines)
+        return sum(
+            Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            for l in self.lines
+        )
 
     def total_tva(self):
-        total = 0
+        total = Decimal('0')
         for l in self.lines:
-            ht = l.get('quantity', 0) * l.get('unit_price', 0)
-            rate = float(l.get('vat_rate', 20))
-            total += ht * rate / 100
-        return round(total, 2)
+            ht = Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            rate = Decimal(str(l.get('vat_rate', 20)))
+            total += ht * rate / Decimal('100')
+        return _quantize(total)
 
     def total_ttc(self):
-        return round(self.total_ht() + self.total_tva(), 2)
+        return _quantize(self.total_ht() + self.total_tva())
 
     def __str__(self):
         return f'{self.number}'
@@ -128,21 +138,24 @@ class Invoice(models.Model):
         super().save(*args, **kwargs)
 
     def total_ht(self):
-        return sum(l.get('quantity', 0) * l.get('unit_price', 0) for l in self.lines)
+        return sum(
+            Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            for l in self.lines
+        )
 
     def total_tva(self):
-        total = 0
+        total = Decimal('0')
         for l in self.lines:
-            ht = l.get('quantity', 0) * l.get('unit_price', 0)
-            rate = float(l.get('vat_rate', 20))
-            total += ht * rate / 100
-        return round(total, 2)
+            ht = Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            rate = Decimal(str(l.get('vat_rate', 20)))
+            total += ht * rate / Decimal('100')
+        return _quantize(total)
 
     def total_ttc(self):
-        return round(self.total_ht() + self.total_tva(), 2)
+        return _quantize(self.total_ht() + self.total_tva())
 
     def remaining(self):
-        return round(self.total_ttc() - float(self.paid_amount), 2)
+        return _quantize(self.total_ttc() - self.paid_amount)
 
     def __str__(self):
         return f'{self.number}'
@@ -169,18 +182,21 @@ class CreditNote(models.Model):
         super().save(*args, **kwargs)
 
     def total_ht(self):
-        return sum(l.get('quantity', 0) * l.get('unit_price', 0) for l in self.lines)
+        return sum(
+            Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            for l in self.lines
+        )
 
     def total_tva(self):
-        total = 0
+        total = Decimal('0')
         for l in self.lines:
-            ht = l.get('quantity', 0) * l.get('unit_price', 0)
-            rate = float(l.get('vat_rate', 20))
-            total += ht * rate / 100
-        return round(total, 2)
+            ht = Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            rate = Decimal(str(l.get('vat_rate', 20)))
+            total += ht * rate / Decimal('100')
+        return _quantize(total)
 
     def total_ttc(self):
-        return round(self.total_ht() + self.total_tva(), 2)
+        return _quantize(self.total_ht() + self.total_tva())
 
     def __str__(self):
         return f'{self.number}'
@@ -216,21 +232,24 @@ class SupplierInvoice(models.Model):
         super().save(*args, **kwargs)
 
     def total_ht(self):
-        return sum(l.get('quantity', 0) * l.get('unit_price', 0) for l in self.lines)
+        return sum(
+            Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            for l in self.lines
+        )
 
     def total_tva(self):
-        total = 0
+        total = Decimal('0')
         for l in self.lines:
-            ht = l.get('quantity', 0) * l.get('unit_price', 0)
-            rate = float(l.get('vat_rate', 20))
-            total += ht * rate / 100
-        return round(total, 2)
+            ht = Decimal(str(l.get('quantity', 0))) * Decimal(str(l.get('unit_price', 0)))
+            rate = Decimal(str(l.get('vat_rate', 20)))
+            total += ht * rate / Decimal('100')
+        return _quantize(total)
 
     def total_ttc(self):
-        return round(self.total_ht() + self.total_tva(), 2)
+        return _quantize(self.total_ht() + self.total_tva())
 
     def remaining(self):
-        return round(self.total_ttc() - float(self.paid_amount), 2)
+        return _quantize(self.total_ttc() - self.paid_amount)
 
     def __str__(self):
         return f'{self.internal_number}'

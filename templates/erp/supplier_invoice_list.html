@@ -25,8 +25,8 @@
             <td class="py-2 text-gray-500">{{ inv.number|default:'-' }}</td>
             <td class="py-2">{{ inv.provider|default:'-' }}</td>
             <td class="py-2 text-gray-600">{{ inv.date|date:"d/m/Y" }}</td>
-            <td class="py-2">{{ inv.total_ttc }} €</td>
-            <td class="py-2">{{ inv.paid_amount }} €</td>
+            <td class="py-2">{{ inv.total_ttc|format_money }} €</td>
+            <td class="py-2">{{ inv.paid_amount|format_money }} €</td>
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if inv.status == 'payee' %}bg-green-200 text-green-800{% elif inv.status == 'enregistree' %}bg-blue-200 text-blue-800{% else %}bg-gray-200 text-gray-600{% endif %}">{{ inv.get_status_display }}</span></td>
         </tr>{% empty %}<tr><td colspan="7" class="py-8 text-center text-gray-400">Aucune facture fournisseur</td></tr>{% endfor %}</tbody>
     </table>

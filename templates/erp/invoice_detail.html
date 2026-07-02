@@ -29,25 +29,25 @@
         <tbody>{% for l in inv.lines %}<tr class="border-b border-gray-100">
             <td class="py-2">{{ l.description }}</td>
             <td class="py-2">{{ l.quantity }}</td>
-            <td class="py-2">{{ l.unit_price }} €</td>
+            <td class="py-2">{{ l.unit_price|format_money }} €</td>
             <td class="py-2">{{ l.vat_rate|default:20 }}%</td>
             <td class="py-2 text-right">{% widthratio l.quantity 1 l.unit_price %} €</td>
         </tr>{% endfor %}</tbody>
     </table>
     <div class="text-right space-y-1 text-sm">
-        <p>Total HT : <strong>{{ inv.total_ht }} €</strong></p>
-        <p>TVA : <strong>{{ inv.total_tva }} €</strong></p>
-        <p class="text-lg font-bold">Total TTC : {{ inv.total_ttc }} €</p>
+        <p>Total HT : <strong>{{ inv.total_ht|format_money }} €</strong></p>
+        <p>TVA : <strong>{{ inv.total_tva|format_money }} €</strong></p>
+        <p class="text-lg font-bold">Total TTC : {{ inv.total_ttc|format_money }} €</p>
         {% if vat_bd.items|length > 1 %}
         <div class="mt-2 text-xs text-gray-500 border-t pt-1">
             <p class="font-medium">Détail par taux :</p>
             {% for rate, amounts in vat_bd.items %}
-            <p>TVA {{ rate|floatformat:1 }}% : HT {{ amounts.ht|floatformat:2 }} € · TVA {{ amounts.vat|floatformat:2 }} €</p>
+            <p>TVA {{ rate|floatformat:1 }}% : HT {{ amounts.ht|format_money }} € · TVA {{ amounts.vat|format_money }} €</p>
             {% endfor %}
         </div>
         {% endif %}
-        <p>Payé : <strong class="{% if inv.paid_amount >= inv.total_ttc %}text-green-700{% else %}text-red-700{% endif %}">{{ inv.paid_amount }} €</strong></p>
-        {% if inv.remaining > 0 %}<p>Reste : <strong class="text-red-700">{{ inv.remaining }} €</strong></p>{% endif %}
+        <p>Payé : <strong class="{% if inv.paid_amount >= inv.total_ttc %}text-green-700{% else %}text-red-700{% endif %}">{{ inv.paid_amount|format_money }} €</strong></p>
+        {% if inv.remaining > 0 %}<p>Reste : <strong class="text-red-700">{{ inv.remaining|format_money }} €</strong></p>{% endif %}
     </div>
     {% if inv.notes %}<div class="mt-4 p-3 bg-gray-50 rounded text-sm"><strong>Notes :</strong> {{ inv.notes }}</div>{% endif %}
     {% if payments %}

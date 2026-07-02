@@ -22,7 +22,7 @@
                 {% endif %}
             </td>
             <td class="py-2">{{ r.date|date:"d/m/Y" }}</td>
-            <td class="py-2">{{ r.amount_due }} €</td>
+            <td class="py-2">{{ r.amount_due|format_money }} €</td>
         </tr>{% empty %}<tr><td colspan="3" class="py-4 text-center text-gray-400">Aucune relance</td></tr>{% endfor %}
     </table>
 </div>

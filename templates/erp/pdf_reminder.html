@@ -58,15 +58,15 @@
     <td>{{ inv.number }}</td>
     <td>{{ inv.date|date:"d/m/Y" }}</td>
     <td>{{ inv.due_date|date:"d/m/Y" }}</td>
-    <td>{{ inv.total_ttc }} €</td>
-    <td>{{ inv.total_tva }} €</td>
+    <td>{{ inv.total_ttc|format_money }} €</td>
+    <td>{{ inv.total_tva|format_money }} €</td>
   </tr>
 </table>
 
 <div class="totals">
-  <p class="level-label">Total dû : <strong>{{ reminder.amount_due }} €</strong></p>
+  <p class="level-label">Total dû : <strong>{{ reminder.amount_due|format_money }} €</strong></p>
   {% if inv.remaining != reminder.amount_due %}
-  <p class="level-label">Dont reste à payer : <strong>{{ inv.remaining }} €</strong></p>
+  <p class="level-label">Dont reste à payer : <strong>{{ inv.remaining|format_money }} €</strong></p>
   {% endif %}
 </div>
 

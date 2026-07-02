@@ -29,12 +29,22 @@ class GuichetTicket(models.Model):
         'ebi': 'EBI',
     }
 
+    STATUS_CHOICES = [
+        ('nouveau', 'Nouveau'),
+        ('en_cours', 'En cours'),
+        ('en_etude', 'En étude'),
+        ('resolu', 'Résolu'),
+        ('valide', 'Validé'),
+        ('realise', 'Réalisé'),
+        ('ferme', 'Fermé'),
+    ]
+
     ticket_type = models.CharField(max_length=20, choices=TYPES, verbose_name='Type')
     number = models.IntegerField(editable=False, verbose_name='Numéro')
     title = models.CharField(max_length=255, verbose_name='Titre')
     description = models.TextField(blank=True, verbose_name='Description')
     assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='guichet_tickets')
-    status = models.CharField(max_length=20, default='nouveau', verbose_name='Statut')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='nouveau', verbose_name='Statut')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_guichet_tickets')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

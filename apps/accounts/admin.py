@@ -16,8 +16,11 @@ class UserAdmin(BaseUserAdmin):
     list_select_related = ('profile',)
 
     def get_role(self, instance):
-        return instance.profile.get_role_display() if hasattr(instance, 'profile') else '-'
-    get_role.short_description = 'Rôle'
+        if hasattr(instance, 'profile'):
+            roles = ', '.join(r.label for r in instance.profile.roles.all()) or '-'
+            return roles
+        return '-'
+    get_role.short_description = 'Rôles'
 
 
 admin.site.unregister(User)

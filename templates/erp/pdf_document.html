@@ -70,7 +70,7 @@
             <tr>
                 <td>{{ l.description }}</td>
                 <td>{{ l.quantity }}</td>
-                <td>{{ l.unit_price }} €</td>
+                <td>{{ l.unit_price|format_money }} €</td>
                 <td>{{ l.vat_rate|default:20 }}%</td>
                 <td style="text-align:right">{% widthratio l.quantity 1 l.unit_price %} €</td>
             </tr>
@@ -79,12 +79,12 @@
     </table>
 
     <div class="totals">
-        <p>Total HT : <strong>{{ doc.total_ht }} €</strong></p>
-        <p>TVA : <strong>{{ doc.total_tva }} €</strong></p>
-        <p class="grand-total">Total TTC : {{ doc.total_ttc }} €</p>
+        <p>Total HT : <strong>{{ doc.total_ht|format_money }} €</strong></p>
+        <p>TVA : <strong>{{ doc.total_tva|format_money }} €</strong></p>
+        <p class="grand-total">Total TTC : {{ doc.total_ttc|format_money }} €</p>
         {% if show_payments %}
-        <p>Payé : <strong>{{ doc.paid_amount }} €</strong></p>
-        {% if doc.remaining > 0 %}<p style="color:#dc2626">Reste dû : <strong>{{ doc.remaining }} €</strong></p>{% endif %}
+        <p>Payé : <strong>{{ doc.paid_amount|format_money }} €</strong></p>
+        {% if doc.remaining > 0 %}<p style="color:#dc2626">Reste dû : <strong>{{ doc.remaining|format_money }} €</strong></p>{% endif %}
         {% endif %}
     </div>
 

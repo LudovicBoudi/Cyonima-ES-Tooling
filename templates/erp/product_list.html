@@ -16,7 +16,7 @@
         <tbody>{% for p in products %}<tr class="border-b border-gray-100 hover:bg-gray-50">
             <td class="py-2 font-medium">{{ p.name }}</td>
             <td class="py-2 text-gray-500">{{ p.category|default:'-' }}</td>
-            <td class="py-2">{{ p.unit_price }} €</td>
+            <td class="py-2">{{ p.unit_price|format_money }} €</td>
             <td class="py-2">{{ p.vat_rate }}%</td>
             <td class="py-2 text-right flex gap-2 justify-end">
                 <a href="{% url 'erp_product_edit' p.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a>

@@ -13,7 +13,7 @@
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">{{ c.get_type_display }}</span></td>
             <td class="py-2 text-gray-600">{{ c.start_date|date:"d/m/Y" }}</td>
             <td class="py-2 text-gray-600">{{ c.end_date|date:"d/m/Y"|default:'—' }}</td>
-            {% if can_view_salary %}<td class="py-2 text-right">{{ c.salary|floatformat:0 }} €</td>{% endif %}
+            {% if can_view_salary %}<td class="py-2 text-right">{{ c.salary|format_money }} €</td>{% endif %}
             <td class="py-2 text-right"><a href="{% url 'hr_contract_edit' c.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>
         </tr>{% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun contrat</td></tr>{% endfor %}</tbody>
     </table>

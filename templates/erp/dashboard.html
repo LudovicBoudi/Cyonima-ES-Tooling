@@ -7,15 +7,15 @@
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">CA mensuel</p>
-            <p class="text-2xl font-bold text-green-700">{{ ca_mensuel }} €</p>
+            <p class="text-2xl font-bold text-green-700">{{ ca_mensuel|format_money }} €</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">CA trimestriel</p>
-            <p class="text-2xl font-bold text-blue-700">{{ ca_trimestriel }} €</p>
+            <p class="text-2xl font-bold text-blue-700">{{ ca_trimestriel|format_money }} €</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">CA annuel</p>
-            <p class="text-2xl font-bold text-indigo-700">{{ ca_annuel }} €</p>
+            <p class="text-2xl font-bold text-indigo-700">{{ ca_annuel|format_money }} €</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">Taux conversion devis</p>
@@ -25,12 +25,12 @@
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">Impayés clients</p>
             <p class="text-2xl font-bold text-red-700">{{ unpaid_count }}</p>
-            <p class="text-xs text-gray-400">{{ unpaid_total }} €</p>
+            <p class="text-xs text-gray-400">{{ unpaid_total|format_money }} €</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-xs text-gray-500 uppercase tracking-wide">Factures fournisseurs</p>
             <p class="text-2xl font-bold text-orange-700">{{ supplier_unpaid_count }}</p>
-            <p class="text-xs text-gray-400">{{ supplier_unpaid_total }} €</p>
+            <p class="text-xs text-gray-400">{{ supplier_unpaid_total|format_money }} €</p>
         </div>
     </div>
 
@@ -52,7 +52,7 @@
                 {% for c in top_clients %}
                 <div class="flex justify-between items-center p-2 rounded hover:bg-gray-50">
                     <span class="font-medium">{{ c.company__name|default:'Client inconnu' }}</span>
-                    <span class="text-gray-600">{{ c.total_ca }} €</span>
+                    <span class="text-gray-600">{{ c.total_ca|format_money }} €</span>
                 </div>
                 {% empty %}
                 <p class="text-gray-400">Aucune donnée</p>
@@ -65,7 +65,7 @@
                 {% for q in recent_quotations %}
                 <a href="{% url 'erp_quotation_detail' q.pk %}" class="flex justify-between items-center p-2 rounded hover:bg-gray-50">
                     <span class="font-medium">{{ q.number }}</span>
-                    <span class="text-gray-500">{{ q.company|default:'-' }} — {{ q.total_ttc }} €</span>
+                    <span class="text-gray-500">{{ q.company|default:'-' }} — {{ q.total_ttc|format_money }} €</span>
                 </a>
                 {% empty %}
                 <p class="text-gray-400">Aucun devis</p>

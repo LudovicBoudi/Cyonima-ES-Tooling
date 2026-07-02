@@ -43,7 +43,10 @@ def todo_delete(request, pk):
 def todo_update_status(request, pk):
     if request.method == 'POST':
         item = get_object_or_404(TodoItem, pk=pk)
-        data = json.loads(request.body)
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'ok': False, 'error': 'JSON invalide'}, status=400)
         new_status = data.get('status')
         if new_status in dict(TodoItem.STATUS_CHOICES):
             item.status = new_status

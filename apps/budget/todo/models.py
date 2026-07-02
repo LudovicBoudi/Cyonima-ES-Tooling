@@ -13,6 +13,8 @@ class TodoItem(models.Model):
     deadline = models.DateField(verbose_name='Date limite')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo', verbose_name='Statut')
     order = models.IntegerField(default=0, verbose_name='Ordre')
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     class Meta:
         verbose_name = 'Tâche'

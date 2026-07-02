@@ -194,10 +194,12 @@ def department_create(request):
         dept = Department.objects.create(
             name=request.POST['name'],
             description=request.POST.get('description', ''),
+            manager_id=request.POST.get('manager') or None,
         )
         messages.success(request, f'Département "{dept.name}" créé.')
         return redirect('hr_department_list')
-    return render(request, 'hr/department_form.html', {'title': 'Nouveau département'})
+    employees = Employee.objects.all()
+    return render(request, 'hr/department_form.html', {'title': 'Nouveau département', 'employees': employees})
 
 
 @hrbp_or_admin_required
@@ -206,11 +208,13 @@ def department_edit(request, pk):
     if request.method == 'POST':
         dept.name = request.POST['name']
         dept.description = request.POST.get('description', '')
+        dept.manager_id = request.POST.get('manager') or None
         dept.save()
         messages.success(request, f'Département "{dept.name}" modifié.')
         return redirect('hr_department_list')
+    employees = Employee.objects.all()
     return render(request, 'hr/department_form.html', {
-        'department': dept, 'title': 'Modifier le département',
+        'department': dept, 'title': 'Modifier le département', 'employees': employees,
     })
 
 
@@ -452,6 +456,9 @@ def leave_delete(request, pk):
 @hrbp_or_admin_required
 def leave_approve(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_leave_list')
     leave.status = 'valide'
     leave.approved_by = request.user
     leave.save()
@@ -462,6 +469,9 @@ def leave_approve(request, pk):
 @hrbp_or_admin_required
 def leave_reject(request, pk):
     leave = get_object_or_404(LeaveRequest, pk=pk)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_leave_list')
     leave.status = 'refuse'
     leave.approved_by = request.user
     leave.save()
@@ -535,9 +545,12 @@ def diplome_edit(request, pk):
 @login_required
 def diplome_delete(request, pk):
     diploma = get_object_or_404(Diploma, pk=pk, employee__user=request.user)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_profil')
     name = str(diploma)
     diploma.delete()
-    messages.success(request, f'Dipl\u00f4me "{name}" supprim\u00e9.')
+    messages.success(request, f'Diplôme "{name}" supprimé.')
     return redirect('hr_profil')
 
 
@@ -580,9 +593,12 @@ def certification_edit(request, pk):
 @login_required
 def certification_delete(request, pk):
     cert = get_object_or_404(Certification, pk=pk, employee__user=request.user)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_profil')
     name = str(cert)
     cert.delete()
-    messages.success(request, f'Certification "{name}" supprim\u00e9e.')
+    messages.success(request, f'Certification "{name}" supprimée.')
     return redirect('hr_profil')
 
 
@@ -625,9 +641,12 @@ def training_edit(request, pk):
 @login_required
 def training_delete(request, pk):
     training = get_object_or_404(Training, pk=pk, employee__user=request.user)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_profil')
     name = str(training)
     training.delete()
-    messages.success(request, f'Formation "{name}" supprim\u00e9e.')
+    messages.success(request, f'Formation "{name}" supprimée.')
     return redirect('hr_profil')
 
 
@@ -671,9 +690,12 @@ def employment_edit(request, pk):
 @login_required
 def employment_delete(request, pk):
     emp = get_object_or_404(Employment, pk=pk, employee__user=request.user)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_profil')
     name = str(emp)
     emp.delete()
-    messages.success(request, f'Emploi "{name}" supprim\u00e9.')
+    messages.success(request, f'Emploi "{name}" supprimé.')
     return redirect('hr_profil')
 
 
@@ -698,9 +720,12 @@ def cv_upload(request):
 @login_required
 def cv_delete(request, pk):
     cv = get_object_or_404(Cv, pk=pk, employee__user=request.user)
+    if request.method != 'POST':
+        messages.error(request, 'Méthode non autorisée.')
+        return redirect('hr_profil')
     name = str(cv)
     cv.delete()
-    messages.success(request, f'CV "{name}" supprim\u00e9.')
+    messages.success(request, f'CV "{name}" supprimé.')
     return redirect('hr_profil')
 
 

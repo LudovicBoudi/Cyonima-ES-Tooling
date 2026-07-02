@@ -7,7 +7,7 @@
             <h1 class="text-xl font-bold">{{ deal.title }}</h1>
             <p class="text-sm text-gray-400 mt-1">
                 {% if deal.company %}{{ deal.company.name }} — {% endif %}
-                {{ deal.get_stage_display }} — {{ deal.amount|floatformat:0 }} € — {{ deal.probability }}%
+                {{ deal.get_stage_display }} — {{ deal.amount|format_money }} € — {{ deal.probability }}%
             </p>
         </div>
         <div class="flex gap-2 text-sm">
@@ -21,7 +21,7 @@
     <div class="grid grid-cols-2 gap-4 text-sm mb-6">
         <div><span class="text-gray-500">Société :</span> {% if deal.company %}{{ deal.company.name }}{% else %}—{% endif %}</div>
         <div><span class="text-gray-500">Contact :</span> {% if deal.contact %}{{ deal.contact }}{% else %}—{% endif %}</div>
-        <div><span class="text-gray-500">Montant :</span> {{ deal.amount|floatformat:2 }} €</div>
+        <div><span class="text-gray-500">Montant :</span> {{ deal.amount|format_money }} €</div>
         <div><span class="text-gray-500">Probabilité :</span> {{ deal.probability }}%</div>
         <div><span class="text-gray-500">Étape :</span> <span class="px-2 py-0.5 rounded text-xs font-medium {% if deal.stage == 'gagne' %}bg-green-100 text-green-800{% elif deal.stage == 'perdu' %}bg-red-100 text-red-800{% elif deal.stage == 'negociation' %}bg-orange-100 text-orange-800{% elif deal.stage == 'devis' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">{{ deal.get_stage_display }}</span></div>
         <div><span class="text-gray-500">Clôture prévue :</span> {{ deal.expected_close_date|date:"d/m/Y"|default:'—' }}</div>

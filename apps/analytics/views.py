@@ -1,8 +1,10 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, date
+from collections import defaultdict
 from .models import PageView
 
 
@@ -20,19 +22,20 @@ def dashboard(request):
     total_views_7 = qs_7.count()
     unique_visitors_7 = qs_7.values('session_key').distinct().count()
 
+    daily_counts = (
+        qs_30.annotate(day=TruncDate('timestamp'))
+        .values('day')
+        .annotate(count=Count('id'))
+        .order_by('day')
+    )
+    count_map = {item['day']: item['count'] for item in daily_counts}
     views_by_day = []
     for i in range(29, -1, -1):
         day = (now - timedelta(days=i)).date()
-        count = PageView.objects.filter(
-            timestamp__year=day.year,
-            timestamp__month=day.month,
-            timestamp__day=day.day,
-        ).count()
-        views_by_day.append({'date': day.isoformat(), 'count': count})
+        views_by_day.append({'date': day.isoformat(), 'count': count_map.get(day, 0)})
 
     popular_pages = (
-        PageView.objects.filter(timestamp__gte=thirty_days_ago)
-        .values('url')
+        qs_30.values('url')
         .annotate(count=Count('id'))
         .order_by('-count')[:20]
     )

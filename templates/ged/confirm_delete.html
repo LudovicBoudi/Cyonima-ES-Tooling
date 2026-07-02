@@ -3,11 +3,12 @@
 {% block ged_content %}
 <div class="bg-white rounded-xl shadow p-6 max-w-lg mx-auto">
     <h1 class="text-lg font-bold mb-4">Confirmer la suppression</h1>
-    <p class="text-gray-600 mb-6">Supprimer <strong>{{ obj }}</strong> ? Le fichier sera définitivement effacé.</p>
+    <p class="text-gray-600 mb-6">Supprimer <strong>{{ obj }}</strong> ? {% if not permanent %}Le fichier sera définitivement effacé.{% endif %}</p>
+    {% if affected_count %}<p class="text-amber-600 text-sm mb-4">⚠ {{ affected_count }} document(s) lié(s) à cette catégorie seront orphelins.</p>{% endif %}
     <form method="post" class="flex gap-2">
         {% csrf_token %}
         <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm hover:bg-red-700">Supprimer</button>
-        <a href="{% url 'ged_document_detail' obj.pk %}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
+        <a href="{{ cancel_url }}" class="text-gray-500 px-4 py-2 text-sm">Annuler</a>
     </form>
 </div>
 {% endblock %}

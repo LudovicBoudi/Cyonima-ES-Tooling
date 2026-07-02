@@ -29,7 +29,7 @@
         <tbody>{% for d in deals %}<tr class="border-b border-gray-100 hover:bg-gray-50">
              <td class="py-2 font-medium"><a href="{% url 'crm_deal_detail' d.pk %}" class="text-blue-600 hover:underline">{{ d.title }}</a></td>
             <td class="py-2 text-gray-600">{% if d.company %}{{ d.company.name }}{% endif %}</td>
-            <td class="py-2">{{ d.amount|floatformat:0 }} €</td>
+            <td class="py-2">{{ d.amount|format_money }} €</td>
             <td class="py-2">{{ d.probability }}%</td>
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if d.stage == 'gagne' %}bg-green-100 text-green-800{% elif d.stage == 'perdu' %}bg-red-100 text-red-800{% elif d.stage == 'negociation' %}bg-orange-100 text-orange-800{% elif d.stage == 'devis' %}bg-yellow-100 text-yellow-800{% else %}bg-blue-100 text-blue-800{% endif %}">{{ d.get_stage_display }}</span></td>
             <td class="py-2 text-right"><a href="{% url 'crm_deal_edit' d.pk %}" class="text-amber-600 hover:underline text-xs">Modifier</a></td>

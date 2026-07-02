@@ -34,20 +34,20 @@
             {% for rate, amounts in rates %}
             <tr class="border-b border-gray-100 hover:bg-gray-50">
                 <td class="py-2 font-medium">TVA {{ rate|floatformat:1 }}%</td>
-                <td class="py-2 text-right">{{ amounts.ht_client|floatformat:2 }} €</td>
-                <td class="py-2 text-right">{{ amounts.tva_client|floatformat:2 }} €</td>
-                <td class="py-2 text-right">{{ amounts.ht_fourn|floatformat:2 }} €</td>
-                <td class="py-2 text-right">{{ amounts.tva_fourn|floatformat:2 }} €</td>
+                <td class="py-2 text-right">{{ amounts.ht_client|format_money }} €</td>
+                <td class="py-2 text-right">{{ amounts.tva_client|format_money }} €</td>
+                <td class="py-2 text-right">{{ amounts.ht_fourn|format_money }} €</td>
+                <td class="py-2 text-right">{{ amounts.tva_fourn|format_money }} €</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
     <div class="text-right space-y-1 text-sm border-t pt-3">
-        <p>Total TVA collectée : <strong>{{ total_tva_collectee|floatformat:2 }} €</strong></p>
-        <p>Total TVA déductible : <strong>{{ total_tva_deductible|floatformat:2 }} €</strong></p>
+        <p>Total TVA collectée : <strong>{{ total_tva_collectee|format_money }} €</strong></p>
+        <p>Total TVA déductible : <strong>{{ total_tva_deductible|format_money }} €</strong></p>
         <p class="text-lg font-bold {% if tva_net > 0 %}text-red-700{% elif tva_net < 0 %}text-green-700{% endif %}">
-            TVA nette à reverser : {{ tva_net|floatformat:2 }} €
+            TVA nette à reverser : {{ tva_net|format_money }} €
         </p>
     </div>
     {% else %}

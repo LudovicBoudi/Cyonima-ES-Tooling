@@ -11,7 +11,7 @@
             <td class="py-2">{{ d.invoice.company|default:'-' }}</td>
             <td class="py-2">{{ d.invoice.due_date|date:"d/m/Y" }}</td>
             <td class="py-2"><span class="text-red-600 font-medium">{{ d.days_overdue }}j</span></td>
-            <td class="py-2 font-medium">{{ d.invoice.remaining }} €</td>
+            <td class="py-2 font-medium">{{ d.invoice.remaining|format_money }} €</td>
             <td class="py-2">
                 {% if d.last_level == 0 %}<span class="text-gray-400">—</span>
                 {% elif d.last_level == 1 %}<span class="text-amber-600">1ʳᵉ relance</span>

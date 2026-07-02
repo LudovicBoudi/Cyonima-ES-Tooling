@@ -8,7 +8,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">Date</label>
-                <input type="date" name="date" value="" class="w-full border rounded-lg px-3 py-2 text-sm">
+                <input type="date" name="date" value="{% now 'Y-m-d' %}" class="w-full border rounded-lg px-3 py-2 text-sm">
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700">Montant</label>
@@ -30,7 +30,7 @@
             <select name="invoice" class="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="">—</option>
                 {% for inv in invoices %}
-                <option value="{{ inv.pk }}" {% if request.GET.invoice == inv.pk|stringformat:'s' %}selected{% endif %}>{{ inv.number }} — {{ inv.company|default:'' }} (reste {{ inv.remaining }} €)</option>
+                <option value="{{ inv.pk }}" {% if request.GET.invoice == inv.pk|stringformat:'s' %}selected{% endif %}>{{ inv.number }} — {{ inv.company|default:'' }} (reste {{ inv.remaining|format_money }} €)</option>
                 {% endfor %}
             </select>
         </div>
@@ -39,7 +39,7 @@
             <select name="supplier_invoice" class="w-full border rounded-lg px-3 py-2 text-sm">
                 <option value="">—</option>
                 {% for inv in supplier_invoices %}
-                <option value="{{ inv.pk }}">{{ inv.internal_number }} — {{ inv.provider|default:'' }} (reste {{ inv.remaining }} €)</option>
+                <option value="{{ inv.pk }}">{{ inv.internal_number }} — {{ inv.provider|default:'' }} (reste {{ inv.remaining|format_money }} €)</option>
                 {% endfor %}
             </select>
         </div>

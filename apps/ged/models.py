@@ -1,10 +1,13 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.utils import timezone
 import os
 import io
 import re
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def extract_text(file_field, file_type):
@@ -27,12 +30,15 @@ def extract_text(file_field, file_type):
 def next_registration_number():
     year = timezone.now().year
     prefix = f'DOC-{year}-'
-    last = Document.objects.filter(registration_number__startswith=prefix, deleted_at__isnull=True).order_by('registration_number').last()
-    if last:
-        seq = int(last.registration_number.split('-')[-1]) + 1
-    else:
-        seq = 1
-    return f'{prefix}{seq:05d}'
+    with transaction.atomic():
+        last = Document.objects.select_for_update().filter(
+            registration_number__startswith=prefix, deleted_at__isnull=True
+        ).order_by('registration_number').last()
+        if last:
+            seq = int(last.registration_number.split('-')[-1]) + 1
+        else:
+            seq = 1
+        return f'{prefix}{seq:05d}'
 
 
 class DocumentCategory(models.Model):
@@ -94,8 +100,8 @@ class Document(models.Model):
         if self.file and self.file_type in ('txt', 'pdf', 'docx'):
             try:
                 self.content_text = extract_text(self.file, self.file_type)
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning(f"Échec extraction texte pour {self.title}: {e}")
         super().save(*args, **kwargs)
 
     def filename(self):

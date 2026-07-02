@@ -33,9 +33,10 @@ Réservé aux membres du staff (`is_staff=True`).
 ### Web Analytics
 - `/administration/analytiques/` — tableau de bord des visites :
   - Vues totales et visiteurs uniques (7 et 30 jours)
-  - Graphique d'évolution quotidienne (Chart.js)
+  - Graphique d'évolution quotidienne (Chart.js) — optimisé en 1 requête agrégée
   - Pages les plus visitées
 - Les visites sont enregistrées automatiquement via un middleware (hors pages d'administration et statiques).
+- **Configuration du site** : singleton (une seule ligne), nom et logo modifiables.
 
 ---
 
@@ -67,6 +68,7 @@ Les DAT sont identifiées par `IT-XXXX-ANNEE`.
 - CRUD complet : créer, modifier, supprimer des enveloppes budgétaires par année et type.
 - Types : Investissement, Fonctionnement.
 - Contrôle d'unicité : impossible de créer deux budgets de même type pour la même année.
+- Validation côté serveur : conversion sécurisée des montants (Decimal).
 
 ### Tâches / Todo (`/budget/taches/`)
 - Kanban avec 3 colonnes : À faire, En cours, Terminé.
@@ -77,9 +79,11 @@ Les DAT sont identifiées par `IT-XXXX-ANNEE`.
   - Orange : 1-3 jours
   - Rouge : aujourd'hui ou dépassé
 - Création rapide, suppression.
+- Robustesse : `JSONDecodeError` intercepté sur mise à jour statut.
 
 ### Fournisseurs (`/budget/fournisseurs/`)
 - CRUD complet : entreprise, contact, téléphone, email, description.
+- Protection `ProtectedError` si suppression d'un fournisseur lié à des DAT.
 
 ---
 
@@ -223,9 +227,8 @@ Cinq blogs accessibles selon le rôle :
 - Possibilité d'ajouter une image à la une.
 - **Pièces jointes PDF** : upload fonctionnel, stocké dans le modèle ArticleAttachment.
 - Suppression avec confirmation.
-
-### Notifications
-- Une notification in-app est créée pour l'auteur lors de la publication d'un article.
+- **Sécurité** : contenu HTML assaini (sanitizer BeautifulSoup) avant sauvegarde.
+- **Notification** in-app créée pour l'auteur lors de la publication.
 
 ---
 
@@ -233,12 +236,17 @@ Cinq blogs accessibles selon le rôle :
 
 Documentation collaborative accessible à tous les utilisateurs connectés.
 
+### Layout
+- **Sidebar** : barre de recherche, bouton "Nouvelle page", index alphabétique complet de toutes les pages (scrollable).
+- Page active surlignée en bleu dans l'index.
+
 ### Fonctionnalités
-- **Liste** des pages avec lien vers le détail.
-- **Création** : titre et contenu saisis avec CKEditor 5 (éditeur WYSIWYG).
-- **Modification** : toute page peut être éditée (bouton "Modifier").
+- **Liste** : toutes les pages avec recherche plein texte (titre + contenu), compteur de pages.
+- **Détail** : breadcrumb, boutons Modifier/Supprimer, **sommaire automatique** extrait des titres h2/h3, typographie wiki enrichie (bordures, blockquotes, code, tableaux).
+- **Création/Modification** : titre et contenu saisis avec CKEditor 5 (éditeur WYSIWYG), langue FR.
 - **Suppression** : confirmation avant suppression.
 - **Slugs** : génération automatique à partir du titre avec gestion des doublons.
+- **Sécurité** : contenu HTML assaini (sanitizer BeautifulSoup — suppression scripts, iframes, javascript:).
 
 ---
 
@@ -285,7 +293,7 @@ Module de gestion commerciale avec pipeline de ventes.
 ### Pièces jointes (Attachments)
 - Modèle `CrmAttachment` lié aux affaires et interactions.
 - Upload sur la page détail d'une affaire.
-- Visualisation et suppression inline via `serve_attachment` et `delete_attachment`.
+- Visualisation et suppression inline via `serve_attachment` (streaming `FileResponse`) et `delete_attachment`.
 - URLs : `/crm/pj/<pk>/` et `/crm/pj/<pk>/supprimer/`
 
 ### Export CSV
@@ -325,7 +333,7 @@ Gestion administrative du personnel.
 ### Fonctionnalités
 - **Tableau de bord** : effectif, actifs, essais, congés en cours, demandes en attente, graphiques (employés par département, contrats par type), anniversaires du mois, dernières demandes de congé.
 - **Employés** : fiche complète (coordonnées, département, poste, **grade Ccn. Métallurgie A1–I18**, société prestataire, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
-- **Départements** : liste avec nombre d'employés, description.
+- **Départements** : liste avec nombre d'employés, description, **responsable** (manager assignable).
 - **Contrats** : CDI, CDD, mission, stage, alternance, freelance, intérim — avec dates, salaire, poste. Colorisation par échéance (vert >3mo, jaune 1-3mo, orange <1mo, rouge expiré/semaine). CDI toujours vert.
 - **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours. Calendrier mensuel avec navigation, affichage par initiales colorées. Détection de conflits (chevauchement dans le même département).
 
@@ -360,12 +368,14 @@ Module de gestion comptable avec devis, factures, avoirs et paiements.
 | Facture fournisseur | `FACF-{seq:04d}` | `FACF-0007` |
 
 ### Fonctionnalités
-- **Tableau de bord** : CA mensuel et trimestriel, impayés, donut par statut.
+- **Tableau de bord** : CA mensuel, trimestriel et annuel, impayés, donut par statut.
 - **Devis → Facture** : conversion en un clic depuis le détail du devis.
 - **Lignes** : chaque document contient des lignes (description, quantité, prix unitaire, TVA) stockées en JSON.
-- **Paiements** : création d'un paiement qui met automatiquement la facture en statut « payée » si le montant est atteint.
+- **Paiements** : création d'un paiement qui met automatiquement la facture en statut « payée » si le montant est atteint. Validation : le paiement ne peut pas dépasser le montant restant dû.
 - **Avoirs** : documents de correction liés à une facture.
 - **Factures fournisseurs** : suivi des factures reçues.
+- **Produits** : catalogue de produits/services enregistré dans l'admin Django.
+- **Sécurité** : données JSON lignes protégées (XSS via `json_script`), calculs en `Decimal` (précision centimes), numérotation thread-safe (`select_for_update`).
 
 ---
 
@@ -376,6 +386,7 @@ Module de classement, recherche et téléchargement de fichiers avec catégories
 ### Catégories
 - **Catégories colorées** : 11 catégories pré-générées (RH, Juridique, Finances, IT, Commercial, Procédures, Formation, Qualité, Direction, Projets, Communication).
 - **Gestion CRUD** par le staff via `/ged/categories/` (lien dans le sidebar).
+- **Suppression** : avertit du nombre de documents qui deviendront orphelins.
 - **Filtre** en haut de la liste des documents par catégorie.
 - **Abonnements** 🔔/🔕 : s'abonner à une catégorie directement depuis le sidebar pour suivre les nouveaux documents.
 
@@ -472,9 +483,12 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 ## 14. Notifications
 
-- **Paramètres** : chaque utilisateur peut configurer ses notifications par type (email ou in-app) via son profil.
-- Création automatique d'un paramétrage vide à la création du compte.
-- Déclenchement : manuel via `Notification.objects.create()` dans le code.
+- Cloche 🔔 dans la barre de navigation (badge avec compteur de notifications non lues).
+- **Page de liste** : `/notifications/` avec recherche, lecture individuelle, **bouton "Tout marquer comme lu"** (POST).
+- **Messages** : styles distincts pour erreur (rouge), succès (vert), avertissement (ambre), info (bleu), debug (gris).
+- **Paramètres** : modèle `NotificationSetting` par utilisateur.
+- Création automatique à la publication d'articles, assignation de tickets, changement de statut.
+- **Nettoyage** : commande `notify_deadlines` pour les échéances J+2.
 
 ---
 
@@ -501,3 +515,24 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 2. À la connexion, un code à 6 chiffres est envoyé par email.
 3. Le code est valable 5 minutes.
 4. Saisie du code sur la page de vérification avant accès à l'application.
+
+---
+
+## 17. Sécurité
+
+- **SECRET_KEY** : variable d'environnement obligatoire (pas de fallback).
+- **Production** : `CSRF_COOKIE_SECURE`, `SESSION_COOKIE_SECURE`, `HSTS`, `SSL_REDIRECT` activés automatiquement hors DEBUG.
+- **Sanitizer HTML** : filtre BeautifulSoup sur le contenu wiki et blogs (suppression `<script>`, `<iframe>`, `javascript:`, attributs `on*`).
+- **CSRF** : token sur tous les formulaires et requêtes AJAX (kanban CRM, kanban tickets).
+- **POST obligatoire** : actions de mutation (validation congés, suppressions RH, marquage notifs).
+- **robots.txt** : `Disallow: /` pour bloquer les crawlers.
+- **Protection** : `ProtectedError` sur suppression fournisseur, validation montant paiement ERP.
+
+---
+
+## 18. Format monétaire
+
+Tous les montants affichés dans l'application (ERP, Budget, CRM, RH) utilisent le **format financier français** :
+- Séparateur de milliers : espace insécable (ex. `1 000 000,00`)
+- Séparateur décimal : virgule
+- Filtre `format_money` appliqué sur 70+ expressions dans 35 templates.

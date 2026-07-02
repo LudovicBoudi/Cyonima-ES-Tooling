@@ -34,7 +34,7 @@
             {% for alert in b.consumed_alerts %}
                 {% if alert.3 == "danger" or alert.3 == "warning" %}
                 <div class="{% if alert.3 == 'danger' %}bg-red-50 border-red-200 text-red-700{% else %}bg-yellow-50 border-yellow-200 text-yellow-700{% endif %} border rounded-lg px-4 py-2 mb-2 text-sm flex justify-between">
-                    <span><strong>{{ alert.0 }}</strong> : {{ alert.1|floatformat:2 }} €</span>
+                    <span><strong>{{ alert.0 }}</strong> : {{ alert.1|format_money }} €</span>
                     <span>({{ alert.2 }}%)</span>
                 </div>
                 {% endif %}
@@ -70,7 +70,7 @@
                                     {% if cat_level == "danger" %}<span class="bg-red-100 text-red-600 text-xs px-1.5 py-0.5 rounded">100%+</span>
                                     {% elif cat_level == "warning" %}<span class="bg-yellow-100 text-yellow-600 text-xs px-1.5 py-0.5 rounded">&gt;80%</span>{% endif %}
                                 </td>
-                                <td class="py-1 text-right">{{ cat_val|floatformat:2 }}</td>
+                                <td class="py-1 text-right">{{ cat_val|format_money }}</td>
                                 <td class="py-1 text-right">{{ cat_pct }}%</td>
                             </tr>
                             {% endfor %}
@@ -78,17 +78,17 @@
                         <tfoot class="font-semibold border-t-2 border-gray-200">
                             <tr>
                                 <td class="pt-2">Alloué</td>
-                                <td class="pt-2 text-right">{{ b.allocated|floatformat:2 }} €</td>
+                                <td class="pt-2 text-right">{{ b.allocated|format_money }} €</td>
                                 <td></td>
                             </tr>
                             <tr>
                                 <td>Consommé total</td>
-                                <td class="text-right">{{ b.total_consumed|floatformat:2 }} €</td>
+                                <td class="text-right">{{ b.total_consumed|format_money }} €</td>
                                 <td class="text-right">{{ b.overall_pct }}%</td>
                             </tr>
                             <tr>
                                 <td>Restant</td>
-                                <td class="text-right">{{ b.remaining|floatformat:2 }} €</td>
+                                <td class="text-right">{{ b.remaining|format_money }} €</td>
                                 <td></td>
                             </tr>
                         </tfoot>

@@ -264,5 +264,9 @@ class LeaveRequest(models.Model):
     def __str__(self):
         return f'{self.employee} — {self.get_type_display()} ({self.start_date} → {self.end_date})'
 
+    def clean(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError('La date de fin ne peut pas être antérieure à la date de début.')
+
     def duration_days(self):
         return (self.end_date - self.start_date).days + 1

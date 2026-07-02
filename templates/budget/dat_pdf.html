@@ -50,8 +50,8 @@
                 <td>{{ line.product }}</td>
                 <td>{{ line.reference|default:"—" }}</td>
                 <td class="center">{{ line.quantity }}</td>
-                <td class="right">{{ line.unit_price|floatformat:2 }}</td>
-                <td class="right">{{ line.global_price|floatformat:2 }}</td>
+                <td class="right">{{ line.unit_price|format_money }}</td>
+                <td class="right">{{ line.global_price|format_money }}</td>
                 <td>{{ line.get_budget_type_display }}</td>
                 <td>{{ line.get_budget_category_display }}</td>
             </tr>
@@ -60,7 +60,7 @@
         <tfoot>
             <tr class="total">
                 <td colspan="4" class="right">Total</td>
-                <td class="right">{{ dat.total_cost|floatformat:2 }} €</td>
+                <td class="right">{{ dat.total_cost|format_money }} €</td>
                 <td colspan="2"></td>
             </tr>
         </tfoot>

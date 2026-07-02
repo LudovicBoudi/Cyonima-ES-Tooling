@@ -1,17 +1,18 @@
-{% extends 'base.html' %}
-{% block title %}Supprimer {{ page.title }} - Wiki{% endblock %}
-{% block content %}
-<div class="max-w-lg mx-auto mt-12">
-    <div class="bg-white rounded-xl shadow-md p-8 text-center">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4">Confirmer la suppression</h1>
-        <p class="text-gray-600 mb-6">Supprimer la page <strong>{{ page.title }}</strong> ?</p>
-        <form method="post">
-            {% csrf_token %}
-            <div class="flex justify-center gap-4">
-                <a href="{% url 'wiki_detail' page.slug %}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Annuler</a>
-                <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Supprimer</button>
-            </div>
-        </form>
-    </div>
+{% extends 'wiki/base_wiki.html' %}
+
+{% block title %}Supprimer {{ page.title }} — Wiki{% endblock %}
+
+{% block wiki_content %}
+<div class="bg-white rounded-xl shadow-md p-8 text-center">
+    <div class="text-5xl mb-4">⚠️</div>
+    <h1 class="text-xl font-bold text-gray-800 mb-2">Supprimer cette page ?</h1>
+    <p class="text-gray-500 mb-6">La page <strong>{{ page.title }}</strong> sera définitivement effacée.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="flex justify-center gap-3">
+            <a href="{% url 'wiki_detail' page.slug %}" class="px-6 py-2 border rounded-lg text-gray-700 hover:bg-gray-50">Annuler</a>
+            <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Supprimer</button>
+        </div>
+    </form>
 </div>
 {% endblock %}

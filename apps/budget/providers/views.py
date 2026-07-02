@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models.deletion import ProtectedError
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Provider
 
@@ -13,11 +14,15 @@ def provider_list(request):
 @login_required
 def provider_create(request):
     if request.method == 'POST':
+        name = request.POST.get('company_name', '').strip()
+        if not name:
+            messages.error(request, "Le nom de l'entreprise est requis.")
+            return render(request, 'budget/provider_form.html', {'title': 'Nouveau fournisseur'})
         Provider.objects.create(
-            company_name=request.POST['company_name'],
-            sales_contact=request.POST['sales_contact'],
-            phone=request.POST['phone'],
-            email=request.POST['email'],
+            company_name=name,
+            sales_contact=request.POST.get('sales_contact', ''),
+            phone=request.POST.get('phone', ''),
+            email=request.POST.get('email', ''),
             description=request.POST.get('description', ''),
         )
         messages.success(request, 'Fournisseur créé.')
@@ -29,10 +34,14 @@ def provider_create(request):
 def provider_edit(request, pk):
     provider = get_object_or_404(Provider, pk=pk)
     if request.method == 'POST':
-        provider.company_name = request.POST['company_name']
-        provider.sales_contact = request.POST['sales_contact']
-        provider.phone = request.POST['phone']
-        provider.email = request.POST['email']
+        name = request.POST.get('company_name', '').strip()
+        if not name:
+            messages.error(request, "Le nom de l'entreprise est requis.")
+            return render(request, 'budget/provider_form.html', {'provider': provider, 'title': 'Modifier fournisseur'})
+        provider.company_name = name
+        provider.sales_contact = request.POST.get('sales_contact', '')
+        provider.phone = request.POST.get('phone', '')
+        provider.email = request.POST.get('email', '')
         provider.description = request.POST.get('description', '')
         provider.save()
         messages.success(request, 'Fournisseur modifié.')
@@ -44,7 +53,10 @@ def provider_edit(request, pk):
 def provider_delete(request, pk):
     provider = get_object_or_404(Provider, pk=pk)
     if request.method == 'POST':
-        provider.delete()
-        messages.success(request, 'Fournisseur supprimé.')
+        try:
+            provider.delete()
+            messages.success(request, 'Fournisseur supprimé.')
+        except ProtectedError:
+            messages.error(request, 'Impossible de supprimer ce fournisseur car il est lié à des DAT existantes.')
         return redirect('provider_list')
     return render(request, 'budget/provider_confirm_delete.html', {'provider': provider})
