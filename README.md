@@ -48,20 +48,20 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 ## Installation rapide (Docker, recommandé)
 
 > L'image est automatiquement buildée et publiée sur [ghcr.io](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/pkgs/container/cyonima-es-tooling) à chaque push.
+> Pour télécharger l'image manuellement : `docker pull ghcr.io/ludovicboudi/cyonima-es-tooling:latest`
 
 ```bash
-# 1. Créer le dossier et le fichier docker-compose.yml
+# 1. Créer le dossier et télécharger les fichiers de configuration
 mkdir cyonima && cd cyonima
 curl -O https://raw.githubusercontent.com/LudovicBoudi/Cyonima-ES-Tooling/main/docker-compose.yml
-
-# 2. Télécharger le .env.example et le configurer
 curl -O https://raw.githubusercontent.com/LudovicBoudi/Cyonima-ES-Tooling/main/.env.example
+
+# 2. Configurer l'environnement
 mv .env.example .env
-# Générer une SECRET_KEY :
 echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> .env
 nano .env
 
-# 3. Lancer
+# 3. Lancer (l'image est téléchargée automatiquement)
 docker compose up -d
 
 # 4. Créer le compte admin

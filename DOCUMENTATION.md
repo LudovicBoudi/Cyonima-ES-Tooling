@@ -608,6 +608,7 @@ docker compose pull && up -d  # Mise à jour
 docker compose exec app python manage.py createsuperuser
 ```
 L'image est publiée sur [ghcr.io](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/pkgs/container/cyonima-es-tooling) via GitHub Actions.
+Téléchargement manuel : `docker pull ghcr.io/ludovicboudi/cyonima-es-tooling:latest`
 
 ### Codespaces
 Ouverture en 1 clic depuis GitHub : environnement Python 3.12 préconfiguré, dépendances installées, prêt à développer.
