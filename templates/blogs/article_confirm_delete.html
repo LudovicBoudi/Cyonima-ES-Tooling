@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'blogs/base_blog.html' %}
 
 {% block title %}Supprimer {{ article.title }}{% endblock %}
 
-{% block content %}
+{% block blog_content %}
 <div class="max-w-lg mx-auto bg-white rounded-lg shadow p-6 text-center">
     <div class="text-5xl text-red-500 mb-4">&#9888;</div>
     <p class="text-gray-500 mb-6">Supprimer <strong>{{ article.display_id }} - {{ article.title }}</strong> ?</p>

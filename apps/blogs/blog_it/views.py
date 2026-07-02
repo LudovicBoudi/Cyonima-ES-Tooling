@@ -1,7 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import ITArticle
+from django.db.models import Q
+from django.core.paginator import Paginator
+from .models import ITArticle, ITArticleAttachment
+from apps.notifications.utils import create_notification
 
 
 def can_write(user):
@@ -11,8 +14,13 @@ def can_write(user):
 @login_required
 def article_list(request):
     articles = ITArticle.objects.all()
+    q = request.GET.get('q', '')
+    if q:
+        articles = articles.filter(Q(title__icontains=q) | Q(content__icontains=q))
+    paginator = Paginator(articles, 15)
+    page = paginator.get_page(request.GET.get('page'))
     return render(request, 'blogs/article_list.html', {
-        'articles': articles,
+        'articles': page,
         'blog_title': 'Blog IT',
         'list_url': 'it_blog_list',
         'create_url': 'it_blog_create',
@@ -20,6 +28,7 @@ def article_list(request):
         'edit_url': 'it_blog_edit',
         'can_write': can_write(request.user),
         'delete_url': 'it_blog_delete',
+        'q': q,
     })
 
 
@@ -51,6 +60,19 @@ def article_create(request):
             image=request.FILES.get('image'),
             created_by=request.user,
         )
+        attachment = request.FILES.get('attachment')
+        if attachment:
+            ITArticleAttachment.objects.create(
+                article=article,
+                file=attachment,
+                filename=attachment.name,
+            )
+        create_notification(
+            request.user,
+            f"Nouvel article : {article.display_id()}",
+            f"Article publié dans le blog IT : {article.title}",
+            link='',
+        )
         messages.success(request, f"Article {article.display_id()} créé.")
         return redirect('it_blog_detail', article_id=article.id)
     return render(request, 'blogs/article_form.html', {
@@ -75,6 +97,13 @@ def article_edit(request, article_id):
         if request.FILES.get('image'):
             article.image = request.FILES['image']
         article.save()
+        attachment = request.FILES.get('attachment')
+        if attachment:
+            ITArticleAttachment.objects.create(
+                article=article,
+                file=attachment,
+                filename=attachment.name,
+            )
         messages.success(request, f"Article {article.display_id()} modifié.")
         return redirect('it_blog_detail', article_id=article.id)
     return render(request, 'blogs/article_form.html', {

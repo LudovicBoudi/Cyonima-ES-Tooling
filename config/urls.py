@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from apps.blogs import views as blog_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,6 +25,7 @@ urlpatterns = [
     path('ged/', include('apps.ged.urls')),
     path('notifications/', include('apps.notifications.urls')),
     path('ressources/', include('apps.ressources.urls')),
+    path('blog/', include('apps.blogs.urls')),
     path('blog/securite/', include('apps.blogs.sec_blog.urls')),
     path('blog/direction/', include('apps.blogs.dg_blog.urls')),
     path('blog/communication/', include('apps.blogs.blog_com.urls')),

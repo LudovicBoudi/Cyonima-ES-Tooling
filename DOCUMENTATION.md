@@ -209,14 +209,23 @@ Cinq blogs accessibles selon le rôle :
 | IT | `/blog/it/` | `it_manager` ou `admin` | Tous |
 | Rep. Syndicale | `/blog/representation-syndicale/` | `elus_syndicaux` ou `admin` | Tous |
 
+### Page d'accueil (`/blog/`)
+- Grille présentant les 5 blogs avec leurs icônes, descriptions et 3 derniers articles.
+
 ### Liste des articles
 - Affichage complet des articles (titre, image à la une, contenu, métadonnées) les uns en dessous des autres.
 - Barre latérale : 30 derniers articles, lien "Tous les articles", bouton "Nouvel article".
+- **Recherche** plein texte dans le titre et le contenu des articles.
+- **Pagination** : 15 articles par page avec navigation précédent/suivant.
 
 ### Édition d'articles
 - Création et modification avec éditeur de texte riche (CKEditor 5) — mise en forme HTML (titres, gras, listes, etc.).
 - Possibilité d'ajouter une image à la une.
+- **Pièces jointes PDF** : upload fonctionnel, stocké dans le modèle ArticleAttachment.
 - Suppression avec confirmation.
+
+### Notifications
+- Une notification in-app est créée pour l'auteur lors de la publication d'un article.
 
 ---
 

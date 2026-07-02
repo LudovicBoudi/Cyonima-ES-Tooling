@@ -9,6 +9,15 @@
         <a href="{% url create_url %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvel article</a>
     {% endif %}
 </div>
+
+<form method="get" class="mb-6">
+    <div class="flex gap-2">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher dans les articles…" class="flex-1 px-4 py-2 border rounded-lg text-sm">
+        <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">Chercher</button>
+        {% if q %}<a href="{% url list_url %}" class="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Réinitialiser</a>{% endif %}
+    </div>
+</form>
+
 <div class="space-y-6">
     {% for a in articles %}
     <div class="bg-white rounded-xl shadow-md p-6">
@@ -35,7 +44,21 @@
         </div>
     </div>
     {% empty %}
-    <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-400">Aucun article</div>
+    <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-400">
+        {% if q %}Aucun article ne correspond à votre recherche.{% else %}Aucun article{% endif %}
+    </div>
     {% endfor %}
 </div>
+
+{% if articles.paginator.num_pages > 1 %}
+<div class="mt-6 flex justify-center gap-2">
+    {% if articles.has_previous %}
+    <a href="?page={{ articles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">← Précédent</a>
+    {% endif %}
+    <span class="px-3 py-1.5 text-sm text-gray-500">Page {{ articles.number }} / {{ articles.paginator.num_pages }}</span>
+    {% if articles.has_next %}
+    <a href="?page={{ articles.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">Suivant →</a>
+    {% endif %}
+</div>
+{% endif %}
 {% endblock %}

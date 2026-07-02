@@ -57,7 +57,7 @@ class UserProfile(models.Model):
             'security': ['security_officer'],
             'direction': ['direction'],
             'communication': ['communication'],
-            'it': ['direction'],
+            'it': ['it_manager'],
             'comex': ['direction'],
             'rep_syndicale': ['elus_syndicaux'],
         }
