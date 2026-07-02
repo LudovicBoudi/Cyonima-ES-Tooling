@@ -1,0 +1,9 @@
+repository:
+  has_discussions: true
+  has_wiki: false
+  has_projects: false
+  description: "Plateforme web modulaire — Budget IT, ALM, CRM, ERP, RH, GED, Wiki, Blogs, Guichet IT"
+  topics: "django, python, erp, crm, alm, hr, ged, wiki, tailwind, docker"
+  default_branch: main
+  allow_squash_merge: true
+  allow_rebase_merge: false
