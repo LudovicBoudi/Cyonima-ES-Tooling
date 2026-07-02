@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     path('', views.dat_list, name='dat_list'),
     path('nouveau/', views.dat_create, name='dat_create'),
+    path('modele/sauvegarder/', views.dat_template_save, name='dat_template_save'),
+    path('modele/charger/', views.dat_template_load, name='dat_template_load'),
     path('<int:pk>/', views.dat_detail, name='dat_detail'),
     path('<int:pk>/modifier/', views.dat_update, name='dat_update'),
     path('<int:pk>/supprimer/', views.dat_delete, name='dat_delete'),

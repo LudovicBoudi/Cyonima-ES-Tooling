@@ -2,10 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
-from .models import Ticket, TicketLog, Sprint
+from .models import Ticket, TicketLog, Sprint, TicketAttachment, Release
 from apps.alm.repositories.models import Repository
 from apps.alm.projects.models import Project
 from apps.alm.projects.views import can_access_project
@@ -124,11 +124,18 @@ def ticket_detail(request, project_id, ticket_id):
         ticket.save()
         messages.success(request, "Lien commit retiré.")
         return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
+    if request.method == 'POST' and request.FILES.get('attachment'):
+        f = request.FILES['attachment']
+        TicketAttachment.objects.create(ticket=ticket, file=f, filename=f.name, uploaded_by=request.user)
+        messages.success(request, f'Pièce jointe "{f.name}" ajoutée.')
+        return redirect('ticket_detail', project_id=project.id, ticket_id=ticket.id)
     logs = ticket.logs.select_related('user').all()
     transitions = ticket.get_available_statuses()
     repos = project.repositories.all()
+    total_hours = ticket.logs.aggregate(total=Sum('hours_spent'))['total'] or 0
     return render(request, 'alm/tickets/ticket_detail.html', {
         'project': project, 'ticket': ticket, 'logs': logs, 'transitions': transitions, 'repos': repos,
+        'total_hours': total_hours,
     })
 
 
@@ -376,3 +383,65 @@ def ticket_import_csv(request, project_id):
         messages.success(request, f"{count} ticket(s) importé(s).")
         return redirect('ticket_list', project_id=project.id)
     return render(request, 'alm/tickets/ticket_import.html', {'project': project})
+
+
+@login_required
+def release_list(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    releases = project.releases.annotate(
+        ticket_count=Count('tickets'),
+        completed_count=Count('tickets', filter=Q(tickets__status='cloture'))
+    ).all()
+    return render(request, 'alm/tickets/release_list.html', {'project': project, 'releases': releases})
+
+
+@login_required
+def release_create(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    if request.method == 'POST':
+        r = Release.objects.create(
+            project=project,
+            name=request.POST['name'],
+            version=request.POST.get('version', ''),
+            description=request.POST.get('description', ''),
+            release_date=request.POST.get('release_date') or None,
+            is_released=request.POST.get('is_released') == 'on',
+        )
+        messages.success(request, f"Release {r} créée.")
+        return redirect('release_list', project_id=project.id)
+    return render(request, 'alm/tickets/release_form.html', {'project': project, 'title': 'Nouvelle release'})
+
+
+@login_required
+def release_detail(request, project_id, release_id):
+    project = get_object_or_404(Project, id=project_id)
+    release_obj = get_object_or_404(Release, id=release_id, project=project)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    tickets = release_obj.tickets.select_related('assigned_to').all()
+    available = project.tickets.exclude(id__in=release_obj.tickets.values('id'))
+    return render(request, 'alm/tickets/release_detail.html', {
+        'project': project, 'release': release_obj, 'tickets': tickets, 'available': available,
+    })
+
+
+@login_required
+def release_add_tickets(request, project_id, release_id):
+    project = get_object_or_404(Project, id=project_id)
+    release_obj = get_object_or_404(Release, id=release_id, project=project)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    if request.method == 'POST':
+        ticket_ids = request.POST.getlist('tickets')
+        release_obj.tickets.add(*ticket_ids)
+        messages.success(request, "Tickets ajoutés à la release.")
+        return redirect('release_detail', project_id=project.id, release_id=release_obj.id)
+    return redirect('release_detail', project_id=project.id, release_id=release_obj.id)

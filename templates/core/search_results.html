@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Recherche — {{ site_config.site_name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <form method="get" action="{% url 'global_search' %}" class="mb-6">
+        <div class="flex gap-2">
+            <input type="text" name="q" value="{{ q }}" placeholder="Rechercher sur tout le site…" autofocus
+                   class="flex-1 px-4 py-3 border rounded-lg text-lg">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-3 rounded-lg hover:bg-[#142b52]">🔍</button>
+        </div>
+    </form>
+
+    {% if q %}
+        <p class="text-sm text-gray-500 mb-4">{{ results|length }} résultat(s) pour « <strong>{{ q }}</strong> »</p>
+        {% if results %}
+        <div class="space-y-3">
+            {% for r in results %}
+            <a href="{{ r.url }}" class="block bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow border-l-4 border-[#1a3a6b]">
+                <div class="flex items-center gap-3">
+                    <span class="text-xl shrink-0">{{ r.icon }}</span>
+                    <div class="min-w-0">
+                        <p class="font-semibold text-gray-800 truncate">{{ r.title }}</p>
+                        {% if r.description %}<p class="text-xs text-gray-400 mt-0.5 truncate">{{ r.description }}</p>{% endif %}
+                        <p class="text-xs text-gray-400 mt-0.5 truncate">{{ r.url }}</p>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-16 text-gray-400">
+            <p class="text-4xl mb-4">🔍</p>
+            <p class="text-lg">Aucun résultat pour « {{ q }} »</p>
+            <p class="text-sm mt-2">Essayez un autre terme de recherche.</p>
+        </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

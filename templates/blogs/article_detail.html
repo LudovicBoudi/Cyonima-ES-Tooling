@@ -3,11 +3,14 @@
 {% block title %}{{ article.title }} - {{ blog_title }}{% endblock %}
 
 {% block blog_content %}
-<div class="bg-white rounded-xl shadow-md p-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
     <div class="flex justify-between items-start mb-4">
         <div>
-            <h1 class="text-2xl font-bold">{{ article.title }}</h1>
-            <p class="text-sm text-gray-400 mt-1">{{ article.display_id }} - {{ article.created_by.username }} - {{ article.created_at|date:"d/m/Y" }}</p>
+            <h1 class="text-2xl font-bold dark:text-gray-100">
+                {{ article.title }}
+                {% if article.status == 'brouillon' %}<span class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Brouillon</span>{% endif %}
+            </h1>
+            <p class="text-sm text-gray-400 mt-1">{{ article.display_id }} — {{ article.created_by.username }} — {{ article.created_at|date:"d/m/Y" }}</p>
         </div>
         <div class="flex gap-2 shrink-0">
             <a href="{% url list_url %}" class="text-sm text-gray-500 hover:underline">← Retour</a>
@@ -21,12 +24,19 @@
         <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full max-h-80 object-cover rounded-lg">
     </div>
     {% endif %}
-    <div class="text-gray-700 leading-relaxed break-words overflow-hidden">
+    {% if article.tags %}
+    <div class="flex flex-wrap gap-1 mb-4">
+        {% for tag in article.tags|split_comma %}
+        <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs rounded-full text-gray-500 dark:text-gray-400">{{ tag }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <div class="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-hidden">
         {{ article.content|safe }}
     </div>
     {% if article.attachments.exists %}
-    <div class="border-t mt-6 pt-4">
-        <h3 class="text-sm font-semibold mb-2">Pièces jointes</h3>
+    <div class="border-t dark:border-gray-700 mt-6 pt-4">
+        <h3 class="text-sm font-semibold mb-2 dark:text-gray-200">Pièces jointes</h3>
         {% for att in article.attachments.all %}
             <a href="{{ att.file.url }}" class="text-sm text-blue-600 hover:underline block">{{ att.filename }}</a>
         {% endfor %}

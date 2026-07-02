@@ -1,0 +1,32 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Releases - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-semibold">Releases</h1>
+        <a href="{% url 'release_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouvelle release</a>
+    </div>
+    <div class="space-y-3">
+        {% for r in releases %}
+        <div class="border rounded p-4 hover:bg-gray-50">
+            <div class="flex justify-between items-start">
+                <div>
+                    <a href="{% url 'release_detail' project.id r.id %}" class="font-semibold text-lg hover:text-[#1a3a6b]">{{ r.name }} <span class="text-sm text-gray-500">v{{ r.version }}</span></a>
+                    {% if r.is_released %}<span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Publiée</span>{% else %}<span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">En cours</span>{% endif %}
+                    {% if r.release_date %}<span class="text-sm text-gray-400 ml-2">{{ r.release_date|date:"d/m/Y" }}</span>{% endif %}
+                </div>
+                <div class="text-sm text-gray-500 shrink-0">
+                    {{ r.ticket_count }} ticket{{ r.ticket_count|pluralize }} —
+                    {{ r.completed_count }} clôturé{{ r.completed_count|pluralize }}
+                </div>
+            </div>
+            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                <div class="bg-[#1a3a6b] rounded-full h-2" style="width: {% widthratio r.completed_count r.ticket_count 100 %}%"></div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-gray-400 py-8">Aucune release</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

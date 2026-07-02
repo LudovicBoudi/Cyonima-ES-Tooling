@@ -5,9 +5,9 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
 
     <nav class="mb-8 text-sm breadcrumbs">
-        <a href="{% url 'ressources_home' %}" class="text-indigo-600 hover:text-indigo-800">&larr; Ressources</a>
+        <a href="{% url 'ressources_home' %}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800">&larr; Ressources</a>
         <span class="mx-2 text-gray-400">/</span>
-        <span class="text-gray-700 font-semibold">PCI DSS</span>
+        <span class="text-gray-700 dark:text-gray-300 font-semibold">PCI DSS</span>
     </nav>
 
     <div class="bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl p-10 mb-10 text-white shadow-xl">
@@ -20,35 +20,35 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">📋 Sommaire</h2>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">📋 Sommaire</h2>
         <ul class="space-y-2 text-lg">
-            <li><a href="#intro" class="text-indigo-600 hover:text-indigo-800 font-medium">1. Présentation</a></li>
-            <li><a href="#objectifs" class="text-indigo-600 hover:text-indigo-800 font-medium">2. 6 objectifs & 12 exigences</a></li>
-            <li><a href="#niveaux" class="text-indigo-600 hover:text-indigo-800 font-medium">3. Niveaux de conformité</a></li>
-            <li><a href="#eval" class="text-indigo-600 hover:text-indigo-800 font-medium">4. Évaluation & audit</a></li>
-            <li><a href="#v4" class="text-indigo-600 hover:text-indigo-800 font-medium">5. PCI DSS v4.0</a></li>
+            <li><a href="#intro" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium">1. Présentation</a></li>
+            <li><a href="#objectifs" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium">2. 6 objectifs & 12 exigences</a></li>
+            <li><a href="#niveaux" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium">3. Niveaux de conformité</a></li>
+            <li><a href="#eval" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium">4. Évaluation & audit</a></li>
+            <li><a href="#v4" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-medium">5. PCI DSS v4.0</a></li>
         </ul>
     </div>
 
-    <section id="intro" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">1. Présentation</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+    <section id="intro" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">1. Présentation</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
             Le <strong>PCI DSS</strong> est un standard de sécurité développé par le <strong>PCI Security Standards Council</strong>
             (fondé par American Express, Discover, JCB, Mastercard et Visa) pour protéger les données de cartes de paiement.
         </p>
-        <p class="text-gray-700 leading-relaxed mb-4">
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
             Il s'applique à toute entité qui stocke, traite ou transmet des données de titulaires de cartes
             (numéros de carte, dates d'expiration, codes de sécurité) ainsi qu'aux données d'authentification sensibles.
         </p>
-        <p class="text-gray-700 leading-relaxed">
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
             <strong>Date de référence :</strong> La version actuelle est la <strong>v4.0.1</strong> (juin 2024).
             La v3.2.1 a été retirée le 31 mars 2024.
         </p>
     </section>
 
-    <section id="objectifs" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">2. 6 objectifs & 12 exigences</h2>
+    <section id="objectifs" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">2. 6 objectifs & 12 exigences</h2>
         <div class="space-y-4">
             <div class="bg-purple-50 rounded-xl p-5 border border-purple-200">
                 <h3 class="font-bold text-purple-800 text-lg mb-2">Objectif 1 — Mettre en place un pare-feu</h3>
@@ -77,9 +77,9 @@
         </div>
     </section>
 
-    <section id="niveaux" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">3. Niveaux de conformité</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+    <section id="niveaux" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">3. Niveaux de conformité</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
             Les commerçants sont classés en 4 niveaux selon le volume de transactions par an :
         </p>
         <div class="overflow-x-auto">
@@ -91,7 +91,7 @@
                         <th class="p-3 font-semibold border border-purple-200">Type d'évaluation</th>
                     </tr>
                 </thead>
-                <tbody class="text-gray-700">
+                <tbody class="text-gray-700 dark:text-gray-300">
                     <tr class="border-b border-gray-200">
                         <td class="p-3 font-bold border border-gray-200">1</td>
                         <td class="p-3 border border-gray-200">&gt; 6 millions</td>
@@ -117,9 +117,9 @@
         </div>
     </section>
 
-    <section id="eval" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">4. Évaluation & audit</h2>
-        <ul class="list-disc list-inside text-gray-700 space-y-2 ml-4">
+    <section id="eval" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 mb-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">4. Évaluation & audit</h2>
+        <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-2 ml-4">
             <li><strong>QSA</strong> (Qualified Security Assessor) : Auditeur agréé pour les évaluations sur site.</li>
             <li><strong>SAQ</strong> (Self-Assessment Questionnaire) : Auto-évaluation pour les niveaux 3 et 4.</li>
             <li><strong>ASV</strong> (Approved Scanning Vendor) : Scan de vulnérabilités externe trimestriel.</li>
@@ -128,34 +128,34 @@
         </ul>
     </section>
 
-    <section id="v4" class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">5. PCI DSS v4.0</h2>
-        <p class="text-gray-700 leading-relaxed mb-4">
+    <section id="v4" class="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 border border-gray-100 scroll-mt-20">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">5. PCI DSS v4.0</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
             La <strong>version 4.0</strong> (mars 2022, obligatoire depuis avril 2024) introduit des évolutions majeures :
         </p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-200">
                 <h3 class="font-bold text-blue-700 mb-2">Nouvelles exigences</h3>
-                <p class="text-blue-600 text-sm">Gestion des identités et des accès renforcée, authentification multifacteur (MFA) étendue, chiffrement plus strict.</p>
+                <p class="text-blue-600 dark:text-blue-400 text-sm">Gestion des identités et des accès renforcée, authentification multifacteur (MFA) étendue, chiffrement plus strict.</p>
             </div>
-            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-200">
                 <h3 class="font-bold text-blue-700 mb-2">Approche personnalisée</h3>
-                <p class="text-blue-600 text-sm">Possibilité de définir des contrôles compensatoires personnalisés documentés.</p>
+                <p class="text-blue-600 dark:text-blue-400 text-sm">Possibilité de définir des contrôles compensatoires personnalisés documentés.</p>
             </div>
-            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-200">
                 <h3 class="font-bold text-blue-700 mb-2">Sécurité continue</h3>
-                <p class="text-blue-600 text-sm">Passage d'une approche ponctuelle à une gestion continue de la sécurité.</p>
+                <p class="text-blue-600 dark:text-blue-400 text-sm">Passage d'une approche ponctuelle à une gestion continue de la sécurité.</p>
             </div>
-            <div class="bg-blue-50 rounded-xl p-5 border border-blue-200">
+            <div class="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-5 border border-blue-200">
                 <h3 class="font-bold text-blue-700 mb-2">Flexibilité accrue</h3>
-                <p class="text-blue-600 text-sm">Nouvelles options pour répondre aux objectifs de sécurité de manière différenciée.</p>
+                <p class="text-blue-600 dark:text-blue-400 text-sm">Nouvelles options pour répondre aux objectifs de sécurité de manière différenciée.</p>
             </div>
         </div>
-        <p class="text-gray-600 mt-4 text-sm italic">Certaines exigences v4.0 sont « best practice » jusqu'au 31 mars 2025, puis deviendront obligatoires au 1er avril 2025.</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-4 text-sm italic">Certaines exigences v4.0 sont « best practice » jusqu'au 31 mars 2025, puis deviendront obligatoires au 1er avril 2025.</p>
     </section>
 
     <div class="mt-8 text-center">
-        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-800 font-semibold">
+        <a href="{% url 'ressources_home' %}" class="inline-flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 font-semibold">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
             </svg>

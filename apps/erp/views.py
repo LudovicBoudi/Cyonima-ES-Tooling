@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from datetime import timedelta, date as dt_date
 from django.http import HttpResponse, FileResponse
 from weasyprint import HTML
-from .models import Quotation, Invoice, CreditNote, SupplierInvoice, Payment, Product, Reminder, ErpAuditLog, vat_breakdown
+from .models import Quotation, Invoice, CreditNote, SupplierInvoice, Payment, Product, Reminder, ErpAuditLog, RecurringInvoice, QuotationTemplate, vat_breakdown
 from .notifications import notify_user, notify_admins, log_audit
 from apps.crm.models import Company
 
@@ -774,3 +774,79 @@ def product_delete(request, pk):
         messages.success(request, f'Produit "{p.name}" supprimé.')
         return redirect('erp_product_list')
     return render(request, 'erp/confirm_delete.html', {'obj': p})
+
+
+@login_required
+def recurring_list(request):
+    items = RecurringInvoice.objects.select_related('company', 'created_by').all()
+    return render(request, 'erp/recurring_list.html', {'items': items})
+
+
+@login_required
+def recurring_create(request):
+    if request.method == 'POST':
+        import json
+        lines_json = request.POST.get('lines_json', '[]')
+        try:
+            lines = json.loads(lines_json)
+        except json.JSONDecodeError:
+            lines = []
+        r = RecurringInvoice.objects.create(
+            title=request.POST['title'],
+            company_id=request.POST['company'],
+            lines=lines,
+            frequency=request.POST.get('frequency', 'monthly'),
+            next_date=request.POST.get('next_date') or timezone.now().date(),
+            is_active=request.POST.get('is_active') == 'on',
+            created_by=request.user,
+        )
+        messages.success(request, f'Facture récurrente "{r.title}" créée.')
+        return redirect('erp_recurring_list')
+    companies = Company.objects.all()
+    return render(request, 'erp/recurring_form.html', {'companies': companies, 'title': 'Nouvelle facture récurrente'})
+
+
+@login_required
+def quotation_template_save(request):
+    if request.method == 'POST':
+        import json
+        name = request.POST.get('template_name', '').strip()
+        lines_json = request.POST.get('lines_json', '[]')
+        if not name:
+            messages.error(request, "Nom du modèle requis.")
+            return redirect('erp_quotation_create')
+        try:
+            lines = json.loads(lines_json)
+        except json.JSONDecodeError:
+            lines = []
+        QuotationTemplate.objects.create(name=name, lines=lines, created_by=request.user)
+        messages.success(request, f"Modèle '{name}' sauvegardé.")
+        return redirect('erp_quotation_create')
+    return redirect('erp_quotation_create')
+
+
+@login_required
+def reconciliation(request):
+    unpaid_invoices = Invoice.objects.filter(status__in=['emise', 'impayee']).select_related('company')
+    unlinked_payments = Payment.objects.filter(invoice__isnull=True, supplier_invoice__isnull=True)
+    if request.method == 'POST':
+        payment_id = request.POST.get('payment_id')
+        invoice_id = request.POST.get('invoice_id')
+        if payment_id and invoice_id:
+            p = get_object_or_404(Payment, pk=payment_id)
+            inv = get_object_or_404(Invoice, pk=invoice_id)
+            p.invoice = inv
+            p.save()
+            total_paid = inv.payments.aggregate(Sum('amount'))['amount__sum'] or 0
+            inv.paid_amount = total_paid
+            if total_paid >= inv.total_ttc():
+                inv.status = 'payee'
+            elif total_paid > 0:
+                inv.status = 'impayee'
+            inv.save()
+            messages.success(request, f'Paiement {p.amount} € rapproché de {inv.number}.')
+            return redirect('erp_reconciliation')
+    return render(request, 'erp/reconciliation.html', {
+        'unpaid_invoices': unpaid_invoices,
+        'unlinked_payments': unlinked_payments,
+    })

@@ -9,6 +9,20 @@
 
 <form method="post" class="space-y-6">
     {% csrf_token %}
+    {% if templates %}
+    <div class="bg-white rounded-xl shadow-md p-4 flex gap-3 items-end">
+        <div class="flex-1">
+            <label class="block text-xs text-gray-500 mb-1">Charger un modèle</label>
+            <select id="template-select" class="w-full px-3 py-2 border rounded text-sm" onchange="loadTemplate()">
+                <option value="">— Modèles sauvegardés —</option>
+                {% for t in templates %}
+                <option value="{{ t.id }}">{{ t.name }} ({{ t.provider.company_name }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="button" onclick="saveAsTemplate()" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">💾 Sauvegarder en modèle</button>
+    </div>
+    {% endif %}
     <div class="bg-white rounded-xl shadow-md p-6 space-y-4">
         <h2 class="text-lg font-semibold text-gray-700">Informations générales</h2>
         <div>
@@ -107,5 +121,39 @@ function addLine() {
     clone.querySelectorAll('input').forEach(i => i.value = '');
     tbody.appendChild(clone);
 }
+
+function saveAsTemplate() {
+    const name = prompt('Nom du modèle :');
+    if (!name) return;
+    const form = document.querySelector('form');
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = 'template_name'; input.value = name;
+    form.appendChild(input);
+    form.action = "{% url 'dat_template_save' %}";
+    form.submit();
+}
+
+function loadTemplate() {
+    const id = document.getElementById('template-select').value;
+    if (!id) return;
+    window.location.href = "{% url 'dat_template_load' %}?template_id=" + id;
+}
+{% if template_lines_json %}
+(function() {
+    const lines = JSON.parse('{{ template_lines_json|escapejs }}');
+    lines.forEach(l => {
+        const row = document.querySelector('#lines-table tbody .line-row');
+        row.querySelector('[name="product[]"]').value = l.product || '';
+        row.querySelector('[name="reference[]"]').value = l.reference || '';
+        row.querySelector('[name="quantity[]"]').value = l.quantity || 1;
+        row.querySelector('[name="unit_price[]"]').value = l.unit_price || 0;
+        row.querySelector('[name="budget_type[]"]').value = l.budget_type || 'investment';
+        row.querySelector('[name="budget_category[]"]').value = l.budget_category || 'pc';
+    });
+    {% if selected_provider_id %}
+    document.querySelector('[name="provider"]').value = '{{ selected_provider_id }}';
+    {% endif %}
+})();
+{% endif %}
 </script>
 {% endblock %}

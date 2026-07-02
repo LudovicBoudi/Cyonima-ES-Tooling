@@ -39,7 +39,10 @@
             </div>
             {% endif %}
             <div id="lines-container" class="space-y-2"></div>
-            <button type="button" onclick="addLine()" class="text-sm text-blue-600 hover:underline mt-2">+ Ajouter une ligne</button>
+            <div class="flex gap-2 mt-2">
+                <button type="button" onclick="addLine()" class="text-sm text-blue-600 hover:underline">+ Ajouter une ligne</button>
+                <button type="button" onclick="saveAsTemplate()" class="text-sm text-gray-500 hover:underline">💾 Sauvegarder en modèle</button>
+            </div>
             <textarea name="lines_json" id="lines_json" class="hidden"></textarea>
         </div>
         <div>
@@ -92,5 +95,16 @@ function insertProduct() {
 }
 lines.forEach(l => addLine(l.description, l.quantity, l.unit_price, l.vat_rate));
 if (!lines.length) addLine();
+function saveAsTemplate() {
+    saveLines();
+    const name = prompt('Nom du modèle de devis :');
+    if (!name) return;
+    const form = document.querySelector('form');
+    const input = document.createElement('input');
+    input.type = 'hidden'; input.name = 'template_name'; input.value = name;
+    form.appendChild(input);
+    form.action = "{% url 'erp_template_save' %}";
+    form.submit();
+}
 </script>
 {% endblock %}

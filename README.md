@@ -23,6 +23,18 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2, Convention Métallurgie…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 
+## Captures d'écran
+
+<p align="center">
+  <img src="img-doc/administration.png" alt="Administration" width="400">
+  <img src="img-doc/budget-it.png" alt="Budget IT" width="400">
+  <img src="img-doc/alm.png" alt="ALM" width="400">
+  <img src="img-doc/crm.png" alt="CRM" width="400">
+  <img src="img-doc/hr.png" alt="RH" width="400">
+  <img src="img-doc/erp.png" alt="ERP" width="400">
+  <img src="img-doc/ressources-externes.png" alt="Ressources Externes" width="400">
+</p>
+
 ## Prérequis
 
 - Python 3.12+
@@ -96,7 +108,8 @@ Génère une archive ZIP (dump JSON + médias) dans le répertoire courant.
 - SQLite (développement), PostgreSQL/MySQL (production)
 - Chart.js (graphiques), WeasyPrint (PDF), openpyxl (XLSX)
 - CKEditor 5 (éditeur de texte riche) — blogs et wiki
-- Pillow (traitement d'images), python-magic (détection MIME)
+- BeautifulSoup4 (sanitizer HTML), Pillow (traitement d'images)
 - Système de rôles multiples (ManyToMany) avec 8 rôles prédéfinis
 - Export CSV (BOM-prefixed UTF-8), import CSV avec auto-détection de format
 - Diagrammes Chart.js : barres, donuts, courbes (dual axis count + amount)
+- Dark mode natif, recherche globale, format monétaire français

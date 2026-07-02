@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><title>{{ company.name }}</title>
+<style>
+body { font-family: sans-serif; font-size: 12px; color: #333; margin: 30px; }
+h1 { font-size: 22px; color: #1a3a6b; margin-bottom: 5px; }
+h2 { font-size: 14px; color: #1a3a6b; margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #eee; font-size: 11px; }
+.label { color: #666; width: 100px; }
+.footer { margin-top: 30px; font-size: 9px; color: #999; text-align: center; }
+</style></head>
+<body>
+<h1>{{ company.name }}</h1>
+<table>
+    {% if company.sector %}<tr><td class="label">Secteur</td><td>{{ company.sector }}</td></tr>{% endif %}
+    {% if company.address %}<tr><td class="label">Adresse</td><td>{{ company.address }}{% if company.postal_code %} {{ company.postal_code }}{% endif %} {{ company.city }}</td></tr>{% endif %}
+    {% if company.country %}<tr><td class="label">Pays</td><td>{{ company.country }}</td></tr>{% endif %}
+    {% if company.phone %}<tr><td class="label">Téléphone</td><td>{{ company.phone }}</td></tr>{% endif %}
+    {% if company.email %}<tr><td class="label">Email</td><td>{{ company.email }}</td></tr>{% endif %}
+    {% if company.website %}<tr><td class="label">Site web</td><td>{{ company.website }}</td></tr>{% endif %}
+    {% if company.siret %}<tr><td class="label">SIRET</td><td>{{ company.siret }}</td></tr>{% endif %}
+</table>
+
+<h2>Contacts ({{ contacts|length }})</h2>
+<table>
+    {% for c in contacts %}
+    <tr><td>{{ c.first_name }} {{ c.last_name }}</td><td>{{ c.function }}</td><td>{{ c.email }}</td><td>{{ c.phone }}</td></tr>
+    {% empty %}<tr><td colspan="4">Aucun contact</td></tr>{% endfor %}
+</table>
+
+<h2>Affaires ({{ deals|length }})</h2>
+<table>
+    <tr><th>Affaire</th><th>Étape</th><th>Montant</th></tr>
+    {% for d in deals %}
+    <tr><td>{{ d.title }}</td><td>{{ d.get_stage_display }}</td><td>{{ d.amount }} €</td></tr>
+    {% empty %}<tr><td colspan="3">Aucune affaire</td></tr>{% endfor %}
+</table>
+
+<div class="footer">Fiche générée le {% now "d/m/Y à H:i" %}</div>
+</body></html>

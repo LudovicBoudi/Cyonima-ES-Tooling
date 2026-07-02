@@ -30,3 +30,35 @@ class WikiPage(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+
+
+class WikiPageVersion(models.Model):
+    page = models.ForeignKey(WikiPage, on_delete=models.CASCADE, related_name='versions')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    version_number = models.PositiveIntegerField(editable=False)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Version de page'
+        verbose_name_plural = 'Versions de pages'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.page.title} — v{self.version_number} ({self.created_at.strftime('%d/%m/%Y %H:%M')})"
+
+
+class WikiAttachment(models.Model):
+    page = models.ForeignKey(WikiPage, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to='wiki/attachments/%Y/%m/')
+    filename = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Pièce jointe wiki'
+        verbose_name_plural = 'Pièces jointes wiki'
+
+    def __str__(self):
+        return self.filename

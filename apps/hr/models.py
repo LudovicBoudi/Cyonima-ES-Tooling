@@ -66,6 +66,21 @@ class Employee(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+    def leave_balance(self, leave_type=None):
+        from django.utils import timezone
+        year = timezone.now().year
+        balances = {'cp': 25, 'rtt': 10, 'maladie': 0, 'maternite': 0, 'sans_solde': 0, 'formation': 0}
+        taken = {}
+        for lt in balances:
+            taken[lt] = sum(
+                lr.duration_days() for lr in self.leave_requests.filter(
+                    type=lt, status='valide', start_date__year=year
+                )
+            )
+        if leave_type:
+            return {'total': balances.get(leave_type, 0), 'taken': taken.get(leave_type, 0)}
+        return {lt: {'total': balances[lt], 'taken': taken[lt]} for lt in balances}
+
 
 DIPLOMA_LEVELS = [
     ('bepc', 'BEPC'),

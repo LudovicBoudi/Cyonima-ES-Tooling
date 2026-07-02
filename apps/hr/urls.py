@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.dashboard, name='hr_dashboard'),
+    path('organigramme/', views.org_chart, name='hr_org_chart'),
     path('employes/', views.employee_list, name='hr_employee_list'),
     path('employes/creer/', views.employee_create, name='hr_employee_create'),
     path('employes/<int:pk>/', views.employee_detail, name='hr_employee_detail'),
@@ -14,6 +15,7 @@ urlpatterns = [
     path('departements/<int:pk>/supprimer/', views.department_delete, name='hr_department_delete'),
     path('contrats/', views.contract_list, name='hr_contract_list'),
     path('contrats/creer/', views.contract_create, name='hr_contract_create'),
+    path('contrats/<int:pk>/pdf/', views.contract_pdf, name='hr_contract_pdf'),
     path('contrats/<int:pk>/modifier/', views.contract_edit, name='hr_contract_edit'),
     path('contrats/<int:pk>/supprimer/', views.contract_delete, name='hr_contract_delete'),
     path('conges/', views.leave_list, name='hr_leave_list'),

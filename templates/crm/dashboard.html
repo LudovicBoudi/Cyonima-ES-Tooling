@@ -34,6 +34,10 @@
             <p class="text-sm text-gray-500">Pipeline</p>
         </div>
         <div class="bg-white rounded-xl shadow p-4 text-center">
+            <p class="text-3xl font-bold text-teal-600">{{ weighted_pipeline|format_money }} €</p>
+            <p class="text-sm text-gray-500">Pipeline pondéré</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 text-center">
             <p class="text-3xl font-bold text-indigo-600">{{ total_interactions }}</p>
             <p class="text-sm text-gray-500">Interactions</p>
         </div>
@@ -144,6 +148,7 @@
 {% endblock %}
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#666'; Chart.defaults.borderColor = document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb';</script>
 <script>
 new Chart(document.getElementById('stageChart'), {
     type: 'bar',

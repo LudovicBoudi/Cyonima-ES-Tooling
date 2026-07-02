@@ -5,6 +5,7 @@
     <div class="flex justify-between items-start mb-6">
         <h1 class="text-xl font-bold">{{ company.name }}</h1>
         <div class="flex gap-2 text-sm">
+            <a href="{% url 'crm_company_pdf' company.pk %}" class="text-gray-500 hover:underline" title="Exporter en PDF">🖨️</a>
             <a href="{% url 'crm_company_edit' company.pk %}" class="text-amber-600 hover:underline">Modifier</a>
             <a href="{% url 'crm_company_delete' company.pk %}" class="text-red-600 hover:underline">Supprimer</a>
             <a href="{% url 'crm_company_list' %}" class="text-gray-500 hover:underline">← Retour</a>
@@ -44,29 +45,16 @@
 
     <h2 class="text-lg font-semibold mb-3 border-t pt-4">📋 Timeline d'activité</h2>
     <div class="space-y-3">
-        {% for i in timeline_interactions %}
+        {% for t in timeline %}
         <div class="flex gap-3 text-sm">
-            <div class="shrink-0 mt-0.5">
-                {% if i.type == 'appel' %}🔵{% elif i.type == 'email' %}📧{% elif i.type == 'reunion' %}🤝{% else %}📝{% endif %}
-            </div>
+            <div class="shrink-0 mt-0.5">{{ t.icon }}</div>
             <div class="min-w-0 flex-1">
-                <p class="font-medium">{{ i.subject }}</p>
-                <p class="text-xs text-gray-400">{{ i.get_type_display }} — {{ i.contact }} — {{ i.created_by.username }} — {{ i.created_at|date:"d/m/Y H:i" }}</p>
-                {% if i.content %}<p class="text-gray-600 mt-1">{{ i.content|truncatewords:30 }}</p>{% endif %}
+                <p class="font-medium">{{ t.text }}</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ t.date|date:"d/m/Y H:i" }} — {{ t.user }}{% if t.detail %} — {{ t.detail }}{% endif %}</p>
             </div>
         </div>
         {% empty %}
-        <p class="text-gray-400 text-sm">Aucune interaction récente</p>
-        {% endfor %}
-
-        {% for t in timeline_tasks %}
-        <div class="flex gap-3 text-sm">
-            <div class="shrink-0 mt-0.5">{% if t.completed %}✅{% else %}⬜{% endif %}</div>
-            <div class="min-w-0 flex-1">
-                <p class="font-medium {% if t.completed %}line-through text-gray-400{% endif %}">{{ t.title }}</p>
-                <p class="text-xs text-gray-400">{% if t.due_date %}Échéance : {{ t.due_date|date:"d/m/Y" }}{% endif %}</p>
-            </div>
-        </div>
+        <p class="text-gray-400 text-sm">Aucune activité récente</p>
         {% endfor %}
     </div>
 </div>

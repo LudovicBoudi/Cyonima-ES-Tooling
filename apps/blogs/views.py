@@ -15,7 +15,7 @@ def blog_index(request):
             'description': 'Actualités et alertes cybersécurité',
             'icon': 'images/Security-blog-icon.png',
             'url': 'sec_blog_list',
-            'articles': SecurityArticle.objects.all()[:3],
+            'articles': SecurityArticle.objects.filter(status='publie')[:3],
             'can_write': hasattr(request.user, 'profile') and request.user.profile.can_write_blog('security'),
         },
         {
@@ -23,7 +23,7 @@ def blog_index(request):
             'description': 'Communications de la direction',
             'icon': 'images/DG-blog-icon.png',
             'url': 'dg_blog_list',
-            'articles': DirectionArticle.objects.all()[:3],
+            'articles': DirectionArticle.objects.filter(status='publie')[:3],
             'can_write': hasattr(request.user, 'profile') and request.user.profile.can_write_blog('direction'),
         },
         {
@@ -31,7 +31,7 @@ def blog_index(request):
             'description': 'Informations et actualités internes',
             'icon': 'images/com-blog-icon.png',
             'url': 'com_blog_list',
-            'articles': ComArticle.objects.all()[:3],
+            'articles': ComArticle.objects.filter(status='publie')[:3],
             'can_write': hasattr(request.user, 'profile') and request.user.profile.can_write_blog('communication'),
         },
         {
@@ -39,7 +39,7 @@ def blog_index(request):
             'description': 'Actualités techniques et informatiques',
             'icon': 'images/IT-blog-icon.png',
             'url': 'it_blog_list',
-            'articles': ITArticle.objects.all()[:3],
+            'articles': ITArticle.objects.filter(status='publie')[:3],
             'can_write': hasattr(request.user, 'profile') and request.user.profile.can_write_blog('it'),
         },
         {
@@ -47,7 +47,7 @@ def blog_index(request):
             'description': 'Communications des élus syndicaux',
             'icon': 'images/rep-syndicale-blog-icon.png',
             'url': 'rep_syndicale_blog_list',
-            'articles': RepSyndicaleArticle.objects.all()[:3],
+            'articles': RepSyndicaleArticle.objects.filter(status='publie')[:3],
             'can_write': hasattr(request.user, 'profile') and request.user.profile.can_write_blog('rep_syndicale'),
         },
     ]

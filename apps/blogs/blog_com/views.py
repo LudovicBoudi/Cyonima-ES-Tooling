@@ -15,11 +15,23 @@ def can_write(user):
 @login_required
 def article_list(request):
     articles = ComArticle.objects.all()
+    user_can_write = can_write(request.user)
+    if not user_can_write:
+        articles = articles.filter(Q(status='publie') | Q(created_by=request.user))
     q = request.GET.get('q', '')
+    tag = request.GET.get('tag', '')
     if q:
         articles = articles.filter(Q(title__icontains=q) | Q(content__icontains=q))
+    if tag:
+        articles = articles.filter(tags__icontains=tag)
     paginator = Paginator(articles, 15)
     page = paginator.get_page(request.GET.get('page'))
+    all_tags = set()
+    for t in ComArticle.objects.filter(status='publie').values_list('tags', flat=True):
+        for tag_name in (t or '').split(','):
+            name = tag_name.strip()
+            if name:
+                all_tags.add(name)
     return render(request, 'blogs/article_list.html', {
         'articles': page,
         'blog_title': 'Blog Communication',
@@ -27,16 +39,21 @@ def article_list(request):
         'create_url': 'com_blog_create',
         'detail_url': 'com_blog_detail',
         'edit_url': 'com_blog_edit',
-        'can_write': can_write(request.user),
+        'can_write': user_can_write,
         'delete_url': 'com_blog_delete',
         'q': q,
+        'current_tag': tag,
+        'all_tags': sorted(all_tags),
     })
 
 
 @login_required
 def article_detail(request, article_id):
     article = get_object_or_404(ComArticle, id=article_id)
-    articles = ComArticle.objects.all()
+    if article.status == 'brouillon' and request.user != article.created_by and not (hasattr(request.user, 'profile') and request.user.profile.is_admin()):
+        messages.error(request, "Cet article n'est pas publié.")
+        return redirect('com_blog_list')
+    articles = ComArticle.objects.filter(status='publie')
     return render(request, 'blogs/article_detail.html', {
         'article': article,
         'articles': articles,
@@ -59,6 +76,8 @@ def article_create(request):
             title=request.POST['title'],
             content=sanitize_html(request.POST['content']),
             image=request.FILES.get('image'),
+            status=request.POST.get('status', 'publie'),
+            tags=request.POST.get('tags', ''),
             created_by=request.user,
         )
         attachment = request.FILES.get('attachment')
@@ -95,6 +114,8 @@ def article_edit(request, article_id):
     if request.method == 'POST':
         article.title = request.POST['title']
         article.content = sanitize_html(request.POST['content'])
+        article.status = request.POST.get('status', 'publie')
+        article.tags = request.POST.get('tags', '')
         if request.FILES.get('image'):
             article.image = request.FILES['image']
         article.save()

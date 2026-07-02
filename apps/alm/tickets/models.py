@@ -156,3 +156,35 @@ class Sprint(models.Model):
         if not total:
             return 0
         return int(self.completed_tickets() / total * 100)
+
+
+class Release(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='releases')
+    name = models.CharField(max_length=255, verbose_name='Nom')
+    version = models.CharField(max_length=50, verbose_name='Version', help_text='ex: 1.0.0')
+    description = models.TextField(blank=True, verbose_name='Description')
+    release_date = models.DateField(null=True, blank=True, verbose_name='Date de sortie')
+    is_released = models.BooleanField(default=False, verbose_name='Publiée')
+    tickets = models.ManyToManyField(Ticket, blank=True, related_name='releases')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Release'
+        verbose_name_plural = 'Releases'
+        ordering = ['-release_date', '-created_at']
+
+    def __str__(self):
+        return f"{self.name} v{self.version}"
+
+    def total_tickets(self):
+        return self.tickets.count()
+
+    def completed_tickets(self):
+        return self.tickets.filter(status='cloture').count()
+
+    def progress_pct(self):
+        total = self.total_tickets()
+        if not total:
+            return 0
+        return int(self.completed_tickets() / total * 100)

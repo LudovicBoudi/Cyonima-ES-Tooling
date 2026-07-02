@@ -13,6 +13,8 @@
 
 ## 2. Administration (`/administration/`)
 
+![Administration](img-doc/administration.png)
+
 Réservé aux membres du staff (`is_staff=True`).
 
 ### Utilisateurs
@@ -42,12 +44,16 @@ Réservé aux membres du staff (`is_staff=True`).
 
 ## 3. Budget IT (`/budget/`)
 
+![Budget IT](img-doc/budget-it.png)
+
 ### Tableau de bord (`/budget/dashboard/`)
 - Graphiques Chart.js :
   - Donut : répartition par type de DAT
   - Barres : montants par type budgétaire
   - Courbe d'évolution : consommation mensuelle et budget restant
-- Alertes budgétaires : seuils à 80 % (orange) et 100 % (rouge)
+  - **Comparaison N/N-1** : barres côte à côte alloué/consommé année précédente vs année en cours
+- Alertes budgétaires : seuils à 80 % (orange) et 100 % (rouge).
+- **Commande `check_budget_alerts`** : envoie des notifications aux admins et `it_manager` en cas de dépassement.
 
 ### DAT — Demandes d'Achat Travaux (`/budget/dat/`)
 Les DAT sont identifiées par `IT-XXXX-ANNEE`.
@@ -61,7 +67,8 @@ Les DAT sont identifiées par `IT-XXXX-ANNEE`.
 #### Fonctionnalités
 - Création avec produits multiples (ajout dynamique de lignes)
 - Édition, duplication, suppression
-- Export CSV, XLSX (openpyxl), PDF (WeasyPrint)
+- **Export CSV, XLSX (openpyxl), PDF (WeasyPrint)**
+- **Modèles de DAT** : sauvegarder/charger des configurations de lignes prédéfinies (bouton 💾).
 - Affichage détaillé avec lignes de produits
 
 ### Budgets annuels (`/budget/budgets/`)
@@ -106,6 +113,8 @@ Portail de tickets d'incidents et d'expressions de besoins (EBI).
 ---
 
 ## 5. ALM — Gestion de projet (`/projects/`)
+
+![ALM](img-doc/alm.png)
 
 Module de cycle de vie applicatif complet : exigences, tests, campagnes, tickets, sprints.
 
@@ -153,6 +162,8 @@ Vues disponibles :
 - **Gantt** : timeline avec dates de début/échéance.
 - **Détail** : transitions avec suivi du temps (heures passées), commentaires, historique complet.
 - **Édition** (`/tickets/<id>/modifier/`) : modifier titre, description, assignation, dates.
+- **Pièces jointes** : upload de captures/fichiers dans le détail du ticket.
+- **Temps passé** : cumul des heures saisies à chaque transition, affiché dans le détail.
 - **Export CSV** : tous les tickets du projet.
 - **Import CSV** : colonnes `titre`, `type`, `description`, `assigne` (username), `echeance` (YYYY-MM-DD).
 - **Notifications automatiques** : lors de l'assignation, du changement de statut (pour la personne assignée).
@@ -164,6 +175,11 @@ Vues disponibles :
 - **Liste** : tous les sprints du projet avec barre de progression.
 - **Détail** : tickets du sprint, compteurs par statut, **burndown chart** (Chart.js).
 - **Ajout de tickets** : sélection multiple depuis la liste des tickets disponibles.
+
+### Releases
+- Modèle Release (nom, version, description, date de sortie, publiée/en cours).
+- **Liste** : barre de progression, compteur tickets clôturés/total.
+- **Détail** : tickets de la release, ajout multiple de tickets.
 - Lien dans le menu latéral.
 
 ### Journal
@@ -177,7 +193,7 @@ Vues disponibles :
 - Lien "Audit" dans le menu latéral.
 
 ### Rapports
-- **Rapport temps** : heures passées par utilisateur et type de ticket (`/rapports/temps/`).
+- **Rapport temps** : heures passées par utilisateur et type de ticket (`/rapports/temps/`). Filtres par date et utilisateur. Graphiques Chart.js (barres par utilisateur, donut par type).
 
 ### Dépôts Git
 - Module intégrant le suivi de dépôts git distants directement depuis l'interface ALM.
@@ -221,6 +237,8 @@ Cinq blogs accessibles selon le rôle :
 - Barre latérale : 30 derniers articles, lien "Tous les articles", bouton "Nouvel article".
 - **Recherche** plein texte dans le titre et le contenu des articles.
 - **Pagination** : 15 articles par page avec navigation précédent/suivant.
+- **Tags** : nuage de tags filtrables, badges sur les articles.
+- **Brouillon / Publié** : workflow de publication. Les brouillons sont masqués aux non-auteurs (badge orange).
 
 ### Édition d'articles
 - Création et modification avec éditeur de texte riche (CKEditor 5) — mise en forme HTML (titres, gras, listes, etc.).
@@ -246,16 +264,22 @@ Documentation collaborative accessible à tous les utilisateurs connectés.
 - **Création/Modification** : titre et contenu saisis avec CKEditor 5 (éditeur WYSIWYG), langue FR.
 - **Suppression** : confirmation avant suppression.
 - **Slugs** : génération automatique à partir du titre avec gestion des doublons.
+- **Historique / Versioning** : chaque modification sauvegarde la version précédente. Liste des versions, bouton "Restaurer".
+- **Pièces jointes** : upload de fichiers attachés aux pages wiki.
+- **Liens internes `[[ ]]`** : syntaxe wiki `[[Titre de page]]` convertie en lien automatique.
 - **Sécurité** : contenu HTML assaini (sanitizer BeautifulSoup — suppression scripts, iframes, javascript:).
 
 ---
 
 ## 8. CRM — Gestion de la Relation Client (`/crm/`)
 
+![CRM](img-doc/crm.png)
+
 Module de gestion commerciale avec pipeline de ventes.
 
 ### Tableau de bord enrichi (`/crm/dashboard/`)
 - **7 indicateurs KPI** : sociétés, contacts, affaires, affaires actives, valeur du pipeline, interactions, tâches.
+- **Pipeline pondéré** : KPI supplémentaire calculé comme Σ(montant × probabilité).
 - **3 graphiques Chart.js** :
   - Barres : répartition des affaires par étape.
   - Donut : montant total par étape.
@@ -268,6 +292,8 @@ Module de gestion commerciale avec pipeline de ventes.
 - Fiche complète (coordonnées, SIRET, secteur).
 - Liste avec nombre de contacts et d'affaires, bouton d'export CSV.
 - Détail avec contacts et affaires liés.
+- **Timeline unifiée** : fusionne interactions, changements d'étape d'affaires, devis et factures ERP en une chronologie.
+- **Export PDF** : bouton 🖨️ pour générer une fiche synthétique (WeasyPrint).
 
 ### Contacts
 - Prénom, nom, société, fonction, coordonnées, notes.
@@ -328,12 +354,15 @@ Module de gestion commerciale avec pipeline de ventes.
 
 ## 9. RH — Ressources Humaines (`/rh/`)
 
+![RH](img-doc/hr.png)
+
 Gestion administrative du personnel.
 
 ### Fonctionnalités
 - **Tableau de bord** : effectif, actifs, essais, congés en cours, demandes en attente, graphiques (employés par département, contrats par type), anniversaires du mois, dernières demandes de congé.
 - **Employés** : fiche complète (coordonnées, département, poste, **grade Ccn. Métallurgie A1–I18**, société prestataire, statut, date d'embauche, contact d'urgence, notes). Consultation des contrats et congés liés.
 - **Départements** : liste avec nombre d'employés, description, **responsable** (manager assignable).
+- **Organigramme** : vue hiérarchique par département avec avatars et postes.
 - **Contrats** : CDI, CDD, mission, stage, alternance, freelance, intérim — avec dates, salaire, poste. Colorisation par échéance (vert >3mo, jaune 1-3mo, orange <1mo, rouge expiré/semaine). CDI toujours vert.
 - **Congés** : demandes avec workflow de validation (demandé → validé / refusé). Types : CP, RTT, maladie, maternité, sans solde, formation. Affichage du nombre de jours. Calendrier mensuel avec navigation, affichage par initiales colorées. Détection de conflits (chevauchement dans le même département).
 
@@ -357,6 +386,8 @@ Gestion administrative du personnel.
 
 ## 10. ERP — Devis et Factures (`/erp/`)
 
+![ERP](img-doc/erp.png)
+
 Module de gestion comptable avec devis, factures, avoirs et paiements.
 
 ### Identifiants
@@ -371,11 +402,14 @@ Module de gestion comptable avec devis, factures, avoirs et paiements.
 - **Tableau de bord** : CA mensuel, trimestriel et annuel, impayés, donut par statut.
 - **Devis → Facture** : conversion en un clic depuis le détail du devis.
 - **Lignes** : chaque document contient des lignes (description, quantité, prix unitaire, TVA) stockées en JSON.
-- **Paiements** : création d'un paiement qui met automatiquement la facture en statut « payée » si le montant est atteint. Validation : le paiement ne peut pas dépasser le montant restant dû.
+- **Paiements** : validation que le montant ne dépasse pas le restant dû.
 - **Avoirs** : documents de correction liés à une facture.
 - **Factures fournisseurs** : suivi des factures reçues.
+- **Factures récurrentes** : génération automatique périodique (mensuelle, trimestrielle, annuelle). Commande `generate_recurring`.
+- **Modèles de devis** : sauvegarder/charger des lignes prédéfinies (bouton 💾).
+- **Rapprochement bancaire** : associer les paiements non liés aux factures impayées.
 - **Produits** : catalogue de produits/services enregistré dans l'admin Django.
-- **Sécurité** : données JSON lignes protégées (XSS via `json_script`), calculs en `Decimal` (précision centimes), numérotation thread-safe (`select_for_update`).
+- **Sécurité** : données JSON protégées (`json_script`), calculs en `Decimal`, numérotation thread-safe.
 
 ---
 
@@ -439,6 +473,8 @@ Actions disponibles : publier, archiver, désarchiver. Seuls les membres du staf
 
 ### Autres fonctionnalités
 - **Numérotation** automatique : `DOC-{année}-{seq:05d}`.
+- **Upload multiple** : sélectionner plusieurs fichiers d'un coup (input `multiple`).
+- **Date d'expiration** : champ `expiry_date` par document, commande `check_expiry` pour alertes J-30.
 - **Tags** libres pour un classement transversal.
 - **Prévisualisation** des images et PDF.
 - **Téléchargement** avec compteur automatique.
@@ -446,6 +482,8 @@ Actions disponibles : publier, archiver, désarchiver. Seuls les membres du staf
 ---
 
 ## 12. Ressources Externes (`/ressources/`)
+
+![Ressources Externes](img-doc/ressources-externes.png)
 
 Pages d'information statiques sur les principales réglementations SSI.
 
@@ -485,10 +523,12 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 - Cloche 🔔 dans la barre de navigation (badge avec compteur de notifications non lues).
 - **Page de liste** : `/notifications/` avec recherche, lecture individuelle, **bouton "Tout marquer comme lu"** (POST).
+- **Page de préférences** : `/notifications/preferences/` — configurer quelles notifs recevoir par email.
+- **Envoi email** : branché via `django.core.mail` pour les utilisateurs ayant activé les préférences.
 - **Messages** : styles distincts pour erreur (rouge), succès (vert), avertissement (ambre), info (bleu), debug (gris).
-- **Paramètres** : modèle `NotificationSetting` par utilisateur.
+- **Digest quotidien** : commande `daily_digest` pour envoyer un résumé journalier par email.
 - Création automatique à la publication d'articles, assignation de tickets, changement de statut.
-- **Nettoyage** : commande `notify_deadlines` pour les échéances J+2.
+- Commandes : `notify_deadlines` (échéances tickets), `check_budget_alerts` (seuils budget), `check_expiry` (documents GED).
 
 ---
 
@@ -530,9 +570,26 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 18. Format monétaire
+## 18. Interface utilisateur
 
-Tous les montants affichés dans l'application (ERP, Budget, CRM, RH) utilisent le **format financier français** :
-- Séparateur de milliers : espace insécable (ex. `1 000 000,00`)
-- Séparateur décimal : virgule
-- Filtre `format_money` appliqué sur 70+ expressions dans 35 templates.
+### Recherche globale
+- Barre de recherche dans la navbar (🔍), interroge 10+ modèles (Wiki, GED, CRM, RH, ERP, Budget, Tickets).
+- Page de résultats `/recherche/` avec icônes par type et liens.
+
+### Dark mode
+- Toggle 🌓 dans la navbar, persistance `localStorage`, activé par défaut.
+- Tous les dashboards Chart.js, tableaux, cartes et sidebars adaptés.
+
+### Page d'accueil
+- Fil d'activité à gauche : 10 derniers événements (wiki, documents, articles, tickets) avec horodatage.
+- Tuiles de navigation avec `loading="lazy"`.
+
+### Breadcrumbs
+- Navigation hiérarchique sur tous les modules (ALM, CRM, ERP, RH, GED, Budget, Wiki).
+
+### Sidebar
+- Icônes emoji uniformisées sur les 8 sidebars (📊👥📋🧪📦🏃🚀🎫🔗📝🔍⏱️📂💼💬✅🏖️📄🧾↩️💳🏢📁➕).
+
+### Format monétaire
+- Tous les montants au format financier français (séparateur milliers : espace, décimal : virgule).
+- Filtre `format_money` sur 70+ expressions dans 35 templates.

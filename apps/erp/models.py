@@ -328,3 +328,42 @@ class ErpAuditLog(models.Model):
 
     def __str__(self):
         return f'{self.get_action_display()} — {self.object_repr} ({self.created_at.strftime("%d/%m/%Y %H:%M")})'
+
+
+class RecurringInvoice(models.Model):
+    FREQ_CHOICES = [
+        ('monthly', 'Mensuelle'),
+        ('quarterly', 'Trimestrielle'),
+        ('yearly', 'Annuelle'),
+    ]
+    title = models.CharField('Titre', max_length=255)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='recurring_invoices', verbose_name='Société')
+    lines = models.JSONField('Lignes', default=list, blank=True)
+    frequency = models.CharField('Fréquence', max_length=20, choices=FREQ_CHOICES, default='monthly')
+    next_date = models.DateField('Prochaine échéance')
+    is_active = models.BooleanField('Actif', default=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Facture récurrente'
+        verbose_name_plural = 'Factures récurrentes'
+        ordering = ['next_date']
+
+    def __str__(self):
+        return f'{self.title} ({self.company})'
+
+
+class QuotationTemplate(models.Model):
+    name = models.CharField('Nom', max_length=255)
+    lines = models.JSONField('Lignes', default=list, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Modèle de devis'
+        verbose_name_plural = 'Modèles de devis'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name

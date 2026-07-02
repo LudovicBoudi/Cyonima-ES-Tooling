@@ -1,11 +1,18 @@
 {% extends 'base.html' %}
+{% block breadcrumbs %}
+<nav class="text-xs text-gray-400 dark:text-gray-500 mb-3">
+    <a href="{% url 'home' %}" class="hover:text-blue-600 dark:hover:text-blue-400">Accueil</a>
+    <span class="mx-1">/</span>
+    <span class="text-gray-600 dark:text-gray-300 font-medium">GED</span>
+</nav>
+{% endblock %}
 {% block content %}
 <div class="flex gap-6">
     <aside class="w-56 shrink-0">
         <div class="bg-white rounded-lg shadow p-4 space-y-1 sticky top-24">
             <h3 class="font-semibold text-gray-700 mb-3 px-3">GED</h3>
-            <a href="{% url 'ged_document_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_list' %}bg-gray-100 font-medium{% endif %}">Tous les documents</a>
-            <a href="{% url 'ged_document_create' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_create' %}bg-gray-100 font-medium{% endif %}">Ajouter un document</a>
+            <a href="{% url 'ged_document_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_list' %}bg-gray-100 font-medium{% endif %}">📁 Tous les documents</a>
+            <a href="{% url 'ged_document_create' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_create' %}bg-gray-100 font-medium{% endif %}">➕ Ajouter un document</a>
             <a href="{% url 'ged_favorites_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_favorites_list' %}bg-gray-100 font-medium{% endif %}">⭐ Mes favoris</a>
             <a href="{% url 'ged_trash_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_trash_list' %}bg-gray-100 font-medium{% endif %}">🗑 Corbeille</a>
             <hr class="my-2">

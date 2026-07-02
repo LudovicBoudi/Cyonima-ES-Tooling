@@ -46,6 +46,7 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#666'; Chart.defaults.borderColor = document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb';</script>
 <script>
 new Chart(document.getElementById('burndownChart'), {
     type: 'line',

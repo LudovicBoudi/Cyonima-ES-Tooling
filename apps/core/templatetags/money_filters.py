@@ -24,3 +24,18 @@ def format_money(value):
     chunks.append(integer_part)
     formatted = sign + ' '.join(reversed(chunks))
     return f'{formatted},{decimal_part}'
+
+
+@register.filter
+def split_comma(value):
+    if not value:
+        return []
+    return [t.strip() for t in value.split(',') if t.strip()]
+
+
+@register.filter
+def sub(value, arg):
+    try:
+        return float(value) - float(arg)
+    except Exception:
+        return 0

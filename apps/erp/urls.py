@@ -38,4 +38,8 @@ urlpatterns = [
     path('relances/<int:pk>/', views.reminder_detail, name='erp_reminder_detail'),
     path('relances/<int:pk>/pdf/', views.reminder_pdf, name='erp_reminder_pdf'),
     path('audit/', views.audit_log_list, name='erp_audit_log'),
+    path('factures-recurrentes/', views.recurring_list, name='erp_recurring_list'),
+    path('factures-recurrentes/creer/', views.recurring_create, name='erp_recurring_create'),
+    path('modele-devis/sauvegarder/', views.quotation_template_save, name='erp_template_save'),
+    path('rapprochement/', views.reconciliation, name='erp_reconciliation'),
 ]

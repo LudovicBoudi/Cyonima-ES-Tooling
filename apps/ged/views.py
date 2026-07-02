@@ -72,21 +72,27 @@ def document_create(request):
     categories = DocumentCategory.objects.all()
     subscribed_cat_ids = list(CategorySubscription.objects.filter(user=request.user).values_list('category_id', flat=True)) if request.user.is_authenticated else []
     if request.method == 'POST':
-        doc = Document(
-            title=request.POST['title'],
-            category_id=request.POST.get('category') or None,
-            description=request.POST.get('description', ''),
-            version=request.POST.get('version', '1.0'),
-            tags=request.POST.get('tags', ''),
-            created_by=request.user,
-        )
-        if 'file' in request.FILES:
-            doc.file = request.FILES['file']
+        files = request.FILES.getlist('file')
+        if not files:
+            messages.error(request, 'Veuillez sélectionner au moins un fichier.')
+            return render(request, 'ged/document_form.html', {'doc': None, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids})
+        expiry = request.POST.get('expiry_date') or None
+        for f in files:
+            doc = Document(
+                title=request.POST['title'],
+                category_id=request.POST.get('category') or None,
+                description=request.POST.get('description', ''),
+                version=request.POST.get('version', '1.0'),
+                tags=request.POST.get('tags', ''),
+                expiry_date=expiry,
+                file=f,
+                created_by=request.user,
+            )
             doc.save()
             _log_audit(request, doc, 'create')
-            messages.success(request, f'Document "{doc.title}" ajouté.')
-            return redirect('ged_document_detail', pk=doc.pk)
-        messages.error(request, 'Veuillez sélectionner un fichier.')
+        count = len(files)
+        messages.success(request, f'{count} document(s) ajouté(s).')
+        return redirect('ged_document_list')
     return render(request, 'ged/document_form.html', {'doc': None, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids})
 
 
@@ -215,6 +221,7 @@ def document_edit(request, pk):
         doc.description = request.POST.get('description', '')
         doc.version = request.POST.get('version', '1.0')
         doc.tags = request.POST.get('tags', '')
+        doc.expiry_date = request.POST.get('expiry_date') or None
         if 'file' in request.FILES:
             old_file = doc.file
             doc.file = request.FILES['file']

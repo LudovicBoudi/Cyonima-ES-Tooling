@@ -4,7 +4,7 @@
 
 {% block blog_content %}
 <div class="mb-6 flex items-center justify-between">
-    <h1 class="text-2xl font-bold text-gray-800">{{ blog_title }}</h1>
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ blog_title }}</h1>
     {% if can_write %}
         <a href="{% url create_url %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvel article</a>
     {% endif %}
@@ -12,23 +12,37 @@
 
 <form method="get" class="mb-6">
     <div class="flex gap-2">
-        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher dans les articles…" class="flex-1 px-4 py-2 border rounded-lg text-sm">
+        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher dans les articles…" class="flex-1 px-4 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-gray-200">
         <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">Chercher</button>
-        {% if q %}<a href="{% url list_url %}" class="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">Réinitialiser</a>{% endif %}
+        {% if q %}<a href="{% url list_url %}" class="px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">Réinitialiser</a>{% endif %}
     </div>
+    {% if all_tags %}
+    <div class="flex flex-wrap gap-1.5 mt-2">
+        {% for t in all_tags %}
+        <a href="?tag={{ t }}{% if q %}&q={{ q }}{% endif %}"
+           class="px-2 py-0.5 rounded-full text-xs border {% if current_tag == t %}bg-[#1a3a6b] text-white border-[#1a3a6b]{% else %}border-gray-300 text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-700{% endif %}">
+           {{ t }}
+        </a>
+        {% endfor %}
+        {% if current_tag %}<a href="{% url list_url %}{% if q %}?q={{ q }}{% endif %}" class="px-2 py-0.5 text-xs text-red-500 hover:underline">✕</a>{% endif %}
+    </div>
+    {% endif %}
 </form>
 
 <div class="space-y-6">
     {% for a in articles %}
-    <div class="bg-white rounded-xl shadow-md p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 {% if a.status == 'brouillon' %}border-l-4 border-amber-400{% endif %}">
         <div class="flex justify-between items-start mb-3">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">{{ a.title }}</h2>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                    {{ a.title }}
+                    {% if a.status == 'brouillon' %}<span class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs rounded-full">Brouillon</span>{% endif %}
+                </h2>
                 <p class="text-xs text-gray-400 mt-1">{{ a.display_id }} — {{ a.created_by.username }} — {{ a.created_at|date:"d/m/Y" }}</p>
             </div>
             <div class="flex gap-2 text-xs shrink-0">
                 <a href="{% url detail_url a.id %}" class="text-blue-600 hover:underline">Lire</a>
-                {% if can_write %}
+                {% if can_write and user == a.created_by or user.profile.is_admin %}
                 <a href="{% url edit_url a.id %}" class="text-amber-600 hover:underline">Modifier</a>
                 <a href="{% url delete_url a.id %}" class="text-red-600 hover:underline">Supprimer</a>
                 {% endif %}
@@ -39,13 +53,20 @@
             <img src="{{ a.image.url }}" alt="{{ a.title }}" class="w-full max-h-64 object-cover rounded-lg">
         </div>
         {% endif %}
-        <div class="text-gray-700 leading-relaxed break-words overflow-hidden">
+        <div class="text-gray-700 dark:text-gray-300 leading-relaxed break-words overflow-hidden">
             {{ a.content|safe }}
         </div>
+        {% if a.tags %}
+        <div class="flex flex-wrap gap-1 mt-3 pt-3 border-t dark:border-gray-700">
+            {% for tag in a.tags|split_comma %}
+            <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-xs rounded-full text-gray-500 dark:text-gray-400">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
     {% empty %}
-    <div class="bg-white rounded-xl shadow-md p-8 text-center text-gray-400">
-        {% if q %}Aucun article ne correspond à votre recherche.{% else %}Aucun article{% endif %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center text-gray-400">
+        {% if q or current_tag %}Aucun article ne correspond à votre recherche.{% else %}Aucun article{% endif %}
     </div>
     {% endfor %}
 </div>
@@ -53,11 +74,11 @@
 {% if articles.paginator.num_pages > 1 %}
 <div class="mt-6 flex justify-center gap-2">
     {% if articles.has_previous %}
-    <a href="?page={{ articles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">← Précédent</a>
+    <a href="?page={{ articles.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if current_tag %}&tag={{ current_tag }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">← Précédent</a>
     {% endif %}
-    <span class="px-3 py-1.5 text-sm text-gray-500">Page {{ articles.number }} / {{ articles.paginator.num_pages }}</span>
+    <span class="px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400">Page {{ articles.number }} / {{ articles.paginator.num_pages }}</span>
     {% if articles.has_next %}
-    <a href="?page={{ articles.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">Suivant →</a>
+    <a href="?page={{ articles.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if current_tag %}&tag={{ current_tag }}{% endif %}" class="px-3 py-1.5 border rounded text-sm hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700">Suivant →</a>
     {% endif %}
 </div>
 {% endif %}

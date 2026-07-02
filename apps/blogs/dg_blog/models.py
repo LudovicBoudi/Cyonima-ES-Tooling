@@ -9,6 +9,8 @@ class DirectionArticle(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField(verbose_name='Contenu')
     image = models.ImageField(upload_to='blog/images/', blank=True, null=True, verbose_name='Image à la une')
+    status = models.CharField(max_length=20, choices=[('brouillon', 'Brouillon'), ('publie', 'Publié')], default='publie', verbose_name='Statut')
+    tags = models.CharField(max_length=500, blank=True, verbose_name='Tags', help_text='Séparés par des virgules')
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

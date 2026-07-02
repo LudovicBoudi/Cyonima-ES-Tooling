@@ -1,0 +1,50 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}Rapprochement bancaire — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-6 mb-6">
+    <h1 class="text-xl font-bold mb-4">🏦 Rapprochement bancaire</h1>
+    <p class="text-sm text-gray-500 mb-6">Associez les paiements non liés aux factures impayées.</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+            <h2 class="font-semibold text-sm mb-2">💳 Paiements non liés</h2>
+            <div class="space-y-2 max-h-96 overflow-y-auto">
+                {% for p in unlinked_payments %}
+                <div class="border rounded p-3 text-sm">
+                    <p class="font-medium">{{ p.amount|format_money }} € — {{ p.date|date:"d/m/Y" }}</p>
+                    <p class="text-xs text-gray-400">{{ p.get_method_display }}</p>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm">Aucun paiement non lié</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div>
+            <h2 class="font-semibold text-sm mb-2">📋 Factures impayées</h2>
+            <div class="space-y-2 max-h-96 overflow-y-auto">
+                {% for inv in unpaid_invoices %}
+                <div class="border rounded p-3 text-sm flex justify-between items-center">
+                    <div>
+                        <p class="font-medium">{{ inv.number }} — {{ inv.company }}</p>
+                        <p class="text-xs text-gray-400">Reste dû : {{ inv.remaining|format_money }} €</p>
+                    </div>
+                    <form method="post" class="flex gap-2 items-end">
+                        {% csrf_token %}
+                        <select name="payment_id" class="border rounded px-2 py-1 text-xs">
+                            <option value="">— Paiement —</option>
+                            {% for p in unlinked_payments %}
+                            <option value="{{ p.pk }}">{{ p.amount|format_money }} € — {{ p.date|date:"d/m/Y" }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="invoice_id" value="{{ inv.pk }}">
+                        <button type="submit" class="bg-[#1a3a6b] text-white px-2 py-1 rounded text-xs">Lier</button>
+                    </form>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 text-sm">Aucune facture impayée</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

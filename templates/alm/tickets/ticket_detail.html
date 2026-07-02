@@ -25,6 +25,7 @@
         <div><span class="text-gray-500">Créé par :</span> {{ ticket.created_by.username }}</div>
         <div><span class="text-gray-500">Début :</span> {{ ticket.start_date|date:"d/m/Y"|default:"-" }}</div>
         <div><span class="text-gray-500">Échéance :</span> {{ ticket.due_date|date:"d/m/Y"|default:"-" }}</div>
+        <div><span class="text-gray-500">Heures passées :</span> {{ total_hours|floatformat:1 }}h</div>
     </div>
     {% if ticket.description %}
     <div class="text-sm text-gray-700 border-t pt-4">{{ ticket.description|linebreaks }}</div>
@@ -43,6 +44,27 @@
     </div>
 </div>
 {% endif %}
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-3">📎 Pièces jointes</h2>
+    {% if ticket.attachments.exists %}
+    <div class="space-y-1 mb-3">
+        {% for att in ticket.attachments.all %}
+        <div class="flex items-center justify-between text-sm">
+            <a href="{{ att.file.url }}" class="text-blue-600 hover:underline">{{ att.filename }}</a>
+            <span class="text-xs text-gray-400">{{ att.uploaded_at|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-sm text-gray-400 mb-3">Aucune pièce jointe</p>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" class="flex gap-2 items-end">
+        {% csrf_token %}
+        <input type="file" name="attachment" class="flex-1 text-sm border rounded px-3 py-1.5">
+        <button type="submit" class="bg-[#1a3a6b] text-white px-3 py-1.5 rounded text-sm hover:bg-[#142b52]">Ajouter</button>
+    </form>
+</div>
 
 {% if transitions %}
 <div class="bg-white rounded-lg shadow p-6 mb-6">

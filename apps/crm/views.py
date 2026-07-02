@@ -27,6 +27,10 @@ def dashboard(request):
     active_deals = Deal.objects.exclude(stage__in=['gagne', 'perdu']).count()
     pipeline_value = Deal.objects.filter(~Q(stage='perdu')).aggregate(Sum('amount'))['amount__sum'] or 0
 
+    weighted_pipeline = 0
+    for d in Deal.objects.exclude(stage__in=['gagne', 'perdu']):
+        weighted_pipeline += float(d.amount) * d.probability / 100
+
     deals_by_stage = []
     for code, label in Deal.STAGE_CHOICES:
         deals_by_stage.append({
@@ -77,6 +81,7 @@ def dashboard(request):
         'total_tasks': total_tasks,
         'active_deals': active_deals,
         'pipeline_value': pipeline_value,
+        'weighted_pipeline': weighted_pipeline,
         'deals_by_stage': deals_by_stage_sorted,
         'stage_amounts': stage_amounts,
         'won_amount': won_amount,
@@ -118,9 +123,26 @@ def company_detail(request, pk):
     tasks = CrmTask.objects.filter(
         Q(contact_id__in=contact_ids) | Q(deal_id__in=deal_ids)
     ).select_related('contact', 'deal', 'assigned_to').order_by('due_date')[:20]
+
+    timeline = []
+    for i in interactions:
+        timeline.append({'type': 'interaction', 'icon': '📧' if i.type == 'email' else ('🔵' if i.type == 'appel' else '🤝'), 'date': i.created_at, 'text': i.subject, 'detail': str(i.contact or ''), 'user': i.created_by.username if i.created_by else ''})
+    for d in deals:
+        for log in d.stage_logs.select_related('changed_by').order_by('-changed_at')[:5]:
+            timeline.append({'type': 'deal_stage', 'icon': '🔄', 'date': log.changed_at, 'text': f'{d.title} — {log.from_stage} → {log.to_stage}', 'detail': '', 'user': log.changed_by.username if log.changed_by else ''})
+    try:
+        from apps.erp.models import Quotation, Invoice
+        for q in Quotation.objects.filter(company=company).order_by('-created_at')[:10]:
+            timeline.append({'type': 'erp_quote', 'icon': '📄', 'date': q.created_at, 'text': f'Devis {q.number} — {q.get_status_display()}', 'detail': f'{q.total_ttc()} €', 'user': q.created_by.username if q.created_by else ''})
+        for inv in Invoice.objects.filter(company=company).order_by('-created_at')[:10]:
+            timeline.append({'type': 'erp_invoice', 'icon': '🧾', 'date': inv.created_at, 'text': f'Facture {inv.number} — {inv.get_status_display()}', 'detail': f'{inv.total_ttc()} €', 'user': inv.created_by.username if inv.created_by else ''})
+    except Exception:
+        pass
+
+    timeline.sort(key=lambda x: x['date'], reverse=True)
     return render(request, 'crm/company_detail.html', {
         'company': company, 'contacts': contacts, 'deals': deals,
-        'timeline_interactions': interactions, 'timeline_tasks': tasks,
+        'timeline': timeline[:30],
     })
 
 
@@ -687,3 +709,19 @@ def import_csv(request):
         if results['errors']:
             messages.warning(request, f'{len(results["errors"])} erreur(s) lors de l\'import.')
     return render(request, 'crm/import_csv.html', {'results': results})
+
+
+@login_required
+def company_export_pdf(request, pk):
+    company = get_object_or_404(Company, pk=pk)
+    return _render_pdf(request, 'crm/company_pdf.html', {'company': company, 'contacts': company.contacts.all(), 'deals': company.deals.all()}, f'{company.name}.pdf')
+
+
+def _render_pdf(request, template_name, context, filename):
+    from weasyprint import HTML
+    from django.template.loader import render_to_string
+    html = render_to_string(template_name, context, request=request)
+    pdf = HTML(string=html).write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{filename}"'
+    return response

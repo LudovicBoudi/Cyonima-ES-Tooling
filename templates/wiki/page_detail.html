@@ -12,15 +12,15 @@
 
     <div class="flex justify-between items-start mb-6">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">{{ page.title }}</h1>
-            <p class="text-xs text-gray-400 mt-1">
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">{{ page.title }}</h1>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 Dernière modification par {{ page.updated_by.username|default:page.created_by.username }}
                 le {{ page.updated_at|date:"d/m/Y à H:i" }}
             </p>
         </div>
         <div class="flex gap-2 text-sm shrink-0">
-            <a href="{% url 'wiki_edit' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50">✏️ Modifier</a>
-            <a href="{% url 'wiki_delete' page.slug %}" class="px-3 py-1.5 border rounded text-red-600 hover:bg-red-50">🗑 Supprimer</a>
+            <a href="{% url 'wiki_versions' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-300">🕓 Historique</a>
+            <a href="{% url 'wiki_edit' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-300">✏️ Modifier</a>
         </div>
     </div>
 
@@ -37,12 +37,24 @@
     </div>
     {% endif %}
 
-    <div class="text-gray-700 leading-relaxed wiki-content">
-        {{ page.content|safe }}
+    <div class="text-gray-700 dark:text-gray-300 leading-relaxed wiki-content">
+        {{ rendered_content|safe }}
     </div>
 
-    <div class="mt-8 pt-4 border-t text-xs text-gray-400">
-        Créé par {{ page.created_by.username }} le {{ page.created_at|date:"d/m/Y" }}
+    {% if page.attachments.exists %}
+    <div class="mt-6 pt-4 border-t dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">📎 Pièces jointes</h3>
+        <div class="space-y-1">
+            {% for att in page.attachments.all %}
+            <a href="{{ att.file.url }}" class="text-sm text-blue-600 hover:underline block">{{ att.filename }}</a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-8 pt-4 border-t dark:border-gray-700 text-xs text-gray-400 dark:text-gray-500 flex justify-between items-center">
+        <span>Créé par {{ page.created_by.username }} le {{ page.created_at|date:"d/m/Y" }}</span>
+        <a href="{% url 'wiki_delete' page.slug %}" class="text-red-400 hover:text-red-600">🗑 Supprimer</a>
     </div>
 </div>
 {% endblock %}

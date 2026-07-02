@@ -56,7 +56,7 @@
     </div>
     <table class="w-full text-sm">
         <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Employé</th><th class="pb-2">Type</th><th class="pb-2">Du</th><th class="pb-2">Au</th><th class="pb-2">Jours</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
-        <tbody>{% for l in leaves %}<tr class="border-b border-gray-100 hover:bg-gray-50{% if l.row_color == 'orange' %} bg-orange-50 hover:bg-orange-100{% elif l.row_color == 'green' %} bg-green-50 hover:bg-green-100{% elif l.row_color == 'yellow' %} bg-yellow-50 hover:bg-yellow-100{% endif %}">
+        <tbody>{% for l in leaves %}<tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700{% if l.row_color == 'orange' %} bg-orange-50 dark:bg-orange-900/30{% elif l.row_color == 'green' %} bg-green-50 dark:bg-green-900/30{% elif l.row_color == 'yellow' %} bg-yellow-50 dark:bg-yellow-900/30{% endif %}">
             <td class="py-2 font-medium">{{ l.employee }}</td>
             <td class="py-2">{{ l.get_type_display }}</td>
             <td class="py-2 text-gray-600">{{ l.start_date|date:"d/m/Y" }}</td>

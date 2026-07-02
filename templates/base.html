@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Cyonima-ES-Tools — Plateforme collaborative open source{% endblock %}">
     <title>{% block title %}Cyonima-ES-Tools{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -15,27 +17,68 @@
                 }
             }
         }
+        if (localStorage.getItem('theme') !== 'light') {
+            document.documentElement.classList.add('dark')
+        }
     </script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <style>[x-cloak] { display: none !important; }</style>
+    <style>[x-cloak] { display: none !important; }
+    .dark .bg-white { background-color: #1f2937; }
+    .dark .shadow-md, .dark .shadow-sm, .dark .shadow-lg, .dark .shadow-xl { --tw-shadow-colored: 0 0 transparent; box-shadow: none; }
+    .dark .border-gray-200 { border-color: #374151; }
+    .dark .border-gray-100 { border-color: #374151; }
+    .dark .text-gray-800, .dark .text-gray-700 { color: #e5e7eb; }
+    .dark .text-gray-600, .dark .text-gray-500 { color: #9ca3af; }
+    .dark .text-gray-400 { color: #6b7280; }
+    .dark .hover\:bg-gray-50:hover { background-color: #374151; }
+    .dark .hover\:bg-gray-100:hover { background-color: #374151; }
+    .dark .bg-gray-50 { background-color: #111827; }
+    .dark .bg-gray-100 { background-color: #1e293b; }
+    .dark .bg-blue-50 { background-color: #1e3a5f; }
+    .dark .text-blue-700 { color: #93c5fd; }
+    .dark .text-blue-600 { color: #60a5fa; }
+    .dark .bg-red-50 { background-color: #3b1515; }
+    .dark .bg-green-50 { background-color: #0f331a; }
+    .dark .bg-blue-100 { background-color: #1e3a5f; }
+    .dark .bg-red-100 { background-color: #3b1515; }
+    .dark .bg-green-100 { background-color: #0f331a; }
+    .dark .bg-purple-100 { background-color: #2d1f4e; }
+    .dark .bg-amber-100 { background-color: #3d2e0a; }
+    .dark .bg-amber-50 { background-color: #2d2008; }
+    .dark .bg-yellow-50 { background-color: #2d2008; }
+    .dark .text-red-700 { color: #fca5a5; }
+    .dark .text-green-700 { color: #86efac; }
+    .dark .text-purple-700 { color: #c4b5fd; }
+    .dark .text-amber-700 { color: #fcd34d; }
+    .dark .divide-gray-100 > * { border-color: #374151; }
+    .dark .divide-y > * { border-color: #374151; }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
-    <nav class="bg-[#1a3a6b] text-white shadow-lg">
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex flex-col text-gray-800 dark:text-gray-200">
+    <nav class="bg-[#1a3a6b] text-white shadow-lg dark:bg-gray-800">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center space-x-4">
-                    <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-2 shrink-0">
                         {% if site_config.logo %}
                             <img src="{{ site_config.logo.url }}" alt="{{ site_config.site_name }}" class="h-10">
                         {% else %}
                             <span class="text-2xl font-bold">C</span>
                         {% endif %}
-                        <span class="font-semibold text-lg">{{ site_config.site_name }}</span>
+                        <span class="font-semibold text-lg hidden sm:inline">{{ site_config.site_name }}</span>
                     </a>
                 </div>
+                <form method="get" action="{% url 'global_search' %}" class="flex-1 max-w-md mx-4 hidden md:block">
+                    <div class="relative">
+                        <input type="text" name="q" placeholder="Rechercher…"
+                               class="w-full px-3 py-1.5 rounded-lg bg-white/10 text-white placeholder-white/60 border border-white/20 text-sm focus:outline-none focus:bg-white/20">
+                        <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white">🔍</button>
+                    </div>
+                </form>
                 <div class="flex items-center space-x-4">
-                    {% if user.is_authenticated %}
+                        {% if user.is_authenticated %}
+                        <button onclick="toggleDark()" class="text-sm hover:text-gray-300" title="Mode sombre">🌓</button>
                         {% if user.is_staff %}
                             <a href="{% url 'admin_dashboard' %}" class="text-sm hover:text-gray-300">Administration</a>
                         {% endif %}
@@ -86,15 +129,22 @@
     {% endif %}
 
     <main class="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
+        {% block breadcrumbs %}{% endblock %}
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-white border-t border-gray-200 py-4 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-500">
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 flex justify-center text-center text-sm text-gray-500 dark:text-gray-400">
             &copy; {% now "Y" %} {{ site_config.site_name }} — Proposé par Cyonima de la communauté RENEGA2
         </div>
     </footer>
 
+    <script>
+    function toggleDark() {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

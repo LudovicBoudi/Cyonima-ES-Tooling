@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Préférences notifications{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">🔔 Préférences de notification</h1>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div class="space-y-3">
+            <label class="flex items-center gap-3 p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input type="checkbox" name="email_ticket_change" {% if settings.email_ticket_change %}checked{% endif %} class="w-4 h-4">
+                <div><p class="font-medium text-sm dark:text-gray-200">Changements de tickets</p><p class="text-xs text-gray-400">Email lors d'un changement de statut sur vos tickets</p></div>
+            </label>
+            <label class="flex items-center gap-3 p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input type="checkbox" name="email_dat_creation" {% if settings.email_dat_creation %}checked{% endif %} class="w-4 h-4">
+                <div><p class="font-medium text-sm dark:text-gray-200">Création de DAT</p><p class="text-xs text-gray-400">Email lors de la création d'une nouvelle DAT</p></div>
+            </label>
+            <label class="flex items-center gap-3 p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input type="checkbox" name="email_erp_notification" {% if settings.email_erp_notification %}checked{% endif %} class="w-4 h-4">
+                <div><p class="font-medium text-sm dark:text-gray-200">Notifications ERP</p><p class="text-xs text-gray-400">Email pour les événements ERP (paiements, factures)</p></div>
+            </label>
+            <label class="flex items-center gap-3 p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                <input type="checkbox" name="digest_daily" {% if settings.digest_daily %}checked{% endif %} class="w-4 h-4">
+                <div><p class="font-medium text-sm dark:text-gray-200">Résumé quotidien</p><p class="text-xs text-gray-400">Email récapitulatif journalier des événements</p></div>
+            </label>
+        </div>
+        <button type="submit" class="w-full bg-[#1a3a6b] text-white py-2 rounded-lg text-sm hover:bg-[#142b52]">Enregistrer</button>
+    </form>
+    <div class="mt-4 text-center">
+        <a href="{% url 'notification_list' %}" class="text-sm text-blue-600 hover:underline">← Retour aux notifications</a>
+    </div>
+</div>
+{% endblock %}

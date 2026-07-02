@@ -88,6 +88,18 @@ def dashboard(request):
         evolution_run_alloc.append(all_budgets.get(y, {}).get('fonctionnement', 0))
         evolution_run_cons.append(all_cons.get((y, 'fonctionnement'), 0))
 
+    prev_year_data = {}
+    if selected_year and int(selected_year) > min(years or [0]):
+        prev_year = str(int(selected_year) - 1)
+        prev_budgets = {b.budget_type: float(b.amount) for b in BudgetYear.objects.filter(year=prev_year)}
+        prev_cat_sums = {}
+        for row in DATLine.objects.filter(dat__year=prev_year).values('budget_type', 'budget_category').annotate(s=Sum('global_price')):
+            prev_cat_sums[(row['budget_type'], row['budget_category'])] = float(row['s'] or 0)
+        for bt_code in ['investment', 'fonctionnement']:
+            allocated = prev_budgets.get(bt_code, 0)
+            consumed = sum(prev_cat_sums.get((bt_code, cat), 0) for cat, _ in category_labels)
+            prev_year_data[bt_code] = {'allocated': allocated, 'consumed': consumed}
+
     return render(request, 'budget/dashboard.html', {
         'budget_data': budget_data,
         'years': years,
@@ -98,4 +110,5 @@ def dashboard(request):
         'evolution_invest_cons': json.dumps(evolution_invest_cons),
         'evolution_run_alloc': json.dumps(evolution_run_alloc),
         'evolution_run_cons': json.dumps(evolution_run_cons),
+        'prev_year_data': prev_year_data,
     })

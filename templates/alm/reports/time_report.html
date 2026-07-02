@@ -33,24 +33,26 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div>
-            <h3 class="font-semibold mb-2 text-sm">Par utilisateur</h3>
-            <table class="w-full text-sm">
-                {% for u in by_user %}
-                <tr><td class="py-1">{{ u.user__username }}</td><td class="text-right">{{ u.total|floatformat:1 }}h</td></tr>
-                {% endfor %}
-            </table>
-        </div>
-        <div>
-            <h3 class="font-semibold mb-2 text-sm">Par type</h3>
-            <table class="w-full text-sm">
-                {% for t in by_type %}
-                <tr><td class="py-1">{{ t.ticket__ticket_type }}</td><td class="text-right">{{ t.total|floatformat:1 }}h</td></tr>
-                {% endfor %}
-            </table>
-        </div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div>
+        <h3 class="font-semibold mb-2 text-sm">Par utilisateur</h3>
+        <canvas id="userChart" height="200"></canvas>
+        <table class="w-full text-sm mt-2">
+            {% for u in by_user %}
+            <tr><td class="py-1">{{ u.user__username }}</td><td class="text-right">{{ u.total|floatformat:1 }}h</td></tr>
+            {% endfor %}
+        </table>
     </div>
+    <div>
+        <h3 class="font-semibold mb-2 text-sm">Par type</h3>
+        <canvas id="typeChart" height="200"></canvas>
+        <table class="w-full text-sm mt-2">
+            {% for t in by_type %}
+            <tr><td class="py-1">{{ t.ticket__ticket_type }}</td><td class="text-right">{{ t.total|floatformat:1 }}h</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
 
     <h3 class="font-semibold mb-2 text-sm">50 dernières saisies</h3>
     <div class="overflow-x-auto">
@@ -66,4 +68,26 @@
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#666'; Chart.defaults.borderColor = document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb';</script>
+<script>
+new Chart(document.getElementById('userChart'), {
+    type: 'bar',
+    data: {
+        labels: [{% for u in by_user %}'{{ u.user__username }}',{% endfor %}],
+        datasets: [{ label: 'Heures', data: [{% for u in by_user %}{{ u.total }},{% endfor %}], backgroundColor: '#1a3a6b' }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } } }
+});
+new Chart(document.getElementById('typeChart'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for t in by_type %}'{{ t.ticket__ticket_type }}',{% endfor %}],
+        datasets: [{ data: [{% for t in by_type %}{{ t.total }},{% endfor %}], backgroundColor: ['#3b82f6','#f59e0b','#22c55e'] }]
+    }
+});
+</script>
 {% endblock %}

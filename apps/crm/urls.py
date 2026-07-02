@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.dashboard, name='crm_dashboard'),
     path('societes/', views.company_list, name='crm_company_list'),
     path('societes/creer/', views.company_create, name='crm_company_create'),
+    path('societes/<int:pk>/pdf/', views.company_export_pdf, name='crm_company_pdf'),
     path('societes/<int:pk>/', views.company_detail, name='crm_company_detail'),
     path('societes/<int:pk>/modifier/', views.company_edit, name='crm_company_edit'),
     path('societes/<int:pk>/supprimer/', views.company_delete, name='crm_company_delete'),

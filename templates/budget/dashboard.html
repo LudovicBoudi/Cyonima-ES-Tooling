@@ -9,6 +9,13 @@
     <canvas id="chartEvolution" height="100"></canvas>
 </div>
 
+{% if prev_year_data %}
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <h3 class="text-lg font-semibold text-gray-700 mb-3">Comparaison {{ selected_year|add:"-1" }} → {{ selected_year }}</h3>
+    <canvas id="chartCompare" height="80"></canvas>
+</div>
+{% endif %}
+
 <form method="get" class="mb-6">
     <select name="year" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm">
         {% for y in years %}
@@ -107,7 +114,9 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-Chart.defaults.color = '#666';
+Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#9ca3af' : '#666';
+Chart.defaults.borderColor = document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb';
+
 const CAT_LABELS = [{% for cat_code, cat_label in category_labels %}'{{ cat_label }}',{% endfor %}];
 
 {% for b in budget_data %}
@@ -125,7 +134,7 @@ new Chart(document.getElementById('chart_global_{{ b.type_code }}'), {
         responsive: true, cutout: '65%',
         plugins: {
             legend: { position: 'bottom' },
-            title: { display: true, text: 'Budget {{ b.type }}', color: '#333', font: { size: 14 } }
+            title: { display: true, text: 'Budget {{ b.type }}', color: (document.documentElement.classList.contains('dark') ? '#9ca3af' : '#333'), font: { size: 14 } }
         }
     }
 });
@@ -145,7 +154,7 @@ new Chart(document.getElementById('chart_cat_{{ b.type_code }}'), {
         responsive: true,
         plugins: {
             legend: { display: false },
-            title: { display: true, text: 'Consommation par catégorie', color: '#333', font: { size: 14 } }
+            title: { display: true, text: 'Consommation par catégorie', color: (document.documentElement.classList.contains('dark') ? '#9ca3af' : '#333'), font: { size: 14 } }
         },
         scales: {
             y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' } },
@@ -187,7 +196,7 @@ new Chart(document.getElementById('chartEvolution'), {
         responsive: true,
         plugins: {
             legend: { position: 'bottom' },
-            title: { display: true, text: 'Évolution des budgets et consommations', color: '#333', font: { size: 14 } }
+            title: { display: true, text: 'Évolution des budgets et consommations', color: (document.documentElement.classList.contains('dark') ? '#9ca3af' : '#333'), font: { size: 14 } }
         },
         scales: {
             y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.06)' } },
@@ -195,5 +204,18 @@ new Chart(document.getElementById('chartEvolution'), {
         }
     }
 });
+{% if prev_year_data %}
+new Chart(document.getElementById('chartCompare'), {
+    type: 'bar',
+    data: {
+        labels: ['Invest. N-1', 'Invest. N', 'Fonct. N-1', 'Fonct. N'],
+        datasets: [
+            { label: 'Alloué', data: [{{ prev_year_data.investment.allocated|default:0 }}, {{ budget_data.0.allocated|default:0 }}, {{ prev_year_data.fonctionnement.allocated|default:0 }}, {{ budget_data.1.allocated|default:0 }}], backgroundColor: '#1a3a6b' },
+            { label: 'Consommé', data: [{{ prev_year_data.investment.consumed|default:0 }}, {{ budget_data.0.total_consumed|default:0 }}, {{ prev_year_data.fonctionnement.consumed|default:0 }}, {{ budget_data.1.total_consumed|default:0 }}], backgroundColor: '#ef4444' },
+        ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true } } }
+});
+{% endif %}
 </script>
 {% endblock %}

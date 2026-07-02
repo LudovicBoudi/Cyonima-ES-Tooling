@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
-from .models import Notification
+from django.conf import settings
+from django.core.mail import send_mail
+from .models import Notification, NotificationSetting
 
 
 def create_notification(user, title, message, link='', notification_type='in_app'):
@@ -12,6 +14,22 @@ def create_notification(user, title, message, link='', notification_type='in_app
         message=message,
         link=link,
     )
+    if notification_type == 'email' or True:
+        try:
+            settings_obj = NotificationSetting.objects.filter(user=user).first()
+            email_enabled = settings_obj and settings_obj.email_ticket_change
+            if email_enabled and user.email:
+                full_link = f"{settings.SITE_URL}{link}" if link else ''
+                body = f"{message}\n\n{full_link}".strip()
+                send_mail(
+                    subject=f"[{settings.SITE_URL}] {title}",
+                    message=body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+        except Exception:
+            pass
 
 
 def notify_ticket_assigned(ticket, assigned_to, assigned_by):

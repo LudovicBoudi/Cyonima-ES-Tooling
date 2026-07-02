@@ -1,0 +1,49 @@
+{% extends 'wiki/base_wiki.html' %}
+
+{% block title %}Historique — {{ page.title }}{% endblock %}
+
+{% block wiki_content %}
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+    <nav class="text-xs text-gray-400 dark:text-gray-500 mb-4 flex items-center gap-2">
+        <a href="{% url 'wiki_list' %}" class="hover:text-blue-600">Wiki</a>
+        <span>/</span>
+        <a href="{% url 'wiki_detail' page.slug %}" class="hover:text-blue-600">{{ page.title }}</a>
+        <span>/</span>
+        <span class="text-gray-600 dark:text-gray-300 font-medium">Historique</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Historique des versions</h1>
+    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">{{ page.title }}</p>
+
+    {% if versions %}
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead class="text-left text-gray-500 dark:text-gray-400 border-b dark:border-gray-700">
+                <tr>
+                    <th class="pb-2 font-medium">Version</th>
+                    <th class="pb-2 font-medium">Titre</th>
+                    <th class="pb-2 font-medium">Auteur</th>
+                    <th class="pb-2 font-medium">Date</th>
+                    <th class="pb-2 font-medium text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y dark:divide-gray-700">
+                {% for v in versions %}
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td class="py-2 font-mono text-xs text-gray-400">v{{ v.version_number }}</td>
+                    <td class="py-2 text-gray-700 dark:text-gray-300">{{ v.title }}</td>
+                    <td class="py-2 text-gray-500 dark:text-gray-400">{{ v.created_by.username|default:'—' }}</td>
+                    <td class="py-2 text-gray-400 text-xs">{{ v.created_at|date:"d/m/Y H:i" }}</td>
+                    <td class="py-2 text-right">
+                        <a href="{% url 'wiki_version_restore' v.pk %}" class="text-amber-600 hover:underline text-xs">Restaurer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-center py-12 text-gray-400">Aucun historique de versions.</p>
+    {% endif %}
+</div>
+{% endblock %}

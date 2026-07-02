@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 
 @login_required
@@ -23,4 +24,100 @@ def home(request):
     ]
     if request.user.is_staff:
         tiles.insert(0, {'title': 'Administration', 'description': 'Gestion des utilisateurs, rôles, configuration, sauvegarde et analytics', 'icon': 'images/Global-App-logo-icon.png', 'url': '/administration/'})
-    return render(request, 'home.html', {'tiles': tiles})
+
+    activities = _recent_activity(request)
+    return render(request, 'home.html', {'tiles': tiles, 'activities': activities})
+
+
+def _search_model(queryset, fields, q, icon, url_prefix, url_field='pk', url_suffix=''):
+    results = []
+    query = Q()
+    for f in fields:
+        query |= Q(**{f'{f}__icontains': q})
+    for obj in queryset.filter(query)[:5]:
+        pk = getattr(obj, url_field)
+        url = f'{url_prefix}{pk}{url_suffix}'
+        if hasattr(obj, 'display_id'):
+            title = f'{obj.display_id()} - {getattr(obj, "title", "")}'
+        else:
+            title = str(obj)
+        desc = ''
+        if hasattr(obj, 'description'):
+            desc = (obj.description or '')[:200]
+        elif hasattr(obj, 'content'):
+            desc = (obj.content or '')[:200]
+        results.append({'icon': icon, 'title': title, 'description': desc, 'url': url})
+    return results
+
+
+@login_required
+def global_search(request):
+    q = request.GET.get('q', '').strip()
+    results = []
+    if q:
+        from apps.wiki.models import WikiPage
+        results += _search_model(WikiPage.objects, ['title', 'content'], q, '📖', '/wiki/', 'slug')
+
+        from apps.ged.models import Document
+        results += _search_model(Document.objects.filter(deleted_at__isnull=True), ['title', 'description'], q, '📁', '/ged/', 'pk')
+
+        from apps.crm.models import Company, Contact
+        results += _search_model(Company.objects, ['name'], q, '🏢', '/crm/societes/', 'pk')
+        results += _search_model(Contact.objects, ['first_name', 'last_name', 'email'], q, '👤', '/crm/contacts/', 'pk')
+
+        from apps.hr.models import Employee
+        results += _search_model(Employee.objects, ['first_name', 'last_name', 'email'], q, '👥', '/rh/employes/', 'pk')
+
+        from apps.budget.dat.models import DAT
+        results += _search_model(DAT.objects, ['description'], q, '📋', '/budget/dat/', 'pk')
+
+        from apps.erp.models import Quotation, Invoice, SupplierInvoice
+        results += _search_model(Quotation.objects, ['number'], q, '📄', '/erp/devis/', 'pk')
+        results += _search_model(Invoice.objects, ['number'], q, '🧾', '/erp/factures/', 'pk')
+        results += _search_model(SupplierInvoice.objects, ['internal_number', 'number'], q, '🧾', '/erp/factures-fournisseurs/', 'pk')
+
+    return render(request, 'core/search_results.html', {'q': q, 'results': results})
+
+
+def _recent_activity(request):
+    activities = []
+    from django.utils import timezone
+
+    try:
+        from apps.wiki.models import WikiPage
+        for p in WikiPage.objects.order_by('-updated_at')[:3]:
+            activities.append({'icon': '📖', 'text': f'{p.title} — page wiki mise à jour', 'time': p.updated_at, 'url': f'/wiki/{p.slug}/'})
+    except Exception:
+        pass
+    try:
+        from apps.ged.models import Document
+        for d in Document.objects.filter(deleted_at__isnull=True).order_by('-created_at')[:3]:
+            activities.append({'icon': '📁', 'text': f'{d.title} — document ajouté', 'time': d.created_at, 'url': f'/ged/{d.pk}/'})
+    except Exception:
+        pass
+    try:
+        from apps.blogs.blog_com.models import ComArticle
+        from apps.blogs.blog_it.models import ITArticle
+        from apps.blogs.sec_blog.models import SecurityArticle
+        from apps.blogs.dg_blog.models import DirectionArticle
+        from apps.blogs.blog_rep.models import RepSyndicaleArticle
+        articles = []
+        for m in [ComArticle, ITArticle, SecurityArticle, DirectionArticle, RepSyndicaleArticle]:
+            try:
+                articles.extend(m.objects.order_by('-created_at')[:1])
+            except Exception:
+                pass
+        articles.sort(key=lambda a: a.created_at, reverse=True)
+        for a in articles[:3]:
+            activities.append({'icon': '📝', 'text': f'{a.title} — article publié', 'time': a.created_at, 'url': '#'})
+    except Exception:
+        pass
+    try:
+        from apps.alm.tickets.models import Ticket
+        for t in Ticket.objects.order_by('-updated_at')[:3]:
+            activities.append({'icon': '🎫', 'text': f'{t.get_formatted_number()} {t.title}', 'time': t.updated_at, 'url': f'/projects/{t.project_id}/tickets/{t.id}/'})
+    except Exception:
+        pass
+
+    activities.sort(key=lambda a: a['time'], reverse=True)
+    return activities[:10]

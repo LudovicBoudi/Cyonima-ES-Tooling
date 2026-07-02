@@ -15,4 +15,8 @@ urlpatterns = [
     path('<int:project_id>/sprints/creer/', views.sprint_create, name='sprint_create'),
     path('<int:project_id>/sprints/<int:sprint_id>/', views.sprint_detail, name='sprint_detail'),
     path('<int:project_id>/sprints/<int:sprint_id>/ajouter-tickets/', views.sprint_add_tickets, name='sprint_add_tickets'),
+    path('<int:project_id>/releases/', views.release_list, name='release_list'),
+    path('<int:project_id>/releases/creer/', views.release_create, name='release_create'),
+    path('<int:project_id>/releases/<int:release_id>/', views.release_detail, name='release_detail'),
+    path('<int:project_id>/releases/<int:release_id>/ajouter-tickets/', views.release_add_tickets, name='release_add_tickets'),
 ]

@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.db.models import Count, Sum, Q
 from django.utils import timezone
@@ -105,6 +105,8 @@ def employee_detail(request, pk):
         'diplomas': diplomas, 'certifications': certifications, 'trainings': trainings,
         'employments': employments, 'cvs': cvs, 'evaluations': evaluations,
         'can_view_salary': user_can_view_salary(request.user),
+        'leave_balance': employee.leave_balance(),
+        'now': timezone.now(),
     })
 
 
@@ -784,3 +786,22 @@ def evaluation_delete(request, pk):
     eval_obj.delete()
     messages.success(request, 'Évaluation supprimée.')
     return redirect('hr_employee_detail', pk=emp_pk)
+
+
+@staff_member_required
+def org_chart(request):
+    departments = Department.objects.prefetch_related('employees').all()
+    return render(request, 'hr/org_chart.html', {'departments': departments})
+
+
+@staff_member_required
+def contract_pdf(request, pk):
+    from weasyprint import HTML
+    from django.template.loader import render_to_string
+    contract = get_object_or_404(Contract, pk=pk)
+    employee = contract.employee
+    html = render_to_string('hr/contract_pdf.html', {'contract': contract, 'employee': employee}, request=request)
+    pdf = HTML(string=html).write_pdf()
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="contrat_{employee.last_name}.pdf"'
+    return response

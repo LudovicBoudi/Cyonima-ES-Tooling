@@ -1,4 +1,5 @@
 import csv
+import json
 from io import BytesIO
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -7,7 +8,7 @@ from django.http import HttpResponse
 from django.template.loader import render_to_string
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
-from .models import DAT, DATLine
+from .models import DAT, DATLine, DATTtemplate
 from apps.budget.providers.models import Provider
 
 
@@ -85,7 +86,8 @@ def dat_create(request):
         messages.success(request, f'DAT {dat.display_id()} créée.')
         return redirect('dat_detail', pk=dat.pk)
     providers = Provider.objects.all()
-    return render(request, 'budget/dat_form.html', {'providers': providers})
+    templates = DATTtemplate.objects.all()
+    return render(request, 'budget/dat_form.html', {'providers': providers, 'templates': templates})
 
 
 @login_required
@@ -335,3 +337,52 @@ def dat_export_pdf(request, pk):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+def dat_template_save(request):
+    if request.method == 'POST':
+        import json
+        name = request.POST.get('template_name', '').strip()
+        provider_id = request.POST.get('provider')
+        if not name or not provider_id:
+            messages.error(request, "Nom du modèle et fournisseur requis.")
+            return redirect('dat_create')
+        products = request.POST.getlist('product[]')
+        refs = request.POST.getlist('reference[]')
+        quantities = request.POST.getlist('quantity[]')
+        prices = request.POST.getlist('unit_price[]')
+        btypes = request.POST.getlist('budget_type[]')
+        bcats = request.POST.getlist('budget_category[]')
+        lines = []
+        for i, p in enumerate(products):
+            if p.strip():
+                lines.append({
+                    'product': p,
+                    'reference': refs[i] if i < len(refs) else '',
+                    'quantity': quantities[i] if i < len(quantities) else '1',
+                    'unit_price': prices[i] if i < len(prices) else '0',
+                    'budget_type': btypes[i] if i < len(btypes) else 'investment',
+                    'budget_category': bcats[i] if i < len(bcats) else 'pc',
+                })
+        DATTtemplate.objects.create(name=name, provider_id=provider_id, lines=lines)
+        messages.success(request, f"Modèle '{name}' sauvegardé.")
+        return redirect('dat_create')
+    return redirect('dat_create')
+
+
+@login_required
+def dat_template_load(request):
+    tpl_id = request.GET.get('template_id')
+    if tpl_id:
+        tpl = get_object_or_404(DATTtemplate, pk=tpl_id)
+        provider = tpl.provider
+        lines_json = json.dumps(tpl.lines)
+        return render(request, 'budget/dat_form.html', {
+            'providers': Provider.objects.all(),
+            'selected_provider_id': provider.id,
+            'template_lines_json': lines_json,
+            'templates': DATTtemplate.objects.all(),
+        })
+    messages.error(request, "Modèle non trouvé.")
+    return redirect('dat_create')

@@ -4,22 +4,47 @@
 {% block title %}Accueil - {{ site_config.site_name }}{% endblock %}
 
 {% block content %}
-<div class="text-center mb-12">
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">Bienvenue sur {{ site_config.site_name }}</h1>
-    <p class="text-gray-500">Sélectionnez un module pour commencer</p>
+<div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Bienvenue sur {{ site_config.site_name }}</h1>
+    <p class="text-gray-500 dark:text-gray-400">Sélectionnez un module pour commencer</p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-    {% for tile in tiles %}
-        <a href="{{ tile.url }}" class="group h-full">
-            <div class="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 flex flex-col items-center text-center hover:-translate-y-1 h-full">
-                <div class="w-20 h-20 mb-4 flex items-center justify-center shrink-0">
-                    <img src="{% static tile.icon %}" alt="{{ tile.title }}" loading="lazy" class="max-w-full max-h-full">
-                </div>
-                <h2 class="text-lg font-semibold text-gray-800 group-hover:text-[#1a3a6b] transition-colors">{{ tile.title }}</h2>
-                <p class="text-sm text-gray-500 mt-auto pt-2">{{ tile.description }}</p>
+<div class="flex flex-col lg:flex-row gap-6">
+    {% if activities %}
+    <aside class="w-full lg:w-72 shrink-0 order-first lg:order-first">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4">
+            <h3 class="font-semibold text-sm text-gray-700 dark:text-gray-300 mb-3">📋 Activité récente</h3>
+            <div class="space-y-3">
+                {% for a in activities %}
+                <a href="{{ a.url }}" class="block text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded p-1.5 -mx-1.5 transition-colors">
+                    <div class="flex gap-2">
+                        <span class="shrink-0">{{ a.icon }}</span>
+                        <div class="min-w-0">
+                            <p class="text-gray-700 dark:text-gray-300 truncate">{{ a.text }}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ a.time|date:"d/m H:i" }}</p>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
             </div>
-        </a>
-    {% endfor %}
+        </div>
+    </aside>
+    {% endif %}
+
+    <div class="flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {% for tile in tiles %}
+                <a href="{{ tile.url }}" class="group h-full">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-5 flex flex-col items-center text-center hover:-translate-y-1 h-full">
+                        <div class="w-16 h-16 mb-3 flex items-center justify-center shrink-0">
+                            <img src="{% static tile.icon %}" alt="{{ tile.title }}" loading="lazy" class="max-w-full max-h-full">
+                        </div>
+                        <h2 class="text-sm font-semibold text-gray-800 dark:text-gray-100 group-hover:text-[#1a3a6b] dark:group-hover:text-blue-400 transition-colors">{{ tile.title }}</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-auto pt-1">{{ tile.description }}</p>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -15,36 +15,43 @@ def can_write(user):
 @login_required
 def article_list(request):
     articles = RepSyndicaleArticle.objects.all()
+    user_can_write = can_write(request.user)
+    if not user_can_write:
+        articles = articles.filter(Q(status='publie') | Q(created_by=request.user))
     q = request.GET.get('q', '')
+    tag = request.GET.get('tag', '')
     if q:
         articles = articles.filter(Q(title__icontains=q) | Q(content__icontains=q))
+    if tag:
+        articles = articles.filter(tags__icontains=tag)
     paginator = Paginator(articles, 15)
     page = paginator.get_page(request.GET.get('page'))
+    all_tags = set()
+    for t in RepSyndicaleArticle.objects.filter(status='publie').values_list('tags', flat=True):
+        for tag_name in (t or '').split(','):
+            name = tag_name.strip()
+            if name:
+                all_tags.add(name)
     return render(request, 'blogs/article_list.html', {
-        'articles': page,
-        'blog_title': 'Blog Représentation Syndicale',
-        'list_url': 'rep_syndicale_blog_list',
-        'create_url': 'rep_syndicale_blog_create',
-        'detail_url': 'rep_syndicale_blog_detail',
-        'edit_url': 'rep_syndicale_blog_edit',
-        'can_write': can_write(request.user),
-        'delete_url': 'rep_syndicale_blog_delete',
-        'q': q,
+        'articles': page, 'blog_title': 'Blog Représentation Syndicale',
+        'list_url': 'rep_syndicale_blog_list', 'create_url': 'rep_syndicale_blog_create',
+        'detail_url': 'rep_syndicale_blog_detail', 'edit_url': 'rep_syndicale_blog_edit',
+        'can_write': user_can_write, 'delete_url': 'rep_syndicale_blog_delete',
+        'q': q, 'current_tag': tag, 'all_tags': sorted(all_tags),
     })
 
 
 @login_required
 def article_detail(request, article_id):
     article = get_object_or_404(RepSyndicaleArticle, id=article_id)
-    articles = RepSyndicaleArticle.objects.all()
+    if article.status == 'brouillon' and request.user != article.created_by and not (hasattr(request.user, 'profile') and request.user.profile.is_admin()):
+        messages.error(request, "Cet article n'est pas publié.")
+        return redirect('rep_syndicale_blog_list')
+    articles = RepSyndicaleArticle.objects.filter(status='publie')
     return render(request, 'blogs/article_detail.html', {
-        'article': article,
-        'articles': articles,
-        'blog_title': 'Blog Représentation Syndicale',
-        'list_url': 'rep_syndicale_blog_list',
-        'create_url': 'rep_syndicale_blog_create',
-        'detail_url': 'rep_syndicale_blog_detail',
-        'edit_url': 'rep_syndicale_blog_edit',
+        'article': article, 'articles': articles, 'blog_title': 'Blog Représentation Syndicale',
+        'list_url': 'rep_syndicale_blog_list', 'create_url': 'rep_syndicale_blog_create',
+        'detail_url': 'rep_syndicale_blog_detail', 'edit_url': 'rep_syndicale_blog_edit',
         'can_write': can_write(request.user),
     })
 
@@ -56,33 +63,20 @@ def article_create(request):
         return redirect('rep_syndicale_blog_list')
     if request.method == 'POST':
         article = RepSyndicaleArticle.objects.create(
-            title=request.POST['title'],
-            content=sanitize_html(request.POST['content']),
-            image=request.FILES.get('image'),
-            created_by=request.user,
+            title=request.POST['title'], content=sanitize_html(request.POST['content']),
+            image=request.FILES.get('image'), status=request.POST.get('status', 'publie'),
+            tags=request.POST.get('tags', ''), created_by=request.user,
         )
         attachment = request.FILES.get('attachment')
         if attachment:
-            RepSyndicaleArticleAttachment.objects.create(
-                article=article,
-                file=attachment,
-                filename=attachment.name,
-            )
-        create_notification(
-            request.user,
-            f"Nouvel article : {article.display_id()}",
-            f"Article publié dans le blog Représentation Syndicale : {article.title}",
-            link='',
-        )
+            RepSyndicaleArticleAttachment.objects.create(article=article, file=attachment, filename=attachment.name)
+        create_notification(request.user, f"Nouvel article : {article.display_id()}", f"Article publié dans le blog Représentation Syndicale : {article.title}", link='')
         messages.success(request, f"Article {article.display_id()} créé.")
         return redirect('rep_syndicale_blog_detail', article_id=article.id)
     return render(request, 'blogs/article_form.html', {
-        'page': None,
-        'blog_title': 'Blog Représentation Syndicale',
-        'list_url': 'rep_syndicale_blog_list',
-        'create_url': 'rep_syndicale_blog_create',
-        'detail_url': 'rep_syndicale_blog_detail',
-        'edit_url': 'rep_syndicale_blog_edit',
+        'page': None, 'blog_title': 'Blog Représentation Syndicale',
+        'list_url': 'rep_syndicale_blog_list', 'create_url': 'rep_syndicale_blog_create',
+        'detail_url': 'rep_syndicale_blog_detail', 'edit_url': 'rep_syndicale_blog_edit',
     })
 
 
@@ -95,25 +89,20 @@ def article_edit(request, article_id):
     if request.method == 'POST':
         article.title = request.POST['title']
         article.content = sanitize_html(request.POST['content'])
+        article.status = request.POST.get('status', 'publie')
+        article.tags = request.POST.get('tags', '')
         if request.FILES.get('image'):
             article.image = request.FILES['image']
         article.save()
         attachment = request.FILES.get('attachment')
         if attachment:
-            RepSyndicaleArticleAttachment.objects.create(
-                article=article,
-                file=attachment,
-                filename=attachment.name,
-            )
+            RepSyndicaleArticleAttachment.objects.create(article=article, file=attachment, filename=attachment.name)
         messages.success(request, f"Article {article.display_id()} modifié.")
         return redirect('rep_syndicale_blog_detail', article_id=article.id)
     return render(request, 'blogs/article_form.html', {
-        'page': article,
-        'blog_title': 'Blog Représentation Syndicale',
-        'list_url': 'rep_syndicale_blog_list',
-        'create_url': 'rep_syndicale_blog_create',
-        'detail_url': 'rep_syndicale_blog_detail',
-        'edit_url': 'rep_syndicale_blog_edit',
+        'page': article, 'blog_title': 'Blog Représentation Syndicale',
+        'list_url': 'rep_syndicale_blog_list', 'create_url': 'rep_syndicale_blog_create',
+        'detail_url': 'rep_syndicale_blog_detail', 'edit_url': 'rep_syndicale_blog_edit',
     })
 
 
@@ -127,7 +116,4 @@ def article_delete(request, article_id):
         article.delete()
         messages.success(request, "Article supprimé.")
         return redirect('rep_syndicale_blog_list')
-    return render(request, 'blogs/article_confirm_delete.html', {
-        'article': article,
-        'list_url': 'rep_syndicale_blog_list',
-    })
+    return render(request, 'blogs/article_confirm_delete.html', {'article': article, 'list_url': 'rep_syndicale_blog_list'})

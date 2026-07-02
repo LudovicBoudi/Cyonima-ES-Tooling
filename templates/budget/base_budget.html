@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}{{ title|default:"Budget IT" }} - {{ site_config.site_name }}{% endblock %}
+{% block breadcrumbs %}
+<nav class="text-xs text-gray-400 dark:text-gray-500 mb-3">
+    <a href="{% url 'home' %}" class="hover:text-blue-600 dark:hover:text-blue-400">Accueil</a>
+    <span class="mx-1">/</span>
+    <span class="text-gray-600 dark:text-gray-300 font-medium">Budget IT</span>
+</nav>
+{% endblock %}
 {% block content %}
 <div class="flex gap-6">
     <aside class="w-56 shrink-0">

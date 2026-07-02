@@ -116,3 +116,18 @@ class DATLine(models.Model):
     def save(self, *args, **kwargs):
         self.global_price = self.quantity * self.unit_price
         super().save(*args, **kwargs)
+
+
+class DATTtemplate(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Nom')
+    provider = models.ForeignKey(Provider, on_delete=models.CASCADE, verbose_name='Fournisseur')
+    lines = models.JSONField(default=list, blank=True, verbose_name='Lignes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Modèle de DAT'
+        verbose_name_plural = 'Modèles de DAT'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
