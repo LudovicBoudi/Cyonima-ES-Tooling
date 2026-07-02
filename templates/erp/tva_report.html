@@ -1,0 +1,57 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}Déclaration TVA — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <div class="flex justify-between items-start mb-4">
+        <h1 class="text-xl font-bold">📊 Déclaration TVA</h1>
+        <a href="?start={{ start }}&end={{ end }}&export=csv" class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-800">Exporter CSV</a>
+    </div>
+
+    <form method="get" class="flex gap-2 items-end mb-6">
+        <div>
+            <label class="block text-xs text-gray-500">Du</label>
+            <input type="date" name="start" value="{{ start }}" class="border rounded-lg px-3 py-1.5 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-500">Au</label>
+            <input type="date" name="end" value="{{ end }}" class="border rounded-lg px-3 py-1.5 text-sm">
+        </div>
+        <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-1.5 rounded-lg text-sm hover:bg-blue-800">Filtrer</button>
+    </form>
+
+    {% if rates %}
+    <table class="w-full text-sm mb-4">
+        <thead>
+            <tr class="text-left text-gray-500 border-b">
+                <th class="pb-2">Taux TVA</th>
+                <th class="pb-2 text-right">Base HT client</th>
+                <th class="pb-2 text-right">TVA collectée</th>
+                <th class="pb-2 text-right">Base HT fournisseur</th>
+                <th class="pb-2 text-right">TVA déductible</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rate, amounts in rates %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-2 font-medium">TVA {{ rate|floatformat:1 }}%</td>
+                <td class="py-2 text-right">{{ amounts.ht_client|floatformat:2 }} €</td>
+                <td class="py-2 text-right">{{ amounts.tva_client|floatformat:2 }} €</td>
+                <td class="py-2 text-right">{{ amounts.ht_fourn|floatformat:2 }} €</td>
+                <td class="py-2 text-right">{{ amounts.tva_fourn|floatformat:2 }} €</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-right space-y-1 text-sm border-t pt-3">
+        <p>Total TVA collectée : <strong>{{ total_tva_collectee|floatformat:2 }} €</strong></p>
+        <p>Total TVA déductible : <strong>{{ total_tva_deductible|floatformat:2 }} €</strong></p>
+        <p class="text-lg font-bold {% if tva_net > 0 %}text-red-700{% elif tva_net < 0 %}text-green-700{% endif %}">
+            TVA nette à reverser : {{ tva_net|floatformat:2 }} €
+        </p>
+    </div>
+    {% else %}
+    <p class="text-gray-400 text-center py-8">Aucune facture sur cette période.</p>
+    {% endif %}
+</div>
+{% endblock %}

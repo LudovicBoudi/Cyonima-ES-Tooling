@@ -8,6 +8,7 @@ class NotificationSetting(models.Model):
     email_dat_creation = models.BooleanField(default=True, verbose_name='Email création DAT')
     email_ticket_change = models.BooleanField(default=True, verbose_name='Email changement ticket')
     email_report_ready = models.BooleanField(default=True, verbose_name='Email rapport disponible')
+    email_erp_notification = models.BooleanField(default=True, verbose_name='Email notification ERP')
     digest_daily = models.BooleanField(default=False, verbose_name='Résumé quotidien')
 
     class Meta:

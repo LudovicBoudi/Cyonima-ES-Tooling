@@ -40,6 +40,14 @@
         <p>Total HT : <strong>{{ q.total_ht }} €</strong></p>
         <p>TVA : <strong>{{ q.total_tva }} €</strong></p>
         <p class="text-lg font-bold">Total TTC : {{ q.total_ttc }} €</p>
+        {% if vat_bd.items|length > 1 %}
+        <div class="mt-2 text-xs text-gray-500 border-t pt-1">
+            <p class="font-medium">Détail par taux :</p>
+            {% for rate, amounts in vat_bd.items %}
+            <p>TVA {{ rate|floatformat:1 }}% : HT {{ amounts.ht|floatformat:2 }} € · TVA {{ amounts.vat|floatformat:2 }} €</p>
+            {% endfor %}
+        </div>
+        {% endif %}
     </div>
     {% if q.notes %}<div class="mt-4 p-3 bg-gray-50 rounded text-sm"><strong>Notes :</strong> {{ q.notes }}</div>{% endif %}
     {% if invoices %}

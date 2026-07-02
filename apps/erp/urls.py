@@ -32,4 +32,10 @@ urlpatterns = [
     path('produits/creer/', views.product_create, name='erp_product_create'),
     path('produits/<int:pk>/modifier/', views.product_edit, name='erp_product_edit'),
     path('produits/<int:pk>/supprimer/', views.product_delete, name='erp_product_delete'),
+    path('tva/', views.tva_report, name='erp_tva_report'),
+    path('relances/', views.reminder_list, name='erp_reminder_list'),
+    path('relances/<int:pk>/creer/', views.reminder_create, name='erp_reminder_create'),
+    path('relances/<int:pk>/', views.reminder_detail, name='erp_reminder_detail'),
+    path('relances/<int:pk>/pdf/', views.reminder_pdf, name='erp_reminder_pdf'),
+    path('audit/', views.audit_log_list, name='erp_audit_log'),
 ]

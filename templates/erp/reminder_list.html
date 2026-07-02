@@ -1,0 +1,37 @@
+{% extends 'erp/base_erp.html' %}
+{% block title %}Relances — ERP{% endblock %}
+{% block erp_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">📬 Relances — Factures échues</h1>
+    {% if data %}
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">Facture</th><th class="pb-2">Société</th><th class="pb-2">Échéance</th><th class="pb-2">Jours de retard</th><th class="pb-2">Montant dû</th><th class="pb-2">Dernière relance</th><th class="pb-2"></th></tr></thead>
+        <tbody>{% for d in data %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2 font-medium"><a href="{% url 'erp_invoice_detail' d.invoice.pk %}" class="text-blue-600 hover:underline">{{ d.invoice.number }}</a></td>
+            <td class="py-2">{{ d.invoice.company|default:'-' }}</td>
+            <td class="py-2">{{ d.invoice.due_date|date:"d/m/Y" }}</td>
+            <td class="py-2"><span class="text-red-600 font-medium">{{ d.days_overdue }}j</span></td>
+            <td class="py-2 font-medium">{{ d.invoice.remaining }} €</td>
+            <td class="py-2">
+                {% if d.last_level == 0 %}<span class="text-gray-400">—</span>
+                {% elif d.last_level == 1 %}<span class="text-amber-600">1ʳᵉ relance</span>
+                {% elif d.last_level == 2 %}<span class="text-orange-600">2ᵉ relance</span>
+                {% elif d.last_level == 3 %}<span class="text-red-700 font-semibold">3ᵉ relance</span>
+                {% endif %}
+            </td>
+            <td class="py-2 text-right flex gap-1 justify-end">
+                {% if d.last_level < 3 %}
+                <a href="{% url 'erp_reminder_create' d.invoice.pk %}" class="bg-amber-600 text-white px-3 py-1 rounded text-xs hover:bg-amber-700">Envoyer relance</a>
+                {% endif %}
+                {% if d.last_level > 0 %}
+                <a href="{% url 'erp_reminder_detail' d.invoice.pk %}" class="text-blue-600 text-xs hover:underline">Détail</a>
+                <a href="{% url 'erp_reminder_pdf' d.invoice.pk %}" target="_blank" class="text-red-600 text-xs hover:underline">PDF</a>
+                {% endif %}
+            </td>
+        </tr>{% endfor %}</tbody>
+    </table>
+    {% else %}
+    <p class="text-gray-400 text-center py-8">Aucune facture échue pour le moment.</p>
+    {% endif %}
+</div>
+{% endblock %}

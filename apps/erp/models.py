@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from decimal import Decimal
+from collections import OrderedDict
 from apps.crm.models import Company, Contact, Deal
 from apps.budget.providers.models import Provider
 
@@ -13,6 +14,18 @@ def _next_number(prefix, model_cls):
     else:
         seq = 1
     return f'{prefix}-{seq:04d}'
+
+
+def vat_breakdown(lines):
+    rates = OrderedDict()
+    for l in lines:
+        ht = l.get('quantity', 0) * l.get('unit_price', 0)
+        rate = float(l.get('vat_rate', 20))
+        if rate not in rates:
+            rates[rate] = {'ht': 0, 'vat': 0}
+        rates[rate]['ht'] += ht
+        rates[rate]['vat'] += ht * rate / 100
+    return rates
 
 
 class Product(models.Model):
@@ -247,3 +260,52 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'{self.date} — {self.amount}€'
+
+
+class Reminder(models.Model):
+    LEVEL_CHOICES = [
+        (1, '1ʳᵉ relance'),
+        (2, '2ᵉ relance'),
+        (3, '3ᵉ relance'),
+    ]
+    invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='reminders', verbose_name='Facture')
+    level = models.PositiveSmallIntegerField('Niveau', choices=LEVEL_CHOICES, default=1)
+    date = models.DateField('Date', auto_now_add=True)
+    amount_due = models.DecimalField('Montant dû', max_digits=12, decimal_places=2)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, editable=False)
+
+    class Meta:
+        verbose_name = 'Relance'
+        verbose_name_plural = 'Relances'
+        ordering = ['-date']
+
+    def __str__(self):
+        return f'{self.invoice.number} — Niveau {self.level} ({self.date})'
+
+
+class ErpAuditLog(models.Model):
+    ACTION_CHOICES = [
+        ('create', 'Création'),
+        ('edit', 'Modification'),
+        ('delete', 'Suppression'),
+        ('convert', 'Conversion devis→facture'),
+        ('payment', 'Paiement'),
+        ('reminder', 'Relance'),
+        ('export', 'Export'),
+    ]
+    model_name = models.CharField('Modèle', max_length=50)
+    object_id = models.PositiveIntegerField('ID objet')
+    object_repr = models.CharField('Représentation', max_length=200, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    action = models.CharField('Action', max_length=20, choices=ACTION_CHOICES)
+    details = models.TextField('Détails', blank=True)
+    ip_address = models.GenericIPAddressField('IP', blank=True, null=True)
+    created_at = models.DateTimeField('Date', auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Journal d'audit ERP"
+        verbose_name_plural = "Journaux d'audit ERP"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.get_action_display()} — {self.object_repr} ({self.created_at.strftime("%d/%m/%Y %H:%M")})'

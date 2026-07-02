@@ -39,6 +39,12 @@
                         {% if user.is_staff %}
                             <a href="{% url 'admin_dashboard' %}" class="text-sm hover:text-gray-300">Administration</a>
                         {% endif %}
+                        <a href="{% url 'notification_list' %}" class="relative text-sm hover:text-gray-300">
+                            🔔
+                            {% if unread_notifications_count %}
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ unread_notifications_count }}</span>
+                            {% endif %}
+                        </a>
                         <div class="relative" x-data="{ open: false }">
                             <button @click="open = !open" class="flex items-center gap-2 text-sm hover:text-gray-300 focus:outline-none">
                                 <span class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold text-xs">{{ user.username|first|upper }}</span>

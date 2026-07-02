@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Notifications — Cyonima-ES-Tools{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-xl font-bold">🔔 Notifications</h1>
+        <div class="flex gap-2">
+            <form method="get" class="flex gap-2">
+                <input type="text" name="q" value="{{ q }}" placeholder="Rechercher..." class="border rounded-lg px-3 py-1.5 text-sm">
+                <button type="submit" class="bg-gray-600 text-white px-3 py-1.5 rounded text-sm">Filtrer</button>
+            </form>
+            {% if unread_count %}
+            <a href="?mark_read=1" class="text-sm text-blue-600 hover:underline py-1.5">Tout marquer comme lu</a>
+            {% endif %}
+        </div>
+    </div>
+    {% for n in notifications %}
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-2 border-l-4 {% if n.is_read %}border-gray-300{% else %}border-blue-500{% endif %}">
+        <div class="flex justify-between items-start">
+            <div>
+                <h3 class="font-semibold text-sm">{{ n.title }}</h3>
+                <p class="text-xs text-gray-600 mt-1">{{ n.message }}</p>
+            </div>
+            <div class="text-right flex-shrink-0 ml-4">
+                <span class="text-xs text-gray-400">{{ n.created_at|date:"d/m/Y H:i" }}</span>
+                {% if n.link %}<a href="{{ n.link }}" class="block text-xs text-blue-600 hover:underline mt-1">Voir</a>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center text-gray-400 py-12">Aucune notification.</p>
+    {% endfor %}
+</div>
+{% endblock %}

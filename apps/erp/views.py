@@ -8,7 +8,8 @@ from django.core.paginator import Paginator
 from datetime import timedelta, date as dt_date
 from django.http import HttpResponse, FileResponse
 from weasyprint import HTML
-from .models import Quotation, Invoice, CreditNote, SupplierInvoice, Payment, Product
+from .models import Quotation, Invoice, CreditNote, SupplierInvoice, Payment, Product, Reminder, ErpAuditLog, vat_breakdown
+from .notifications import notify_user, notify_admins, log_audit
 from apps.crm.models import Company
 
 
@@ -110,6 +111,65 @@ def dashboard(request):
     })
 
 
+# ─── TVA Report ────────────────────────────────────────────────────
+
+@login_required
+def tva_report(request):
+    now = timezone.now().date()
+    start = request.GET.get('start', now.replace(day=1).isoformat())
+    end = request.GET.get('end', now.isoformat())
+    from datetime import date as dt_date
+    start_dt = dt_date.fromisoformat(start) if isinstance(start, str) else start
+    end_dt = dt_date.fromisoformat(end) if isinstance(end, str) else end
+
+    invoices = Invoice.objects.filter(date__gte=start_dt, date__lte=end_dt, status__in=['emise', 'payee', 'impayee'])
+    supplier_invs = SupplierInvoice.objects.filter(date__gte=start_dt, date__lte=end_dt, status__in=['enregistree', 'payee'])
+
+    all_rates = {}
+    for inv in invoices:
+        lines = inv.lines
+        for rate, amounts in vat_breakdown(lines).items():
+            r = all_rates.setdefault(rate, {'ht_client': 0, 'tva_client': 0, 'ht_fourn': 0, 'tva_fourn': 0})
+            r['ht_client'] += amounts['ht']
+            r['tva_client'] += amounts['vat']
+    for inv in supplier_invs:
+        lines = inv.lines
+        for rate, amounts in vat_breakdown(lines).items():
+            r = all_rates.setdefault(rate, {'ht_client': 0, 'tva_client': 0, 'ht_fourn': 0, 'tva_fourn': 0})
+            r['ht_fourn'] += amounts['ht']
+            r['tva_fourn'] += amounts['vat']
+
+    total_tva_collectee = sum(r['tva_client'] for r in all_rates.values())
+    total_tva_deductible = sum(r['tva_fourn'] for r in all_rates.values())
+    tva_net = total_tva_collectee - total_tva_deductible
+
+    sorted_rates = sorted(all_rates.items())
+
+    if request.GET.get('export') == 'csv':
+        import csv
+        resp = HttpResponse(content_type='text/csv; charset=utf-8')
+        resp['Content-Disposition'] = f'attachment; filename="declaration_tva_{start}_{end}.csv"'
+        resp.write('\ufeff')
+        w = csv.writer(resp)
+        w.writerow(['Taux TVA', 'Base HT client', 'TVA collectée', 'Base HT fournisseur', 'TVA déductible'])
+        for rate in sorted(all_rates.keys()):
+            r = all_rates[rate]
+            w.writerow([f'{rate}%', round(r['ht_client'], 2), round(r['tva_client'], 2), round(r['ht_fourn'], 2), round(r['tva_fourn'], 2)])
+        w.writerow([])
+        w.writerow(['Total TVA collectée', '', round(total_tva_collectee, 2), '', ''])
+        w.writerow(['Total TVA déductible', '', round(total_tva_deductible, 2), '', ''])
+        w.writerow(['TVA nette à reverser', '', round(tva_net, 2), '', ''])
+        return resp
+
+    return render(request, 'erp/tva_report.html', {
+        'rates': sorted_rates,
+        'start': start, 'end': end,
+        'total_tva_collectee': total_tva_collectee,
+        'total_tva_deductible': total_tva_deductible,
+        'tva_net': tva_net,
+    })
+
+
 # ─── Quotations ───────────────────────────────────────────────────
 
 @login_required
@@ -130,7 +190,7 @@ def quotation_list(request):
 def quotation_detail(request, pk):
     q = get_object_or_404(Quotation.objects.select_related('company', 'contact', 'created_by'), pk=pk)
     invoices = q.invoices.all()
-    return render(request, 'erp/quotation_detail.html', {'q': q, 'invoices': invoices})
+    return render(request, 'erp/quotation_detail.html', {'q': q, 'invoices': invoices, 'vat_bd': vat_breakdown(q.lines)})
 
 
 @login_required
@@ -161,6 +221,7 @@ def quotation_create(request):
             notes=request.POST.get('notes', ''),
             created_by=request.user,
         )
+        log_audit(request, 'devis', q.pk, q.number, 'create', f'Création statut={q.status}')
         messages.success(request, f'Devis {q.number} créé.')
         return redirect('erp_quotation_detail', pk=q.pk)
     companies = Company.objects.all()
@@ -177,6 +238,7 @@ def quotation_edit(request, pk):
             lines = json.loads(lines_json)
         except json.JSONDecodeError:
             lines = []
+        old_status = q.status
         q.company_id = request.POST.get('company') or None
         q.contact_id = request.POST.get('contact') or None
         q.valid_until = request.POST.get('valid_until') or None
@@ -184,6 +246,13 @@ def quotation_edit(request, pk):
         q.lines = lines
         q.notes = request.POST.get('notes', '')
         q.save()
+        log_audit(request, 'devis', q.pk, q.number, 'edit', f'Statut: {old_status}→{q.status}')
+        if old_status != 'accepte' and q.status == 'accepte':
+            notify_admins(
+                f'Devis accepté : {q.number}',
+                f'Le devis {q.number} pour {q.company} a été accepté (montant TTC : {q.total_ttc()} €).',
+                link=f'/erp/devis/{q.pk}/',
+            )
         messages.success(request, f'Devis {q.number} modifié.')
         return redirect('erp_quotation_detail', pk=q.pk)
     companies = Company.objects.all()
@@ -194,6 +263,7 @@ def quotation_edit(request, pk):
 def quotation_delete(request, pk):
     q = get_object_or_404(Quotation, pk=pk)
     if request.method == 'POST':
+        log_audit(request, 'devis', q.pk, q.number, 'delete')
         q.delete()
         messages.success(request, 'Devis supprimé.')
         return redirect('erp_quotation_list')
@@ -214,6 +284,13 @@ def quotation_convert(request, pk):
     )
     q.status = 'accepte'
     q.save()
+    log_audit(request, 'devis', q.pk, q.number, 'convert', f'Converti en facture {inv.number}')
+    log_audit(request, 'facture', inv.pk, inv.number, 'create', f'Issu du devis {q.number}')
+    notify_admins(
+        f'Facture créée : {inv.number}',
+        f'La facture {inv.number} a été créée depuis le devis {q.number} (montant TTC : {inv.total_ttc()} €).',
+        link=f'/erp/factures/{inv.pk}/',
+    )
     messages.success(request, f'Facture {inv.number} créée depuis le devis {q.number}.')
     return redirect('erp_invoice_detail', pk=inv.pk)
 
@@ -239,7 +316,7 @@ def invoice_detail(request, pk):
     inv = get_object_or_404(Invoice.objects.select_related('company', 'contact', 'quotation', 'created_by'), pk=pk)
     payments = inv.payments.all()
     credit_notes = inv.credit_notes.all()
-    return render(request, 'erp/invoice_detail.html', {'inv': inv, 'payments': payments, 'credit_notes': credit_notes})
+    return render(request, 'erp/invoice_detail.html', {'inv': inv, 'payments': payments, 'credit_notes': credit_notes, 'vat_bd': vat_breakdown(inv.lines)})
 
 
 @login_required
@@ -270,6 +347,7 @@ def invoice_create(request):
             notes=request.POST.get('notes', ''),
             created_by=request.user,
         )
+        log_audit(request, 'facture', inv.pk, inv.number, 'create', f'Création statut={inv.status}')
         messages.success(request, f'Facture {inv.number} créée.')
         return redirect('erp_invoice_detail', pk=inv.pk)
     companies = Company.objects.all()
@@ -286,6 +364,7 @@ def invoice_edit(request, pk):
             lines = json.loads(lines_json)
         except json.JSONDecodeError:
             lines = []
+        old_status = inv.status
         inv.company_id = request.POST.get('company') or None
         inv.contact_id = request.POST.get('contact') or None
         inv.due_date = request.POST.get('due_date') or None
@@ -293,6 +372,7 @@ def invoice_edit(request, pk):
         inv.lines = lines
         inv.notes = request.POST.get('notes', '')
         inv.save()
+        log_audit(request, 'facture', inv.pk, inv.number, 'edit', f'Statut: {old_status}→{inv.status}')
         messages.success(request, f'Facture {inv.number} modifiée.')
         return redirect('erp_invoice_detail', pk=inv.pk)
     companies = Company.objects.all()
@@ -303,6 +383,7 @@ def invoice_edit(request, pk):
 def invoice_delete(request, pk):
     inv = get_object_or_404(Invoice, pk=pk)
     if request.method == 'POST':
+        log_audit(request, 'facture', inv.pk, inv.number, 'delete')
         inv.delete()
         messages.success(request, 'Facture supprimée.')
         return redirect('erp_invoice_list')
@@ -338,6 +419,7 @@ def creditnote_create(request):
             lines=lines,
             created_by=request.user,
         )
+        log_audit(request, 'avoir', cn.pk, cn.number, 'create', f'Motif: {cn.reason[:100]}')
         messages.success(request, f'Avoir {cn.number} créé.')
         return redirect('erp_creditnote_list')
     companies = Company.objects.all()
@@ -349,6 +431,7 @@ def creditnote_create(request):
 def creditnote_delete(request, pk):
     cn = get_object_or_404(CreditNote, pk=pk)
     if request.method == 'POST':
+        log_audit(request, 'avoir', cn.pk, cn.number, 'delete')
         cn.delete()
         messages.success(request, 'Avoir supprimé.')
         return redirect('erp_creditnote_list')
@@ -436,6 +519,7 @@ def supplier_invoice_create(request):
             notes=request.POST.get('notes', ''),
             created_by=request.user,
         )
+        log_audit(request, 'facture_fournisseur', inv.pk, inv.internal_number, 'create', f'Fournisseur: {inv.provider}')
         messages.success(request, f'Facture fournisseur {inv.internal_number} créée.')
         return redirect('erp_supplier_invoice_list')
     from apps.budget.providers.models import Provider
@@ -461,6 +545,7 @@ def supplier_invoice_edit(request, pk):
         inv.lines = lines
         inv.notes = request.POST.get('notes', '')
         inv.save()
+        log_audit(request, 'facture_fournisseur', inv.pk, inv.internal_number, 'edit', f'Statut: {inv.status}')
         messages.success(request, f'Facture fournisseur {inv.internal_number} modifiée.')
         return redirect('erp_supplier_invoice_list')
     from apps.budget.providers.models import Provider
@@ -472,6 +557,7 @@ def supplier_invoice_edit(request, pk):
 def supplier_invoice_delete(request, pk):
     inv = get_object_or_404(SupplierInvoice, pk=pk)
     if request.method == 'POST':
+        log_audit(request, 'facture_fournisseur', inv.pk, inv.internal_number, 'delete')
         inv.delete()
         messages.success(request, 'Facture fournisseur supprimée.')
         return redirect('erp_supplier_invoice_list')
@@ -501,6 +587,11 @@ def payment_create(request):
             elif total_paid > 0:
                 p.invoice.status = 'impayee'
             p.invoice.save()
+            notify_admins(
+                f'Paiement reçu — {p.invoice.number}',
+                f'Paiement de {p.amount} € enregistré sur {p.invoice.number} (total payé : {total_paid} € / {p.invoice.total_ttc()} €).',
+                link=f'/erp/factures/{p.invoice.pk}/',
+            )
         if p.supplier_invoice:
             total_paid = p.supplier_invoice.payments.aggregate(Sum('amount'))['amount__sum'] or 0
             p.supplier_invoice.paid_amount = total_paid
@@ -509,6 +600,8 @@ def payment_create(request):
             elif total_paid > 0:
                 p.supplier_invoice.status = 'enregistree'
             p.supplier_invoice.save()
+        ref = p.invoice.number if p.invoice else p.supplier_invoice.internal_number if p.supplier_invoice else 'N/A'
+        log_audit(request, 'paiement', p.pk, f'{ref} — {p.amount}€', 'payment', f'Mode: {p.get_method_display()}')
         messages.success(request, 'Paiement enregistré.')
         return redirect('erp_dashboard')
     invoices = Invoice.objects.filter(status__in=['emise', 'impayee'])
@@ -516,6 +609,70 @@ def payment_create(request):
     return render(request, 'erp/payment_form.html', {
         'invoices': invoices, 'supplier_invoices': supplier_invoices,
     })
+
+
+# ─── Rélances ──────────────────────────────────────────────────────
+
+@login_required
+def reminder_list(request):
+    overdue = Invoice.objects.filter(status__in=['emise', 'impayee'], due_date__lt=timezone.now().date())
+    data = []
+    for inv in overdue:
+        last_reminder = inv.reminders.order_by('-level').first()
+        data.append({
+            'invoice': inv,
+            'days_overdue': (timezone.now().date() - inv.due_date).days,
+            'last_level': last_reminder.level if last_reminder else 0,
+        })
+    return render(request, 'erp/reminder_list.html', {'data': data})
+
+
+@login_required
+def reminder_create(request, pk):
+    inv = get_object_or_404(Invoice, pk=pk)
+    if inv.status not in ['emise', 'impayee'] or not inv.due_date or inv.due_date >= timezone.now().date():
+        messages.error(request, 'Cette facture n\'est pas échue.')
+        return redirect('erp_reminder_list')
+    last = inv.reminders.order_by('-level').first()
+    level = (last.level + 1) if last else 1
+    if level > 3:
+        messages.warning(request, '3 relances déjà envoyées pour cette facture.')
+        return redirect('erp_reminder_list')
+    Reminder.objects.create(
+        invoice=inv,
+        level=level,
+        amount_due=inv.remaining(),
+        created_by=request.user,
+    )
+    log_audit(request, 'relance', inv.pk, f'{inv.number} niveau {level}', 'reminder', f'Montant dû: {inv.remaining()} €')
+    notify_admins(
+        f'Relance niveau {level} — {inv.number}',
+        f'La facture {inv.number} ({inv.company}) est impayée depuis {inv.due_date}. Montant dû : {inv.remaining()} €.',
+        link=f'/erp/relances/{inv.pk}/',
+    )
+    messages.success(request, f'Relance niveau {level} générée pour {inv.number}.')
+    return redirect('erp_reminder_detail', pk=inv.pk)
+
+
+@login_required
+def reminder_detail(request, pk):
+    inv = get_object_or_404(Invoice.objects.select_related('company'), pk=pk)
+    reminders = inv.reminders.order_by('-level')
+    return render(request, 'erp/reminder_detail.html', {'inv': inv, 'reminders': reminders})
+
+
+@login_required
+def reminder_pdf(request, pk):
+    inv = get_object_or_404(Invoice.objects.select_related('company', 'contact'), pk=pk)
+    last = inv.reminders.order_by('-level').first()
+    if not last:
+        messages.error(request, 'Aucune relance pour cette facture.')
+        return redirect('erp_reminder_list')
+    html = render(request, 'erp/pdf_reminder.html', {'inv': inv, 'reminder': last}).content.decode('utf-8')
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="relance_{inv.number}_niveau{last.level}.pdf"'
+    HTML(string=html).write_pdf(response)
+    return response
 
 
 # ─── Product catalogue ─────────────────────────────────────────────
@@ -534,7 +691,7 @@ def product_list(request):
 @login_required
 def product_create(request):
     if request.method == 'POST':
-        Product.objects.create(
+        p = Product.objects.create(
             name=request.POST['name'],
             description=request.POST.get('description', ''),
             unit_price=request.POST['unit_price'],
@@ -542,6 +699,7 @@ def product_create(request):
             category=request.POST.get('category', ''),
             created_by=request.user,
         )
+        log_audit(request, 'produit', p.pk, p.name, 'create', f'PU: {p.unit_price}€, TVA: {p.vat_rate}%')
         messages.success(request, 'Produit ajouté au catalogue.')
         return redirect('erp_product_list')
     return render(request, 'erp/product_form.html', {'product': None})
@@ -557,15 +715,43 @@ def product_edit(request, pk):
         p.vat_rate = request.POST.get('vat_rate', 20)
         p.category = request.POST.get('category', '')
         p.save()
+        log_audit(request, 'produit', p.pk, p.name, 'edit', f'PU: {p.unit_price}€, Catégorie: {p.category}')
         messages.success(request, 'Produit modifié.')
         return redirect('erp_product_list')
     return render(request, 'erp/product_form.html', {'product': p})
+
+
+# ─── Audit log ─────────────────────────────────────────────────────
+
+@login_required
+def audit_log_list(request):
+    q = request.GET.get('q', '')
+    model = request.GET.get('model', '')
+    action = request.GET.get('action', '')
+    logs = ErpAuditLog.objects.select_related('user').all()
+    if q:
+        logs = logs.filter(Q(object_repr__icontains=q) | Q(details__icontains=q))
+    if model:
+        logs = logs.filter(model_name=model)
+    if action:
+        logs = logs.filter(action=action)
+    paginator = Paginator(logs, 50)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'erp/audit_log_list.html', {
+        'logs': page,
+        'q': q,
+        'filter_model': model,
+        'filter_action': action,
+        'model_choices': ['devis', 'facture', 'avoir', 'facture_fournisseur', 'paiement', 'relance', 'produit'],
+        'action_choices': ErpAuditLog.ACTION_CHOICES,
+    })
 
 
 @login_required
 def product_delete(request, pk):
     p = get_object_or_404(Product, pk=pk)
     if request.method == 'POST':
+        log_audit(request, 'produit', p.pk, p.name, 'delete')
         p.delete()
         messages.success(request, f'Produit "{p.name}" supprimé.')
         return redirect('erp_product_list')

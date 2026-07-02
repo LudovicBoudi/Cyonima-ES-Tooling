@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #222; margin: 40px; }
+  .header { border-bottom: 2px solid #1a3a6b; padding-bottom: 15px; margin-bottom: 30px; }
+  .header h1 { color: #1a3a6b; font-size: 18px; margin: 0; }
+  .header p { color: #666; margin: 2px 0; }
+  .client-info { margin-bottom: 30px; }
+  .client-info p { margin: 2px 0; }
+  .subject { background: #f3f4f6; padding: 15px; margin-bottom: 25px; border-left: 4px solid #dc2626; }
+  .subject h2 { margin: 0 0 5px 0; font-size: 14px; color: #dc2626; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #ddd; }
+  th { background: #f3f4f6; }
+  .totals { text-align: right; margin-top: 20px; }
+  .totals p { margin: 3px 0; }
+  .footer { margin-top: 50px; border-top: 1px solid #ddd; padding-top: 15px; font-size: 10px; color: #666; }
+  .level-label { font-weight: bold; }
+</style>
+</head><body>
+<div class="header">
+  <h1>Cyonima</h1>
+  <p>13 Rue Françoise Dolto</p>
+  <p>77186 Noisiel</p>
+</div>
+
+<div class="client-info">
+  <p><strong>{{ inv.company.name }}</strong></p>
+  {% if inv.company.address %}<p>{{ inv.company.address }}</p>{% endif %}
+  {% if inv.company.postal_code and inv.company.city %}<p>{{ inv.company.postal_code }} {{ inv.company.city }}</p>{% endif %}
+</div>
+
+<div class="subject">
+  {% if reminder.level == 1 %}
+  <h2>Lettre de relance — 1ʳᵉ relance</h2>
+  {% elif reminder.level == 2 %}
+  <h2>Lettre de relance — 2ᵉ relance</h2>
+  {% elif reminder.level == 3 %}
+  <h2>Lettre de relance — 3ᵉ relance avant mise en demeure</h2>
+  {% endif %}
+  <p>Objet : Facture {{ inv.number }} du {{ inv.date|date:"d/m/Y" }} — échue depuis {{ inv.due_date|date:"d/m/Y" }}</p>
+</div>
+
+{% if reminder.level == 1 %}
+<p>Madame, Monsieur,</p>
+<p>Nous vous rappelons que la facture suivante est arrivée à échéance le {{ inv.due_date|date:"d/m/Y" }} et n'a pas encore été réglée.</p>
+{% elif reminder.level == 2 %}
+<p>Madame, Monsieur,</p>
+<p>Malgré notre première relance, la facture suivante demeure impayée. Nous vous remercions de bien vouloir procéder au règlement dans les plus brefs délais.</p>
+{% elif reminder.level == 3 %}
+<p>Madame, Monsieur,</p>
+<p>Malgré nos deux précédentes relances, la facture suivante reste impayée. À défaut de règlement sous 8 jours, nous nous verrons contraints de transmettre votre dossier à notre service contentieux.</p>
+{% endif %}
+
+<table>
+  <tr><th>N° facture</th><th>Date</th><th>Échéance</th><th>Montant TTC</th><th>Dont TVA</th></tr>
+  <tr>
+    <td>{{ inv.number }}</td>
+    <td>{{ inv.date|date:"d/m/Y" }}</td>
+    <td>{{ inv.due_date|date:"d/m/Y" }}</td>
+    <td>{{ inv.total_ttc }} €</td>
+    <td>{{ inv.total_tva }} €</td>
+  </tr>
+</table>
+
+<div class="totals">
+  <p class="level-label">Total dû : <strong>{{ reminder.amount_due }} €</strong></p>
+  {% if inv.remaining != reminder.amount_due %}
+  <p class="level-label">Dont reste à payer : <strong>{{ inv.remaining }} €</strong></p>
+  {% endif %}
+</div>
+
+{% if reminder.level == 3 %}
+<div style="margin-top: 30px; border: 2px solid #dc2626; padding: 15px; font-weight: bold; color: #dc2626;">
+  ⚠ DERNIER AVANT CONTENTIEUX — Merci de régulariser sous 8 jours.
+</div>
+{% endif %}
+
+<div class="footer">
+  <p>Cyonima — 13 Rue Françoise Dolto, 77186 Noisiel</p>
+  <p>contact@cyonima.com</p>
+</div>
+</body></html>

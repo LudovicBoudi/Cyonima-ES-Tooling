@@ -11,6 +11,9 @@
             <a href="{% url 'erp_supplier_invoice_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_supplier_invoice' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">Factures fournisseurs</a>
             <a href="{% url 'erp_payment_create' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'erp_payment_create' %}bg-gray-100 font-medium{% endif %}">Enregistrer un paiement</a>
             <a href="{% url 'erp_product_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_product' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">📦 Catalogue produits</a>
+            <a href="{% url 'erp_tva_report' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'erp_tva_report' %}bg-gray-100 font-medium{% endif %}">📊 Déclaration TVA</a>
+            <a href="{% url 'erp_reminder_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'erp_reminder' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">📬 Relances</a>
+            <a href="{% url 'erp_audit_log' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'erp_audit_log' %}bg-gray-100 font-medium{% endif %}">📋 Audit</a>
             <hr class="my-2">
             <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
         </div>

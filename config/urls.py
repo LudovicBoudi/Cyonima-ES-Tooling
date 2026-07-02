@@ -21,6 +21,7 @@ urlpatterns = [
     path('rh/', include('apps.hr.urls')),
     path('erp/', include('apps.erp.urls')),
     path('ged/', include('apps.ged.urls')),
+    path('notifications/', include('apps.notifications.urls')),
     path('ressources/', include('apps.ressources.urls')),
     path('blog/securite/', include('apps.blogs.sec_blog.urls')),
     path('blog/direction/', include('apps.blogs.dg_blog.urls')),
