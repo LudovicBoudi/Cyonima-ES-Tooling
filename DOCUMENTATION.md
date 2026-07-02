@@ -103,13 +103,39 @@ Portail de tickets d'incidents et d'expressions de besoins (EBI).
 
 ## 5. ALM — Gestion de projet (`/projects/`)
 
+Module de cycle de vie applicatif complet : exigences, tests, campagnes, tickets, sprints.
+
 ### Projets
 - CRUD de projets.
 - Membres avec rôles : Chef de projet, Développeur, Testeur, Intégrateur.
 - Accès restreint aux membres + administrateurs.
+- **Tableau de bord enrichi** : 4 compteurs (membres, exigences, tests, tickets), 3 graphiques Chart.js (tickets par statut, tickets par type, exigences par catégorie), campagnes de test, échéances à venir, activité récente, derniers tickets.
+
+### Exigences
+- Arborescence avec dossiers parents et sous-exigences.
+- **Liste** : recherche texte, filtre par catégorie, vue arborescente.
+- **Détail** (`/exigences/<id>/`) : informations complètes, dossier parent cliquable, upload de pièces jointes, liste des tests liés.
+- **Création** : type, dossier parent, nom, description.
+- **Dossier** : création via modal depuis la liste (Nouveau dossier).
+- **Export CSV** : toutes les exigences du projet.
+- **Import CSV** : colonnes `nom`, `categorie`, `description`, `parent` (numéro de dossier).
+- **Traçabilité** : matrice reliant exigences et scénarios de test.
+
+### Tests
+- Scénarios de test avec étapes (action → résultat attendu).
+- **Liste** : recherche texte, filtre par exigence liée, pagination.
+- **Exécution** (`/tests/<id>/executer/`) : formulaire pas-à-pas avec statut par étape (Réussi/Échec/Bloqué), résultat global, notes. Historique des exécutions.
+- **Export CSV** : tous les scénarios avec leurs étapes.
+- **Import CSV** : colonnes `nom`, `type`, `description`, `assigne`, `echeance`.
+
+### Campagnes de test
+- Regroupement de tests avec statut de progression.
+- **Kanban** : colonnes Backlog → En cours → Vérifié → Validé avec drag-and-drop (SortableJS + AJAX).
+- **Rapport** : compteurs par statut, détail des tests.
+- **Export CSV** : tests d'une campagne avec statut et position.
 
 ### Tickets
-3 types avec leurs workflows :
+3 types avec workflows distincts :
 
 | Type | Préfixe | Workflow |
 |------|---------|----------|
@@ -118,20 +144,43 @@ Portail de tickets d'incidents et d'expressions de besoins (EBI).
 | **FT** | `FT-XXXX` | nouveau → assigne → en_cours → valide → a_clore → cloture |
 
 Vues disponibles :
-- **Liste** : filtrage par type.
-- **Kanban** : colonnes par statut.
+- **Liste** : filtres par type (onglets), statut, assigné, recherche texte, pagination.
+- **Kanban** : colonnes par statut avec **drag-and-drop** (SortableJS + AJAX), mise à jour en temps réel.
 - **Gantt** : timeline avec dates de début/échéance.
-- **Détail** : transitions avec suivi du temps (heures passées) et commentaires.
+- **Détail** : transitions avec suivi du temps (heures passées), commentaires, historique complet.
+- **Édition** (`/tickets/<id>/modifier/`) : modifier titre, description, assignation, dates.
 - **Export CSV** : tous les tickets du projet.
+- **Import CSV** : colonnes `titre`, `type`, `description`, `assigne` (username), `echeance` (YYYY-MM-DD).
+- **Notifications automatiques** : lors de l'assignation, du changement de statut (pour la personne assignée).
+- **Échéances** : commande `notify_deadlines` pour notifier les tickets à échéance J+2.
 
-### Exigences / Tests
-- Exigences rattachées aux projets.
-- Scénarios de test et campagnes de test.
-- Traçabilité entre exigences et tests.
+### Sprints
+- Modèle Sprint (nom, description, dates début/fin, actif/inactif).
+- **Liste** : tous les sprints du projet avec barre de progression.
+- **Détail** : tickets du sprint, compteurs par statut, **burndown chart** (Chart.js).
+- **Ajout de tickets** : sélection multiple depuis la liste des tickets disponibles.
+- Lien dans le menu latéral.
 
-### Journal / Rapports
-- Journal d'activité.
-- Rapport de temps : heures passées par utilisateur et type de ticket.
+### Journal
+- Comptes rendus d'activité manuscrits.
+- **Liste** : recherche dans le contenu, pagination.
+
+### Audit (journal des modifications)
+- Modèle `AuditLog` enregistrant automatiquement : créations, modifications, suppressions, changements de statut.
+- **Liste** : filtres par action et type d'entité, pagination.
+- Hooks dans : création/changement de statut/édition/kanban des tickets.
+- Lien "Audit" dans le menu latéral.
+
+### Rapports
+- **Rapport temps** : heures passées par utilisateur et type de ticket (`/rapports/temps/`).
+
+### Notifications
+- Module transverse avec cloche 🔔 dans la barre de navigation (badge avec compteur de notifications non lues).
+- Notifications **in-app** créées automatiquement sur :
+  - Assignation d'un ticket
+  - Changement de statut d'un ticket assigné
+  - Échéance approchante (via commande `notify_deadlines`)
+- Page de liste : `/notifications/` avec lecture/tri.
 
 ---
 

@@ -1,0 +1,63 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}{{ req.get_formatted_number }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h1 class="text-xl font-bold">{{ req.get_formatted_number }}</h1>
+            <p class="text-gray-500 text-sm">{{ req.name }}</p>
+        </div>
+        <div class="flex gap-2 items-center">
+            <span class="px-2 py-0.5 rounded text-xs font-medium bg-gray-100">{{ req.get_category_display }}</span>
+            <a href="{% url 'requirement_edit' project.id req.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>
+            <a href="{% url 'requirement_delete' project.id req.id %}" class="text-sm text-red-600 hover:underline">Suppr.</a>
+        </div>
+    </div>
+    {% if req.parent %}
+    <div class="text-sm text-gray-500 mb-2">Dossier parent : <a href="{% url 'requirement_detail' project.id req.parent.id %}" class="text-blue-600 hover:underline">{{ req.parent.get_formatted_number }} - {{ req.parent.name }}</a></div>
+    {% endif %}
+    {% if req.description %}
+    <div class="text-sm text-gray-700 border-t pt-4">{{ req.description|linebreaks }}</div>
+    {% endif %}
+    <div class="text-xs text-gray-400 mt-4 border-t pt-2">
+        Créé le {{ req.created_at|date:"d/m/Y H:i" }} • Modifié le {{ req.updated_at|date:"d/m/Y H:i" }}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Pièces jointes</h2>
+        <form method="post" enctype="multipart/form-data" class="flex gap-2 mb-4">
+            {% csrf_token %}
+            <input type="file" name="file" required class="text-sm flex-1">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-3 py-1.5 rounded text-sm hover:bg-[#142b52]">Ajouter</button>
+        </form>
+        {% if req.attachments.all %}
+        <ul class="divide-y text-sm">
+            {% for a in req.attachments.all %}
+            <li class="py-2 flex justify-between items-center">
+                <a href="{{ a.file.url }}" class="text-blue-600 hover:underline" target="_blank">{{ a.filename }}</a>
+                <span class="text-xs text-gray-400">{{ a.uploaded_by.username }}, {{ a.uploaded_at|date:"d/m/Y" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-gray-400">Aucune pièce jointe.</p>
+        {% endif %}
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Tests liés</h2>
+        {% if tests %}
+        <ul class="divide-y text-sm">
+            {% for t in tests %}
+            <li class="py-2">
+                <a href="{% url 'test_execute' project.id t.id %}" class="text-blue-600 hover:underline">{{ t.get_formatted_number }} - {{ t.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-gray-400">Aucun test lié.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

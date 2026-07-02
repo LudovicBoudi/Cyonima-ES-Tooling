@@ -100,3 +100,26 @@ class TestAttachment(models.Model):
 
     def __str__(self):
         return self.filename
+
+
+class TestExecution(models.Model):
+    RESULT_CHOICES = [
+        ('reussi', 'Réussi'),
+        ('en_echec', 'En échec'),
+        ('bloque', 'Bloqué'),
+        ('non_execute', 'Non exécuté'),
+    ]
+    test_scenario = models.ForeignKey(TestScenario, on_delete=models.CASCADE, related_name='executions')
+    executed_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    result = models.CharField(max_length=20, choices=RESULT_CHOICES, default='non_execute', verbose_name='Résultat')
+    notes = models.TextField(blank=True, verbose_name='Notes')
+    step_results = models.JSONField(default=dict, blank=True, verbose_name='Résultats par étape')
+    executed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Exécution de test'
+        verbose_name_plural = 'Exécutions de test'
+        ordering = ['-executed_at']
+
+    def __str__(self):
+        return f"{self.test_scenario} - {self.get_result_display()} ({self.executed_at})"

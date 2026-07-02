@@ -1,24 +1,38 @@
 {% extends 'alm/base_project.html' %}
-
 {% block title %}Tickets - {{ project.name }}{% endblock %}
-
 {% block alm_content %}
 <div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b flex justify-between items-center">
+    <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
         <div class="flex items-center gap-4">
             <h1 class="text-xl font-semibold">Tickets</h1>
             <div class="flex gap-1 text-sm">
-                <a href="?type=incident" class="px-3 py-1 rounded {% if current_type == 'incident' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %}">Incidents</a>
-                <a href="?type=tache" class="px-3 py-1 rounded {% if current_type == 'tache' %}bg-blue-100 text-blue-700{% else %}bg-gray-100 text-gray-600{% endif %}">Tâches</a>
-                <a href="?type=ft" class="px-3 py-1 rounded {% if current_type == 'ft' %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-600{% endif %}">FT</a>
+                <a href="?{% if q %}q={{ q }}&{% endif %}{% if filter_status %}status={{ filter_status }}&{% endif %}{% if filter_assigned %}assigned={{ filter_assigned }}&{% endif %}type=incident" class="px-3 py-1 rounded {% if current_type == 'incident' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-600{% endif %}">Incidents</a>
+                <a href="?{% if q %}q={{ q }}&{% endif %}{% if filter_status %}status={{ filter_status }}&{% endif %}{% if filter_assigned %}assigned={{ filter_assigned }}&{% endif %}type=tache" class="px-3 py-1 rounded {% if current_type == 'tache' %}bg-blue-100 text-blue-700{% else %}bg-gray-100 text-gray-600{% endif %}">Tâches</a>
+                <a href="?{% if q %}q={{ q }}&{% endif %}{% if filter_status %}status={{ filter_status }}&{% endif %}{% if filter_assigned %}assigned={{ filter_assigned }}&{% endif %}type=ft" class="px-3 py-1 rounded {% if current_type == 'ft' %}bg-purple-100 text-purple-700{% else %}bg-gray-100 text-gray-600{% endif %}">FT</a>
             </div>
         </div>
         <div class="flex gap-2">
             <a href="{% url 'ticket_kanban' project.id %}?type={{ current_type }}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Kanban</a>
             <a href="{% url 'ticket_gantt' project.id %}?type={{ current_type }}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Gantt</a>
+            <a href="{% url 'ticket_export_csv' project.id %}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">CSV</a>
+            <a href="{% url 'ticket_import_csv' project.id %}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Importer</a>
             <a href="{% url 'ticket_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau</a>
         </div>
     </div>
+    <form method="get" class="flex flex-wrap gap-2 px-6 py-3 border-b bg-gray-50">
+        <input type="hidden" name="type" value="{{ current_type }}">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher..." class="border rounded px-3 py-1.5 text-sm flex-1 min-w-[150px]">
+        <select name="status" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Tous statuts</option>
+            {% for s in status_choices %}<option value="{{ s }}" {% if filter_status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+        </select>
+        <select name="assigned" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Tous assignés</option>
+            {% for m in members %}<option value="{{ m.user.id }}" {% if filter_assigned|slugify == m.user.id|slugify %}selected{% endif %}>{{ m.user.username }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded text-sm hover:bg-gray-700">Filtrer</button>
+        <a href="{% url 'ticket_list' project.id %}?type={{ current_type }}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>
+    </form>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead class="bg-gray-50 text-gray-600">
@@ -28,6 +42,7 @@
                     <th class="text-left px-6 py-3">Statut</th>
                     <th class="text-left px-6 py-3">Assigné</th>
                     <th class="text-left px-6 py-3">Créé</th>
+                    <th class="text-left px-6 py-3">Actions</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
@@ -38,12 +53,22 @@
                     <td class="px-6 py-3">{{ t.get_status_display }}</td>
                     <td class="px-6 py-3 text-gray-500">{{ t.assigned_to|default:"-" }}</td>
                     <td class="px-6 py-3 text-gray-400 text-xs">{{ t.created_at|date:"d/m/Y" }}</td>
+                    <td class="px-6 py-3">
+                        <a href="{% url 'ticket_edit' project.id t.id %}" class="text-xs text-blue-600 hover:underline">Modifier</a>
+                    </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Aucun ticket</td></tr>
+                <tr><td colspan="6" class="px-6 py-8 text-center text-gray-500">Aucun ticket</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% if tickets.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 px-6 py-4 text-sm border-t">
+        {% if tickets.has_previous %}<a href="?page={{ tickets.previous_page_number }}&type={{ current_type }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_assigned %}&assigned={{ filter_assigned }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ tickets.number }}/{{ tickets.paginator.num_pages }}</span>
+        {% if tickets.has_next %}<a href="?page={{ tickets.next_page_number }}&type={{ current_type }}{% if q %}&q={{ q }}{% endif %}{% if filter_status %}&status={{ filter_status }}{% endif %}{% if filter_assigned %}&assigned={{ filter_assigned }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Journal des modifications - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b">
+        <h1 class="text-xl font-semibold">Journal des modifications</h1>
+    </div>
+    <form method="get" class="flex flex-wrap gap-2 px-6 py-3 border-b bg-gray-50">
+        <select name="action" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Toutes actions</option>
+            {% for code, label in actions %}<option value="{{ code }}" {% if filter_action == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+        <select name="entity" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Toutes entités</option>
+            {% for e in entity_types %}<option value="{{ e }}" {% if filter_entity == e %}selected{% endif %}>{{ e }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded text-sm hover:bg-gray-700">Filtrer</button>
+        <a href="{% url 'audit_log_list' project.id %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>
+    </form>
+    <div class="divide-y">
+        {% for log in logs %}
+        <div class="px-6 py-3 text-sm flex items-start gap-3">
+            <span class="text-xs text-gray-400 shrink-0 w-16">{{ log.created_at|date:"H:i" }}</span>
+            <span class="text-xs text-gray-400 shrink-0 w-20">{{ log.created_at|date:"d/m/Y" }}</span>
+            <span class="font-medium shrink-0 w-24">{{ log.user|default:"-" }}</span>
+            <span class="px-2 py-0.5 rounded text-xs font-medium
+                {% if log.action == 'create' %}bg-green-100 text-green-700
+                {% elif log.action == 'delete' %}bg-red-100 text-red-700
+                {% elif log.action == 'status_change' %}bg-blue-100 text-blue-700
+                {% else %}bg-gray-100 text-gray-700{% endif %}">{{ log.get_action_display }}</span>
+            <span class="text-gray-500 shrink-0">{{ log.entity_type }}</span>
+            <span class="flex-1">{{ log.summary }}</span>
+        </div>
+        {% empty %}
+        <div class="px-6 py-8 text-center text-gray-500">Aucune modification enregistrée</div>
+        {% endfor %}
+    </div>
+    {% if logs.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 px-6 py-4 text-sm border-t">
+        {% if logs.has_previous %}<a href="?page={{ logs.previous_page_number }}{% if filter_action %}&action={{ filter_action }}{% endif %}{% if filter_entity %}&entity={{ filter_entity }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ logs.number }}/{{ logs.paginator.num_pages }}</span>
+        {% if logs.has_next %}<a href="?page={{ logs.next_page_number }}{% if filter_action %}&action={{ filter_action }}{% endif %}{% if filter_entity %}&entity={{ filter_entity }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

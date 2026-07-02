@@ -1,18 +1,22 @@
 {% extends 'alm/base_project.html' %}
-
 {% block title %}Campagnes - {{ project.name }}{% endblock %}
-
 {% block alm_content %}
 <div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b flex justify-between items-center">
+    <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
         <h1 class="text-xl font-semibold">Campagnes de test</h1>
         <a href="{% url 'campaign_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouvelle campagne</a>
     </div>
+    <form method="get" class="flex flex-wrap gap-2 px-6 py-3 border-b bg-gray-50">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher..." class="border rounded px-3 py-1.5 text-sm flex-1 min-w-[150px]">
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded text-sm hover:bg-gray-700">Filtrer</button>
+        <a href="{% url 'campaign_list' project.id %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>
+    </form>
     <ul class="divide-y">
         {% for c in campaigns %}
         <li class="px-6 py-3 flex justify-between items-center">
             <a href="{% url 'campaign_detail' project.id c.id %}" class="font-medium hover:text-[#1a3a6b]">{{ c.name }}</a>
-            <div class="space-x-2">
+            <div class="flex gap-2 items-center">
+                <a href="{% url 'campaign_report' project.id c.id %}" class="text-sm text-green-600 hover:underline">Rapport</a>
                 <a href="{% url 'campaign_detail' project.id c.id %}" class="text-sm text-blue-600 hover:underline">Détail</a>
                 <a href="{% url 'campaign_delete' project.id c.id %}" class="text-sm text-red-600 hover:underline">Supprimer</a>
             </div>
@@ -21,5 +25,12 @@
         <li class="px-6 py-8 text-center text-gray-500">Aucune campagne</li>
         {% endfor %}
     </ul>
+    {% if campaigns.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 px-6 py-4 text-sm border-t">
+        {% if campaigns.has_previous %}<a href="?page={{ campaigns.previous_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ campaigns.number }}/{{ campaigns.paginator.num_pages }}</span>
+        {% if campaigns.has_next %}<a href="?page={{ campaigns.next_page_number }}{% if q %}&q={{ q }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

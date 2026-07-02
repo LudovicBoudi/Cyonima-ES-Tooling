@@ -1,21 +1,33 @@
 {% extends 'alm/base_project.html' %}
-
 {% block title %}Tests - {{ project.name }}{% endblock %}
-
 {% block alm_content %}
 <div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b flex justify-between items-center">
+    <div class="px-6 py-4 border-b flex flex-wrap justify-between items-center gap-3">
         <h1 class="text-xl font-semibold">Scénarios de test</h1>
-        <a href="{% url 'test_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau test</a>
+        <div class="flex gap-2">
+            <a href="{% url 'test_export_csv' project.id %}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">CSV</a>
+            <a href="{% url 'test_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau test</a>
+        </div>
     </div>
+    <form method="get" class="flex flex-wrap gap-2 px-6 py-3 border-b bg-gray-50">
+        <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher..." class="border rounded px-3 py-1.5 text-sm flex-1 min-w-[150px]">
+        <select name="req" class="border rounded px-3 py-1.5 text-sm">
+            <option value="">Toute exigence liée</option>
+            {% for r in all_reqs %}<option value="{{ r.id }}" {% if filter_req|slugify == r.id|slugify %}selected{% endif %}>{{ r.get_formatted_number }} {{ r.name }}</option>{% endfor %}
+        </select>
+        <button type="submit" class="bg-gray-600 text-white px-4 py-1.5 rounded text-sm hover:bg-gray-700">Filtrer</button>
+        <a href="{% url 'test_list' project.id %}" class="text-gray-500 px-3 py-1.5 text-sm hover:underline">Réinitialiser</a>
+    </form>
     <ul class="divide-y">
         {% for t in tests %}
         <li class="px-6 py-3 flex justify-between items-center">
             <div>
                 <span class="text-sm text-gray-500 mr-2">{{ t.get_formatted_number }}</span>
                 <span class="font-medium">{{ t.name }}</span>
+                <span class="text-xs text-gray-400 ml-2">{% for r in t.requirements.all %}{{ r.get_formatted_number }} {% endfor %}</span>
             </div>
-            <div class="space-x-2">
+            <div class="flex gap-2 items-center">
+                <a href="{% url 'test_execute' project.id t.id %}" class="text-sm text-green-600 hover:underline">Exécuter</a>
                 <a href="{% url 'test_edit' project.id t.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>
                 <a href="{% url 'test_delete' project.id t.id %}" class="text-sm text-red-600 hover:underline">Supprimer</a>
             </div>
@@ -24,5 +36,12 @@
         <li class="px-6 py-8 text-center text-gray-500">Aucun test</li>
         {% endfor %}
     </ul>
+    {% if tests.paginator.num_pages > 1 %}
+    <div class="flex justify-center gap-2 px-6 py-4 text-sm border-t">
+        {% if tests.has_previous %}<a href="?page={{ tests.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_req %}&req={{ filter_req }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">← Précédent</a>{% endif %}
+        <span class="px-3 py-1 text-gray-500">Page {{ tests.number }}/{{ tests.paginator.num_pages }}</span>
+        {% if tests.has_next %}<a href="?page={{ tests.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if filter_req %}&req={{ filter_req }}{% endif %}" class="px-3 py-1 border rounded hover:bg-gray-100">Suivant →</a>{% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

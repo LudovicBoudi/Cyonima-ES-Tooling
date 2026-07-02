@@ -1,0 +1,21 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Importer des tickets - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="max-w-xl mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-2">Importer des tickets (CSV)</h1>
+    <p class="text-sm text-gray-500 mb-4">
+        Le fichier CSV doit contenir les colonnes : <code>titre</code>, <code>type</code> (incident/tache/ft), <code>description</code>, <code>assigne</code> (nom d'utilisateur), <code>echeance</code> (YYYY-MM-DD). UTF-8 requis.
+    </p>
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Fichier CSV</label>
+            <input type="file" name="file" accept=".csv" required class="w-full text-sm">
+        </div>
+        <div class="flex gap-3">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Importer</button>
+            <a href="{% url 'ticket_list' project.id %}" class="px-4 py-2 border rounded text-sm hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

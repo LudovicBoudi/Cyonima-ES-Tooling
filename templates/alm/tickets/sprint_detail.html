@@ -1,0 +1,71 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}{{ sprint.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="flex justify-between items-start mb-4">
+        <div>
+            <h1 class="text-xl font-bold">{{ sprint.name }}</h1>
+            <p class="text-sm text-gray-500">{{ sprint.start_date|date:"d/m/Y" }} → {{ sprint.end_date|date:"d/m/Y" }}</p>
+            {% if sprint.description %}<p class="text-sm text-gray-600 mt-2">{{ sprint.description }}</p>{% endif %}
+        </div>
+        <a href="{% url 'sprint_add_tickets' project.id sprint.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Ajouter des tickets</a>
+    </div>
+    {% if tickets_by_status %}
+    <div class="flex gap-4 mb-4 text-sm">
+        {% for item in tickets_by_status %}
+        <div class="px-3 py-1 rounded bg-gray-100">{{ item.status }}: <strong>{{ item.count }}</strong></div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4">Tickets du sprint ({{ tickets|length }})</h2>
+    <table class="w-full text-sm">
+        <thead><tr class="bg-gray-50"><th class="text-left px-3 py-2">ID</th><th class="text-left px-3 py-2">Titre</th><th class="text-left px-3 py-2">Statut</th><th class="text-left px-3 py-2">Assigné</th></tr></thead>
+        <tbody class="divide-y">
+            {% for t in tickets %}
+            <tr class="hover:bg-gray-50">
+                <td class="px-3 py-2 font-mono text-xs">{{ t.get_formatted_number }}</td>
+                <td class="px-3 py-2"><a href="{% url 'ticket_detail' project.id t.id %}" class="text-blue-600 hover:underline">{{ t.title }}</a></td>
+                <td class="px-3 py-2">{{ t.get_status_display }}</td>
+                <td class="px-3 py-2 text-gray-500">{{ t.assigned_to|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="px-3 py-8 text-center text-gray-500">Aucun ticket dans ce sprint</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if burndown %}
+<div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-lg font-semibold mb-4">Burndown chart</h2>
+    <div class="relative" style="height: 200px;">
+        <canvas id="burndownChart"></canvas>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+new Chart(document.getElementById('burndownChart'), {
+    type: 'line',
+    data: {
+        labels: [{% for b in burndown %}'{{ b.date }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Réel',
+            data: [{% for b in burndown %}{{ b.remaining }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#1a3a6b',
+            fill: false,
+        }, {
+            label: 'Idéal',
+            data: [{% for b in burndown %}{{ b.ideal }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: '#9ca3af',
+            borderDash: [5, 5],
+            fill: false,
+        }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+});
+</script>
+{% endif %}
+{% endblock %}

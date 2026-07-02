@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count
+from django.utils import timezone
 from .models import Project, ProjectMember
 
 
@@ -51,7 +52,25 @@ def project_detail(request, project_id):
         'tests_count': project.test_scenarios.count(),
         'tickets_count': project.tickets.count(),
     }
-    return render(request, 'alm/projects/project_detail.html', {'project': project, 'stats': stats})
+    tickets_by_status = project.tickets.values('status').annotate(count=Count('id')).order_by('status')
+    tickets_by_type = project.tickets.values('ticket_type').annotate(count=Count('id')).order_by('ticket_type')
+    requirements_by_category = project.requirements.values('category').annotate(count=Count('id')).order_by('category')
+    recent_tickets = project.tickets.select_related('assigned_to', 'created_by').order_by('-created_at')[:5]
+    campaigns = project.campaigns.annotate(test_count=Count('tests')).all()
+    today = timezone.now().date()
+    upcoming_deadlines = project.tickets.filter(due_date__gte=today, status__in=['nouveau', 'assigne', 'en_cours']).order_by('due_date')[:5]
+    from apps.alm.tickets.models import TicketLog
+    recent_activity = TicketLog.objects.filter(ticket__project=project).select_related('user', 'ticket').order_by('-created_at')[:10]
+    return render(request, 'alm/projects/project_detail.html', {
+        'project': project, 'stats': stats,
+        'tickets_by_status': list(tickets_by_status),
+        'tickets_by_type': list(tickets_by_type),
+        'requirements_by_category': list(requirements_by_category),
+        'recent_tickets': recent_tickets,
+        'campaigns': campaigns,
+        'upcoming_deadlines': upcoming_deadlines,
+        'recent_activity': recent_activity,
+    })
 
 
 @login_required

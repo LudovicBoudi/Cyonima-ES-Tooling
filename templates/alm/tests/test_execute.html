@@ -1,0 +1,62 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Exécuter {{ scenario.get_formatted_number }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b">
+        <h1 class="text-xl font-semibold">Exécuter : {{ scenario.get_formatted_number }} - {{ scenario.name }}</h1>
+    </div>
+    {% if last_exec %}
+    <div class="px-6 py-3 border-b bg-gray-50 text-sm">
+        Dernière exécution : <span class="font-medium">{{ last_exec.get_result_display }}</span>
+        par {{ last_exec.executed_by.get_full_name|default:last_exec.executed_by.username }}
+        le {{ last_exec.executed_at|date:"d/m/Y H:i" }}
+    </div>
+    {% endif %}
+    <form method="post" class="p-6 space-y-4">
+        {% csrf_token %}
+        {% if scenario.execution_conditions %}
+        <div class="bg-yellow-50 border border-yellow-200 rounded p-3 text-sm">
+            <strong>Conditions :</strong> {{ scenario.execution_conditions }}
+        </div>
+        {% endif %}
+        {% if scenario.description %}
+        <div class="text-sm text-gray-600">{{ scenario.description }}</div>
+        {% endif %}
+        <table class="w-full text-sm border">
+            <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left">#</th><th class="px-3 py-2 text-left">Action</th><th class="px-3 py-2 text-left">Résultat attendu</th><th class="px-3 py-2">Résultat</th></tr></thead>
+            <tbody class="divide-y">
+                {% for step in scenario.steps.all %}
+                <tr>
+                    <td class="px-3 py-2">{{ step.step_number }}</td>
+                    <td class="px-3 py-2">{{ step.action }}</td>
+                    <td class="px-3 py-2">{{ step.expected_result }}</td>
+                    <td class="px-3 py-2">
+                        <select name="step_{{ step.id }}" class="border rounded px-2 py-1 text-sm">
+                            <option value="reussi">Réussi</option>
+                            <option value="en_echec">En échec</option>
+                            <option value="bloque">Bloqué</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div>
+            <label class="block text-sm font-medium mb-1">Résultat global</label>
+            <select name="result" class="border rounded px-3 py-2 text-sm" required>
+                <option value="reussi">Réussi</option>
+                <option value="en_echec">En échec</option>
+                <option value="bloque">Bloqué</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Notes</label>
+            <textarea name="notes" rows="3" class="border rounded px-3 py-2 w-full text-sm"></textarea>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="bg-[#1a3a6b] text-white px-6 py-2 rounded text-sm hover:bg-[#142b52]">Enregistrer</button>
+            <a href="{% url 'test_list' project.id %}" class="px-6 py-2 border rounded text-sm hover:bg-gray-50">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

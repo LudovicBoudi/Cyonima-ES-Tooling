@@ -1,0 +1,37 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Rapport {{ campaign.name }} - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Rapport : {{ campaign.name }}</h1>
+        <a href="{% url 'campaign_export_csv' project.id campaign.id %}" class="px-3 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">CSV</a>
+    </div>
+    <div class="grid grid-cols-4 gap-4 p-6">
+{% for code, label in status_choices %}
+<div class="text-center p-4 rounded-lg border {% if code == 'valide' %}bg-green-50 border-green-200{% elif code == 'verifie' %}bg-blue-50 border-blue-200{% elif code == 'en_cours' %}bg-yellow-50 border-yellow-200{% else %}bg-gray-50 border-gray-200{% endif %}">
+    {% for s, c in counts %}{% if s == code %}<div class="text-2xl font-bold">{{ c }}</div>{% endif %}{% endfor %}
+    <div class="text-xs text-gray-500">{{ label }}</div>
+</div>
+{% endfor %}
+        <div class="text-center p-4 rounded-lg border bg-gray-50 border-gray-200">
+            <div class="text-2xl font-bold">{{ total }}</div>
+            <div class="text-xs text-gray-500">Total</div>
+        </div>
+    </div>
+    <div class="px-6 py-4">
+        <h2 class="font-semibold mb-2">Détail des tests</h2>
+        <table class="w-full text-sm border">
+            <thead><tr class="bg-gray-50"><th class="px-3 py-2 text-left">Test</th><th class="px-3 py-2 text-left">Statut</th><th class="px-3 py-2 text-left">Position</th></tr></thead>
+            <tbody class="divide-y">
+                {% for ct in tests %}
+                <tr>
+                    <td class="px-3 py-2">{{ ct.test_scenario.get_formatted_number }} - {{ ct.test_scenario.name }}</td>
+                    <td class="px-3 py-2">{{ ct.get_status_display }}</td>
+                    <td class="px-3 py-2 text-gray-400">{{ ct.position }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'alm/base_project.html' %}
+{% block title %}Sprints - {{ project.name }}{% endblock %}
+{% block alm_content %}
+<div class="bg-white rounded-lg shadow">
+    <div class="px-6 py-4 border-b flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Sprints</h1>
+        <a href="{% url 'sprint_create' project.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Nouveau sprint</a>
+    </div>
+    <div class="divide-y">
+        {% for s in sprints %}
+        <div class="px-6 py-4 flex items-center gap-4">
+            <div class="flex-1">
+                <a href="{% url 'sprint_detail' project.id s.id %}" class="font-medium hover:text-[#1a3a6b]">{{ s.name }}</a>
+                <div class="text-xs text-gray-500">{{ s.start_date|date:"d/m/Y" }} → {{ s.end_date|date:"d/m/Y" }}</div>
+            </div>
+            <div class="text-sm text-gray-500">{{ s.ticket_count }} tickets</div>
+            {% if s.completed_count and s.ticket_count %}
+            <div class="w-24 bg-gray-200 rounded-full h-2">
+                <div class="bg-green-500 h-2 rounded-full" style="width:{% widthratio s.completed_count s.ticket_count 100 %}%"></div>
+            </div>
+            {% endif %}
+            {% if s.is_active %}<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Actif</span>{% endif %}
+            <a href="{% url 'sprint_detail' project.id s.id %}" class="text-sm text-blue-600 hover:underline">Détail</a>
+        </div>
+        {% empty %}
+        <div class="px-6 py-8 text-center text-gray-500">Aucun sprint</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

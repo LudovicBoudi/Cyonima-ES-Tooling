@@ -1,7 +1,5 @@
 {% extends 'alm/base_project.html' %}
-
 {% block title %}{{ project.name }}{% endblock %}
-
 {% block alm_content %}
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">{{ project.name }}</h1>
@@ -9,7 +7,7 @@
 </div>
 <p class="text-gray-500 mb-6">{{ project.description|default:"Aucune description" }}</p>
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-lg shadow p-4 text-center">
         <div class="text-3xl font-bold text-[#1a3a6b]">{{ stats.members_count }}</div>
         <div class="text-sm text-gray-500">Membres</div>
@@ -27,4 +25,138 @@
         <div class="text-sm text-gray-500">Tickets</div>
     </div>
 </div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">Tickets par statut</h3>
+        <canvas id="statusChart" height="180"></canvas>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">Tickets par type</h3>
+        <canvas id="typeChart" height="180"></canvas>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">Exigences par catégorie</h3>
+        <canvas id="catChart" height="180"></canvas>
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">Campagnes de test</h3>
+        {% if campaigns %}
+        <div class="space-y-2">
+            {% for c in campaigns %}
+            <div class="flex justify-between items-center text-sm">
+                <span>{{ c.name }}</span>
+                <span class="{% if c.test_count > 0 %}text-green-600{% else %}text-gray-400{% endif %}">{{ c.test_count }} tests</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-400 text-sm">Aucune campagne</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">📅 Échéances à venir</h3>
+        {% if upcoming_deadlines %}
+        <div class="space-y-2 text-sm">
+            {% for t in upcoming_deadlines %}
+            <div class="flex justify-between items-center p-2 rounded {% if t.due_date < today %}bg-red-50{% else %}bg-gray-50{% endif %}">
+                <span>{{ t.title|truncatewords:8 }}</span>
+                <span class="{% if t.due_date < today %}text-red-600 font-medium{% else %}text-gray-500{% endif %}">{{ t.due_date|date:"d/m/Y" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-400 text-sm">Aucune échéance à venir</p>
+        {% endif %}
+    </div>
+    <div class="bg-white rounded-xl shadow p-4">
+        <h3 class="font-semibold text-sm mb-3">🕐 Activité récente</h3>
+        {% if recent_activity %}
+        <div class="space-y-2 text-sm max-h-64 overflow-y-auto">
+            {% for log in recent_activity %}
+            <div class="flex justify-between items-start border-b border-gray-100 pb-2">
+                <div>
+                    <span class="font-medium">{{ log.user.username }}</span>
+                    <span class="text-gray-500">{{ log.from_status }} → {{ log.to_status }}</span>
+                    <a href="{% url 'ticket_detail' project.id log.ticket.id %}" class="text-blue-600 hover:underline">{{ log.ticket.get_formatted_number }}</a>
+                </div>
+                <span class="text-xs text-gray-400">{{ log.created_at|timesince }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-400 text-sm">Aucune activité récente</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow p-4 mb-6">
+    <h3 class="font-semibold text-sm mb-3">🎫 Derniers tickets</h3>
+    {% if recent_tickets %}
+    <div class="space-y-2 text-sm">
+        {% for t in recent_tickets %}
+        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-xs font-medium {% if t.ticket_type == 'incident' %}bg-red-100 text-red-700{% elif t.ticket_type == 'tache' %}bg-blue-100 text-blue-700{% else %}bg-purple-100 text-purple-700{% endif %}">{{ t.get_ticket_type_display }}</span>
+                <a href="{% url 'ticket_detail' project.id t.id %}" class="text-blue-600 hover:underline font-medium">{{ t.get_formatted_number }} {{ t.title }}</a>
+                <span class="text-gray-500">{{ t.assigned_to|default:'Non assigné' }}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-xs font-medium
+                {% if t.status == 'cloture' %}bg-green-100 text-green-700
+                {% elif t.status == 'en_cours' %}bg-amber-100 text-amber-700
+                {% elif t.status == 'nouveau' %}bg-gray-100 text-gray-600
+                {% else %}bg-blue-100 text-blue-700{% endif %}">{{ t.get_status_display }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-400 text-sm">Aucun ticket</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_head %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const statusCtx = document.getElementById('statusChart');
+const typeCtx = document.getElementById('typeChart');
+const catCtx = document.getElementById('catChart');
+const statusData = {{ tickets_by_status|safe }};
+const typeData = {{ tickets_by_type|safe }};
+const catData = {{ requirements_by_category|safe }};
+
+function makePie(ctx, data, labelKey, valueKey) {
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: data.map(d => d[labelKey]),
+            datasets: [{
+                data: data.map(d => d[valueKey]),
+                backgroundColor: ['#1a3a6b', '#eab308', '#22c55e', '#ef4444', '#a855f7', '#06b6d4', '#f97316'],
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+    });
+}
+function makeBar(ctx, data, labelKey, valueKey) {
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(d => d[labelKey]),
+            datasets: [{
+                data: data.map(d => d[valueKey]),
+                backgroundColor: ['#1a3a6b', '#eab308', '#22c55e', '#ef4444', '#a855f7', '#06b6d4', '#f97316', '#84cc16'],
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+}
+if (statusData.length) makePie(statusCtx, statusData, 'status', 'count');
+if (typeData.length) makePie(typeCtx, typeData, 'ticket_type', 'count');
+if (catData.length) makeBar(catCtx, catData, 'category', 'count');
+</script>
 {% endblock %}

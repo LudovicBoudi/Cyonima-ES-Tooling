@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
-from .models import TestScenario, TestStep, TestCampaign, CampaignTest, TestAttachment
+from django.db.models import Q
+from django.core.paginator import Paginator
+from .models import TestScenario, TestStep, TestCampaign, CampaignTest, TestAttachment, TestExecution
 from apps.alm.projects.models import Project
 from apps.alm.projects.views import can_access_project
 from apps.alm.requirements.models import Requirement
@@ -14,8 +15,19 @@ def test_list(request, project_id):
     if not can_access_project(project, request.user):
         messages.error(request, "Accès refusé.")
         return redirect('project_list')
-    tests = project.test_scenarios.all()
-    return render(request, 'alm/tests/test_list.html', {'project': project, 'tests': tests})
+    q_val = request.GET.get('q', '')
+    r_val = request.GET.get('req', '')
+    tests = project.test_scenarios.select_related('project').prefetch_related('requirements').all()
+    if q_val:
+        tests = tests.filter(Q(name__icontains=q_val) | Q(description__icontains=q_val) | Q(number__icontains=q_val))
+    if r_val:
+        tests = tests.filter(requirements__id=r_val)
+    paginator = Paginator(tests, 25)
+    page = paginator.get_page(request.GET.get('page'))
+    all_reqs = project.requirements.exclude(category='folder')
+    return render(request, 'alm/tests/test_list.html', {
+        'project': project, 'tests': page, 'q': q_val, 'filter_req': r_val, 'all_reqs': all_reqs,
+    })
 
 
 @login_required
@@ -97,13 +109,65 @@ def test_delete(request, project_id, test_id):
 
 
 @login_required
+def test_execute(request, project_id, test_id):
+    project = get_object_or_404(Project, id=project_id)
+    scenario = get_object_or_404(TestScenario, id=test_id, project=project)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    last_exec = scenario.executions.order_by('-executed_at').first()
+    if request.method == 'POST':
+        result = request.POST.get('result', 'en_echec')
+        notes = request.POST.get('notes', '')
+        step_results = {}
+        for step in scenario.steps.all():
+            sr = request.POST.get(f'step_{step.id}', 'reussi')
+            step_results[f'step_{step.id}'] = sr
+        TestExecution.objects.create(
+            test_scenario=scenario,
+            executed_by=request.user,
+            result=result,
+            notes=notes,
+            step_results=step_results,
+        )
+        messages.success(request, "Exécution enregistrée.")
+        return redirect('test_list', project_id=project.id)
+    return render(request, 'alm/tests/test_execute.html', {
+        'project': project, 'scenario': scenario, 'last_exec': last_exec,
+    })
+
+
+@login_required
+def test_export_csv(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    import csv
+    from django.http import HttpResponse
+    resp = HttpResponse(content_type='text/csv; charset=utf-8')
+    resp['Content-Disposition'] = f'attachment; filename="tests_{project.id}.csv"'
+    resp.write('\ufeff')
+    w = csv.writer(resp)
+    w.writerow(['N°', 'Nom', 'Description', 'Conditions', 'Étapes'])
+    for t in project.test_scenarios.all().order_by('number'):
+        steps = '; '.join([f"{s.step_number}: {s.action} -> {s.expected_result}" for s in t.steps.all()])
+        w.writerow([t.get_formatted_number(), t.name, t.description, t.execution_conditions, steps])
+    return resp
+
+
+@login_required
 def campaign_list(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     if not can_access_project(project, request.user):
         messages.error(request, "Accès refusé.")
         return redirect('project_list')
+    q_val = request.GET.get('q', '')
     campaigns = project.campaigns.all()
-    return render(request, 'alm/tests/campaign_list.html', {'project': project, 'campaigns': campaigns})
+    if q_val:
+        campaigns = campaigns.filter(Q(name__icontains=q_val) | Q(description__icontains=q_val))
+    paginator = Paginator(campaigns, 25)
+    page = paginator.get_page(request.GET.get('page'))
+    return render(request, 'alm/tests/campaign_list.html', {
+        'project': project, 'campaigns': page, 'q': q_val,
+    })
 
 
 @login_required
@@ -187,3 +251,35 @@ def campaign_delete(request, project_id, campaign_id):
         messages.success(request, "Campagne supprimée.")
         return redirect('campaign_list', project_id=project.id)
     return render(request, 'alm/tests/campaign_confirm_delete.html', {'project': project, 'campaign': campaign})
+
+
+@login_required
+def campaign_report(request, project_id, campaign_id):
+    project = get_object_or_404(Project, id=project_id)
+    campaign = get_object_or_404(TestCampaign, id=campaign_id, project=project)
+    if not can_access_project(project, request.user):
+        messages.error(request, "Accès refusé.")
+        return redirect('project_list')
+    tests_qs = campaign.tests.select_related('test_scenario').all()
+    total = tests_qs.count()
+    counts = [(code, tests_qs.filter(status=code).count()) for code, _ in CampaignTest.STATUS_CHOICES]
+    return render(request, 'alm/tests/campaign_report.html', {
+        'project': project, 'campaign': campaign, 'tests': tests_qs,
+        'total': total, 'counts': counts, 'status_choices': CampaignTest.STATUS_CHOICES,
+    })
+
+
+@login_required
+def campaign_export_csv(request, project_id, campaign_id):
+    project = get_object_or_404(Project, id=project_id)
+    campaign = get_object_or_404(TestCampaign, id=campaign_id, project=project)
+    import csv
+    from django.http import HttpResponse
+    resp = HttpResponse(content_type='text/csv; charset=utf-8')
+    resp['Content-Disposition'] = f'attachment; filename="campagne_{campaign.id}.csv"'
+    resp.write('\ufeff')
+    w = csv.writer(resp)
+    w.writerow(['Test', 'Statut', 'Position'])
+    for ct in campaign.tests.select_related('test_scenario').all().order_by('position'):
+        w.writerow([ct.test_scenario.get_formatted_number() + ' - ' + ct.test_scenario.name, ct.get_status_display(), ct.position])
+    return resp

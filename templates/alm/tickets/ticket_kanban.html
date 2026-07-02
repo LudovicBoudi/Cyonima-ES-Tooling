@@ -1,8 +1,8 @@
 {% extends 'alm/base_project.html' %}
-
 {% block title %}Kanban - Tickets {{ project.name }}{% endblock %}
-
 {% block alm_content %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
 <div class="flex items-center gap-4 mb-6">
     <h1 class="text-xl font-semibold">Kanban</h1>
     <div class="flex gap-1 text-sm">
@@ -12,20 +12,41 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="kanban-board">
     {% for col, tickets in columns.items %}
     <div class="bg-gray-50 rounded-lg p-3">
-        <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase">{{ col }}</h3>
-        <div class="space-y-2">
+        <h3 class="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">{{ col }}</h3>
+        <div class="space-y-2 min-h-[100px]" data-status="{{ col }}">
             {% for t in tickets %}
-            <a href="{% url 'ticket_detail' project.id t.id %}" class="block bg-white rounded shadow-sm p-3 text-sm hover:shadow">
+            <div class="bg-white rounded shadow-sm p-3 text-sm cursor-move hover:shadow" data-id="{{ t.id }}">
                 <div class="font-mono text-xs text-gray-400">{{ t.get_formatted_number }}</div>
                 <div class="font-medium">{{ t.title|truncatewords:8 }}</div>
                 <div class="text-xs text-gray-400 mt-1">{{ t.assigned_to|default:"-" }}</div>
-            </a>
+            </div>
             {% endfor %}
         </div>
     </div>
     {% endfor %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#kanban-board > div > div').forEach(function(el) {
+        new Sortable(el, {
+            group: 'kanban',
+            animation: 150,
+            onEnd: function(evt) {
+                var items = [];
+                document.querySelectorAll('#kanban-board > div').forEach(function(col) {
+                    var status = col.dataset.status;
+                    col.querySelectorAll('[data-id]').forEach(function(card) {
+                        items.push({ id: parseInt(card.dataset.id), status: status });
+                    });
+                });
+                fetch('', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' }, body: JSON.stringify(items) });
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
