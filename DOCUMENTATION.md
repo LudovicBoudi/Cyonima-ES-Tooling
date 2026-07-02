@@ -24,8 +24,11 @@ Réservé aux membres du staff (`is_staff=True`).
 - **Suppression** : confirmation avant suppression.
 
 ### Configuration
+- `/administration/configuration/` : nom du site, logo, HTTPS et certificats SSL.
 - **Nom du site** : modifiable depuis `/administration/configuration/`.
-- **Logo** : téléversement d'un fichier image.
+- **Logo** : téléversement d'un fichier image (PNG/SVG recommandé).
+- **HTTPS** : activation de la redirection HTTP → HTTPS, durée HSTS (0 = désactivé, 31536000 = 1 an).
+- **Certificat SSL** : téléversement direct du certificat (.crt/.pem) et de la clé privée (.key). Stockés dans `media/ssl/`. Redémarrage requis après mise à jour. Les chemins sont affichés pour configuration du serveur web (nginx/apache).
 
 ### Sauvegarde
 - `/administration/sauvegarde/` — deux actions :
@@ -593,3 +596,41 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 ### Format monétaire
 - Tous les montants au format financier français (séparateur milliers : espace, décimal : virgule).
 - Filtre `format_money` sur 70+ expressions dans 35 templates.
+
+---
+
+## 19. Déploiement
+
+### Docker (recommandé)
+```bash
+docker compose up -d          # Lancement
+docker compose pull && up -d  # Mise à jour
+docker compose exec app python manage.py createsuperuser
+```
+L'image est publiée sur [ghcr.io](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/pkgs/container/cyonima-es-tooling) via GitHub Actions.
+
+### Codespaces
+Ouverture en 1 clic depuis GitHub : environnement Python 3.12 préconfiguré, dépendances installées, prêt à développer.
+
+### Commandes planifiées (cron)
+```bash
+python manage.py check_budget_alerts   # Alertes seuils budgétaires (80%/100%)
+python manage.py notify_deadlines      # Notifications échéances tickets J+2
+python manage.py check_expiry           # Alertes expiration documents GED (J-30)
+python manage.py generate_recurring     # Génération factures récurrentes
+python manage.py daily_digest          # Résumé quotidien email
+```
+
+---
+
+## 20. Architecture
+
+Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour le détail technique : stack, structure du projet, workflows, modèles de données, URLs, sécurité.
+
+## 21. Contribuer
+
+- **Bugs** : [ouvrir une issue](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/issues/new?template=bug_report.md)
+- **Idées** : [demande de fonctionnalité](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/issues/new?template=feature_request.md)
+- **Discussions** : [espace communauté](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/discussions)
+- **Pull requests** : bienvenues, suivre le [template](.github/PULL_REQUEST_TEMPLATE.md)
+- **Codespaces** : [ouvrir dans le navigateur](https://codespaces.new/LudovicBoudi/Cyonima-ES-Tooling)

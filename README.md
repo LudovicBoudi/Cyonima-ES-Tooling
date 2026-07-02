@@ -4,6 +4,10 @@
   <img src="image.png" alt="Cyonima-ES-Tools screenshot" width="800">
 </p>
 
+[![Docker Image](https://img.shields.io/badge/ghcr.io-cyonima--es--tooling-blue)](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/pkgs/container/cyonima-es-tooling)
+[![Discussions](https://img.shields.io/badge/discussions-bienvenue-green)](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/discussions)
+[![Open in Codespaces](https://img.shields.io/badge/codespaces-open-blue?logo=github)](https://codespaces.new/LudovicBoudi/Cyonima-ES-Tooling)
+
 Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communication interne et le helpdesk en Français proposé par Cyonima de la communauté RENEGA2.
 
 ## Modules
@@ -22,6 +26,7 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **GED** | Gestion électronique de documents (catégories, workflow validation, versionnage, favoris, corbeille, partage, audit) | `/ged/` |
 | **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2, Convention Métallurgie…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
+| **Configuration** | Nom du site, logo, HTTPS (redirection + HSTS) | `/administration/configuration/` |
 
 ## Captures d'écran
 
@@ -40,7 +45,38 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 - Python 3.12+
 - pip (ou venv)
 
-## Installation rapide
+## Installation rapide (Docker, recommandé)
+
+> L'image est automatiquement buildée et publiée sur [ghcr.io](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/pkgs/container/cyonima-es-tooling) à chaque push.
+
+```bash
+# 1. Créer le dossier et le fichier docker-compose.yml
+mkdir cyonima && cd cyonima
+curl -O https://raw.githubusercontent.com/LudovicBoudi/Cyonima-ES-Tooling/main/docker-compose.yml
+
+# 2. Télécharger le .env.example et le configurer
+curl -O https://raw.githubusercontent.com/LudovicBoudi/Cyonima-ES-Tooling/main/.env.example
+mv .env.example .env
+# Générer une SECRET_KEY :
+echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" >> .env
+nano .env
+
+# 3. Lancer
+docker compose up -d
+
+# 4. Créer le compte admin
+docker compose exec app python manage.py createsuperuser
+```
+
+Serveur accessible sur `http://127.0.0.1:8080`.
+
+### Mise à jour
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+## Installation manuelle (sans Docker)
 
 ```bash
 # 1. Cloner le dépôt

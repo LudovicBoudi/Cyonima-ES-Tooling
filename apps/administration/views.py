@@ -102,6 +102,12 @@ def site_config_view(request):
         config.site_name = request.POST.get('site_name', 'Cyonima-ES-Tools')
         if 'logo' in request.FILES:
             config.logo = request.FILES['logo']
+        config.https_enabled = request.POST.get('https_enabled') == 'on'
+        config.hsts_seconds = int(request.POST.get('hsts_seconds', 0))
+        if 'ssl_certificate' in request.FILES:
+            config.ssl_certificate = request.FILES['ssl_certificate']
+        if 'ssl_private_key' in request.FILES:
+            config.ssl_private_key = request.FILES['ssl_private_key']
         config.save()
         messages.success(request, 'Configuration mise à jour.')
         return redirect('admin_site_config')

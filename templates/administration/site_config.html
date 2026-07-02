@@ -20,6 +20,34 @@
             {% endif %}
             <input type="file" name="logo" accept="image/png,image/svg+xml" class="w-full text-sm">
         </div>
+        <hr class="border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-700">Sécurité HTTPS</h3>
+        <div class="flex items-center gap-2">
+            <input type="checkbox" name="https_enabled" id="id_https" {% if config.https_enabled %}checked{% endif %}>
+            <label for="id_https" class="text-sm">Activer la redirection HTTP → HTTPS</label>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Durée HSTS (secondes)</label>
+            <input type="number" name="hsts_seconds" value="{{ config.hsts_seconds }}" class="w-full px-3 py-2 border rounded text-sm">
+            <p class="text-xs text-gray-400 mt-1">0 = désactivé. 31536000 = 1 an (recommandé).</p>
+        </div>
+        <hr class="border-gray-200">
+        <h3 class="text-sm font-semibold text-gray-700">Certificat SSL</h3>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Certificat (.crt / .pem)</label>
+            {% if config.ssl_certificate %}
+                <p class="text-xs text-green-600 mb-1">✓ Certificat téléversé — <code class="bg-gray-100 px-1 rounded">{{ config.cert_path }}</code></p>
+            {% endif %}
+            <input type="file" name="ssl_certificate" accept=".crt,.pem,.cert" class="w-full text-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Clé privée (.key)</label>
+            {% if config.ssl_private_key %}
+                <p class="text-xs text-green-600 mb-1">✓ Clé privée téléversée — <code class="bg-gray-100 px-1 rounded">{{ config.key_path }}</code></p>
+            {% endif %}
+            <input type="file" name="ssl_private_key" accept=".key,.pem" class="w-full text-sm">
+            <p class="text-xs text-gray-400 mt-1">Les certificats sont stockés dans le répertoire <code>media/ssl/</code>. Redémarrez le serveur après mise à jour.<br>Pour utiliser ces certificats avec un serveur de production (nginx/apache), pointez la configuration SSL vers les chemins ci-dessus.</p>
+        </div>
         <div class="flex gap-3">
             <button type="submit" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Enregistrer</button>
             <a href="{% url 'admin_dashboard' %}" class="px-4 py-2 rounded text-sm border border-gray-300 hover:bg-gray-50">Annuler</a>

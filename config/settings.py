@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'apps.analytics.middleware.AnalyticsMiddleware',
+    'apps.core.middleware.HttpsMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -122,3 +123,5 @@ SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
 SECURE_SSL_REDIRECT = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
+
+SITE_ID = 1

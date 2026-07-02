@@ -1,0 +1,16 @@
+services:
+  app:
+    image: ghcr.io/ludovicboudi/cyonima-es-tooling:latest
+    build: .
+    container_name: cyonima-es-tools
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./media:/app/media
+      - ./db.sqlite3:/app/db.sqlite3
+    env_file:
+      - .env
+    environment:
+      - DEBUG=False
+      - ALLOWED_HOSTS=127.0.0.1,localhost
