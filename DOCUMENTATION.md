@@ -121,6 +121,13 @@ Portail de tickets d'incidents et d'expressions de besoins (EBI).
 
 Module de cycle de vie applicatif complet : exigences, tests, campagnes, tickets, sprints.
 
+### Dashboard transversal (`/alm/dashboard/`)
+- **KPI globaux** : nombre de projets, tickets ouverts, exigences sans tests, campagnes en cours.
+- **Tickets par statut** : barres de progression avec compteur.
+- **Campagnes de test** : liste des campagnes actives avec barre de progression (validés/total).
+- **Tableau projets** : liste de tous les projets avec membres, exigences, tickets ouverts, barre d'avancement (pourcentage).
+- Lien "ALM" dans la navbar pour les administrateurs.
+
 ### Projets
 - CRUD de projets.
 - Membres avec rôles : Chef de projet, Développeur, Testeur, Intégrateur.
@@ -330,6 +337,10 @@ Module de gestion commerciale avec pipeline de ventes.
 - Boutons CSV sur les listes sociétés, contacts et affaires.
 - Fichiers générés en UTF-8 avec BOM pour compatibilité Excel.
 
+### Export Excel (XLSX)
+- Boutons 📊 Excel sur les listes sociétés, contacts et affaires.
+- Fichiers XLSX générés via openpyxl avec mise en forme (largeurs auto, en-têtes gras).
+
 ### Import CSV
 - Vue `import_csv` à l'URL `/crm/importer/`
 - Un seul fichier peut contenir des sociétés et des contacts — auto-détection du format par les en-têtes CSV.
@@ -340,6 +351,12 @@ Module de gestion commerciale avec pipeline de ventes.
 - Le modèle `Quotation` (ERP) possède un champ `deal` (ForeignKey) — migration `erp/0002`.
 - Un bouton "Créer un devis" sur la page détail d'une affaire appelle la vue `deal_create_quotation`.
 - Le devis créé affiche un lien vers l'affaire source.
+
+### Gestion des comptes portail
+- `/crm/portail/` : liste des comptes portail (liens CRM → Portail).
+- Colonnes : Contact, Société, Statut (actif/inactif), Date activation.
+- Actions : Activer/Désactiver (toggle `is_active`), Révoquer (supprime le compte portail).
+- Lien "🌐 Portail" dans le sidebar CRM.
 
 ### Migrations CRM appliquées
 | Migration | Contenu |
@@ -412,6 +429,8 @@ Module de gestion comptable avec devis, factures, avoirs et paiements.
 - **Modèles de devis** : sauvegarder/charger des lignes prédéfinies (bouton 💾).
 - **Rapprochement bancaire** : associer les paiements non liés aux factures impayées.
 - **Produits** : catalogue de produits/services enregistré dans l'admin Django.
+- **Relances automatiques** : commande `auto_reminders` — crée des relances pour les factures impayées > 30 jours et notifie le portail.
+- **PDF groupé** : sélectionner plusieurs factures dans la liste et générer un PDF groupé (ZIP).
 - **Sécurité** : données JSON protégées (`json_script`), calculs en `Decimal`, numérotation thread-safe.
 
 ---
@@ -429,7 +448,8 @@ Module de classement, recherche et téléchargement de fichiers avec catégories
 
 ### Recherche
 - **Plein texte** : recherche dans le titre, la description, les tags et le contenu extrait (PDF/DOCX/TXT).
-- **Filtres combinables** : par catégorie, par statut, par favoris (`?fav=1`).
+- **Filtres combinables** : par catégorie, par statut, par favoris (`?fav=1`), par date (du/au), par taille (min/max).
+- **Compteur de résultats** affiché après filtrage.
 - **Réindexation** : commande `python3 manage.py ged_reindex` pour réextraire le texte de tous les documents.
 
 ### Workflow de validation
@@ -451,6 +471,11 @@ Actions disponibles : publier, archiver, désarchiver. Seuls les membres du staf
 - Bouton ☆/★ sur chaque fiche document pour l'ajouter/retirer des favoris.
 - Page `/ged/mes-favoris/` listant tous les favoris avec retrait possible.
 - Filtre `?fav=1` dans la liste des documents pour n'afficher que les favoris.
+
+### Documents récents 🕐
+- Page `/ged/recents/` : les 20 derniers documents consultés par l'utilisateur.
+- Historique de consultation enregistré automatiquement à chaque affichage de fiche document.
+- Lien "🕐 Récents" dans le sidebar GED.
 
 ### Corbeille 🗑
 - Suppression → déplacement dans la corbeille (soft-delete avec `deleted_at`).
@@ -522,7 +547,39 @@ Forum d'échange réservé à la direction et aux administrateurs.
 
 ---
 
-## 14. Notifications
+## 14. Portail self-service (`/portail/`)
+
+Espace client extérieur permettant aux contacts portalisés de consulter leurs documents et gérer leur compte.
+
+### Fonctionnalités
+- **Dashboard** (`/portail/`) : vue d'ensemble avec documents récents et notifications.
+- **Devis** (`/portail/devis/`) : liste et détail des devis, PDF téléchargeable.
+- **Factures** (`/portail/factures/`) : liste et détail des factures, PDF téléchargeable, affichage du montant payé et restant dû.
+- **Avoirs** (`/portail/avoirs/`) : liste et détail des avoirs, PDF téléchargeable.
+- **Mon compte** (`/portail/mon-compte/`) : changer le mot de passe.
+- **Notifications** : badge 🔔 dans la navbar du portail avec compteur de non-lues.
+
+### Gestion admin (depuis le CRM)
+- `/crm/portail/` : liste des comptes portail.
+- Activer/Désactiver un compte (toggle `is_active`).
+- Révoquer un compte (supprime le compte portail).
+- Notifications in-app créées automatiquement sur création/modification de devis, facture ou avoir.
+
+---
+
+## 15. Favoris global (⭐ navbar)
+
+Système de favoris transversal permettant de marquer des éléments de n'importe quel module (GED, CRM, ERP, ALM…).
+
+### Fonctionnalités
+- Bouton ☆/★ sur les pages de détail de documents GED, contacts CRM, affaires CRM, factures ERP, projets ALM, etc.
+- Page `/favoris/` listant tous les favoris groupés par module.
+- API JSON `/favoris/api/check/` pour vérifier si un élément est en favori (via Alpine.js).
+- 21 modèles supportés : Documents GED, Sociétés, Contacts, Affaires CRM, Devis, Factures, Avoirs, Produits, Projets ALM, Exigences, Scénarios de test, Campagnes, Tickets, Sprints, Releases, etc.
+
+---
+
+## 16. Notifications
 
 - Cloche 🔔 dans la barre de navigation (badge avec compteur de notifications non lues).
 - **Page de liste** : `/notifications/` avec recherche, lecture individuelle, **bouton "Tout marquer comme lu"** (POST).
@@ -530,12 +587,12 @@ Forum d'échange réservé à la direction et aux administrateurs.
 - **Envoi email** : branché via `django.core.mail` pour les utilisateurs ayant activé les préférences.
 - **Messages** : styles distincts pour erreur (rouge), succès (vert), avertissement (ambre), info (bleu), debug (gris).
 - **Digest quotidien** : commande `daily_digest` pour envoyer un résumé journalier par email.
-- Création automatique à la publication d'articles, assignation de tickets, changement de statut.
-- Commandes : `notify_deadlines` (échéances tickets), `check_budget_alerts` (seuils budget), `check_expiry` (documents GED).
+- Création automatique à la publication d'articles, assignation de tickets, changement de statut, événements portail (devis/factures/avoirs).
+- Commandes : `notify_deadlines` (échéances tickets), `check_budget_alerts` (seuils budget), `check_expiry` (documents GED), `auto_reminders` (relances factures impayées).
 
 ---
 
-## 15. Rôles et permissions
+## 17. Rôles et permissions
 
 | Code rôle | Accès |
 |-----------|-------|
@@ -552,7 +609,7 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 16. Double authentification (2FA)
+## 18. Double authentification (2FA)
 
 1. L'utilisateur active la 2FA dans son profil.
 2. À la connexion, un code à 6 chiffres est envoyé par email.
@@ -561,7 +618,7 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 17. Sécurité
+## 19. Sécurité
 
 - **SECRET_KEY** : variable d'environnement obligatoire (pas de fallback).
 - **Production** : `CSRF_COOKIE_SECURE`, `SESSION_COOKIE_SECURE`, `HSTS`, `SSL_REDIRECT` activés automatiquement hors DEBUG.
@@ -573,7 +630,7 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 18. Interface utilisateur
+## 20. Interface utilisateur
 
 ### Recherche globale
 - Barre de recherche dans la navbar (🔍), interroge 10+ modèles (Wiki, GED, CRM, RH, ERP, Budget, Tickets).
@@ -599,7 +656,7 @@ Un utilisateur peut avoir **plusieurs rôles simultanément**.
 
 ---
 
-## 19. Déploiement
+## 21. Déploiement
 
 ### Docker (recommandé)
 ```bash
@@ -620,15 +677,16 @@ python manage.py notify_deadlines      # Notifications échéances tickets J+2
 python manage.py check_expiry           # Alertes expiration documents GED (J-30)
 python manage.py generate_recurring     # Génération factures récurrentes
 python manage.py daily_digest          # Résumé quotidien email
+python manage.py auto_reminders        # Relances automatiques factures impayées > 30j
 ```
 
 ---
 
-## 20. Architecture
+## 22. Architecture
 
 Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour le détail technique : stack, structure du projet, workflows, modèles de données, URLs, sécurité.
 
-## 21. Contribuer
+## 23. Contribuer
 
 - **Bugs** : [ouvrir une issue](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/issues/new?template=bug_report.md)
 - **Idées** : [demande de fonctionnalité](https://github.com/LudovicBoudi/Cyonima-ES-Tooling/issues/new?template=feature_request.md)

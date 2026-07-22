@@ -1,0 +1,56 @@
+{% extends 'portal/base_portal.html' %}
+{% load money_filters %}
+{% block title %}{{ creditnote.number }} — Portail{% endblock %}
+
+{% block portal_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-xl font-bold">{{ creditnote.number }}</h1>
+            <p class="text-sm text-gray-500">Avoir — {{ creditnote.date|date:"d/m/Y" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'portal:creditnote_pdf' creditnote.pk %}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200">PDF</a>
+            <a href="{% url 'portal:creditnote_list' %}" class="text-gray-500 hover:underline text-sm">Retour</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+        {% if creditnote.invoice %}<div><span class="text-gray-500">Facture liee :</span> <a href="{% url 'portal:invoice_detail' creditnote.invoice.pk %}" class="text-[#1a3a6b] hover:underline">{{ creditnote.invoice.number }}</a></div>{% endif %}
+        {% if creditnote.company %}<div><span class="text-gray-500">Societe :</span> {{ creditnote.company }}</div>{% endif %}
+    </div>
+
+    <table class="w-full text-sm mb-6">
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Description</th>
+            <th class="pb-2">Qte</th>
+            <th class="pb-2">P.U. HT</th>
+            <th class="pb-2">TVA</th>
+            <th class="pb-2 text-right">Total HT</th>
+        </tr></thead>
+        <tbody>
+            {% for l in creditnote.lines %}
+            <tr class="border-b border-gray-100">
+                <td class="py-2">{{ l.description }}</td>
+                <td class="py-2">{{ l.quantity }}</td>
+                <td class="py-2">{{ l.unit_price|format_money }} EUR</td>
+                <td class="py-2">{{ l.vat_rate|default:20 }}%</td>
+                <td class="py-2 text-right">{{ l.quantity|multiply:l.unit_price|format_money }} EUR</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-right space-y-1">
+        <p class="text-sm">Total HT : <strong>{{ creditnote.total_ht|format_money }} EUR</strong></p>
+        <p class="text-sm">TVA : <strong>{{ creditnote.total_tva|format_money }} EUR</strong></p>
+        <p class="text-lg font-bold text-[#1a3a6b]">Total TTC : {{ creditnote.total_ttc|format_money }} EUR</p>
+    </div>
+
+    {% if creditnote.reason %}
+    <div class="mt-6 bg-gray-50 p-4 rounded-lg text-sm">
+        <strong>Motif :</strong><br>{{ creditnote.reason|linebreaks }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

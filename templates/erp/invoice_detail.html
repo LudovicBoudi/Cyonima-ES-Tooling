@@ -1,4 +1,5 @@
 {% extends 'erp/base_erp.html' %}
+{% load favorite_tags %}
 {% block title %}{{ inv.number }} — Facture{% endblock %}
 {% block erp_content %}
 <div class="bg-white rounded-xl shadow p-5">
@@ -8,6 +9,7 @@
             <p class="text-sm text-gray-500">{{ inv.date|date:"d/m/Y" }}</p>
         </div>
         <div class="flex gap-2">
+            {% favorite_button user "erp.Invoice" inv.pk %}
             <a href="{% url 'erp_invoice_pdf' inv.pk %}" target="_blank" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">PDF</a>
             <a href="{% url 'erp_invoice_edit' inv.pk %}" class="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-600">Modifier</a>
             <a href="{% url 'erp_payment_create' %}?invoice={{ inv.pk }}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Enregistrer un paiement</a>

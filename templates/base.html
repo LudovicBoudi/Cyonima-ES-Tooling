@@ -81,7 +81,9 @@
                         <button onclick="toggleDark()" class="text-sm hover:text-gray-300" title="Mode sombre">🌓</button>
                         {% if user.is_staff %}
                             <a href="{% url 'admin_dashboard' %}" class="text-sm hover:text-gray-300">Administration</a>
+                            <a href="{% url 'alm_dashboard' %}" class="text-sm hover:text-gray-300">ALM</a>
                         {% endif %}
+                        <a href="{% url 'favorites:list' %}" class="text-sm hover:text-gray-300" title="Mes Favoris">⭐</a>
                         <a href="{% url 'notification_list' %}" class="relative text-sm hover:text-gray-300">
                             🔔
                             {% if unread_notifications_count %}

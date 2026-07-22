@@ -14,6 +14,7 @@
             <a href="{% url 'ged_document_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_list' %}bg-gray-100 font-medium{% endif %}">📁 Tous les documents</a>
             <a href="{% url 'ged_document_create' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_document_create' %}bg-gray-100 font-medium{% endif %}">➕ Ajouter un document</a>
             <a href="{% url 'ged_favorites_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_favorites_list' %}bg-gray-100 font-medium{% endif %}">⭐ Mes favoris</a>
+            <a href="{% url 'ged_recent_documents' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_recent_documents' %}bg-gray-100 font-medium{% endif %}">🕐 Récents</a>
             <a href="{% url 'ged_trash_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'ged_trash_list' %}bg-gray-100 font-medium{% endif %}">🗑 Corbeille</a>
             <hr class="my-2">
             <a href="{% url 'ged_audit_report' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">📋 Rapport d'audit</a>

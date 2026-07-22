@@ -33,6 +33,8 @@ urlpatterns = [
     path('blog/it/', include('apps.blogs.blog_it.urls')),
     path('blog/representation-syndicale/', include('apps.blogs.blog_rep.urls')),
     path('comex/', include('apps.blogs.comex_forum.urls')),
+    path('portail/', include('apps.portal.urls')),
+    path('favoris/', include('apps.favorites.urls')),
     path('', include('apps.core.urls')),
     path('robots.txt', TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
 ]

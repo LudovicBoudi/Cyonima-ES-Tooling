@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.utils import timezone
 from .models import Project, ProjectMember
 
@@ -132,3 +132,63 @@ def member_remove(request, project_id, member_id):
         messages.success(request, "Membre retiré.")
         return redirect('member_list', project_id=project.id)
     return render(request, 'alm/projects/member_confirm_delete.html', {'project': project, 'member': member})
+
+
+@login_required
+def alm_dashboard(request):
+    is_admin = hasattr(request.user, 'profile') and request.user.profile.is_admin()
+
+    if is_admin:
+        projects = Project.objects.all()
+    else:
+        projects = Project.objects.filter(members__user=request.user).distinct()
+
+    total_projects = projects.count()
+
+    from apps.alm.tickets.models import Ticket
+    from apps.alm.requirements.models import Requirement
+    from apps.alm.tests.models import TestScenario, TestCampaign, CampaignTest
+
+    open_tickets = Ticket.objects.filter(
+        project__in=projects
+    ).exclude(status__in=['a_clore', 'cloture']).count()
+
+    tickets_by_status = Ticket.objects.filter(
+        project__in=projects
+    ).values('status').annotate(count=Count('id')).order_by('status')
+
+    total_requirements = Requirement.objects.filter(project__in=projects).count()
+    req_without_tests = Requirement.objects.filter(
+        project__in=projects
+    ).exclude(test_scenarios__isnull=False).distinct().count()
+
+    active_campaigns = TestCampaign.objects.filter(project__in=projects).annotate(
+        tests_count=Count('tests'),
+        validated_count=Count('tests', filter=Q(tests__status='valide')),
+    ).order_by('-created_at')[:10]
+
+    project_stats = []
+    for p in projects:
+        p_total = Ticket.objects.filter(project=p).count()
+        p_open = Ticket.objects.filter(project=p).exclude(status__in=['a_clore', 'cloture']).count()
+        p_closed = p_total - p_open
+        p_pct = int((p_closed / p_total * 100)) if p_total > 0 else 0
+        project_stats.append({
+            'project': p,
+            'total_tickets': p_total,
+            'open_tickets': p_open,
+            'closed_tickets': p_closed,
+            'progress_pct': p_pct,
+            'members_count': p.members.count(),
+            'requirements_count': p.requirements.count(),
+        })
+
+    return render(request, 'alm/alm_dashboard.html', {
+        'total_projects': total_projects,
+        'open_tickets': open_tickets,
+        'req_without_tests': req_without_tests,
+        'total_requirements': total_requirements,
+        'tickets_by_status': tickets_by_status,
+        'active_campaigns': active_campaigns,
+        'project_stats': project_stats,
+    })

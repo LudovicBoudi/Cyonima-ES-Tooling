@@ -157,6 +157,15 @@ class Invoice(models.Model):
     def remaining(self):
         return _quantize(self.total_ttc() - self.paid_amount)
 
+    @property
+    def is_overdue(self):
+        from django.utils import timezone
+        return (
+            self.due_date is not None
+            and self.due_date < timezone.now().date()
+            and self.remaining() > 0
+        )
+
     def __str__(self):
         return f'{self.number}'
 

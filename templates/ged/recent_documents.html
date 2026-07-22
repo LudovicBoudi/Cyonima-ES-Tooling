@@ -1,0 +1,42 @@
+{% extends 'ged/base_ged.html' %}
+{% block title %}Documents récents — GED{% endblock %}
+{% block ged_content %}
+<div class="bg-white rounded-xl shadow p-5">
+    <h1 class="text-xl font-bold mb-4">📄 Documents récemment consultés</h1>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Titre</th>
+            <th class="pb-2">Catégorie</th>
+            <th class="pb-2">Version</th>
+            <th class="pb-2">Statut</th>
+            <th class="pb-2">Consulté le</th>
+        </tr></thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-3 font-medium">
+                    <a href="{% url 'ged_document_detail' doc.pk %}" class="text-blue-700 hover:underline">{{ doc.title }}</a>
+                </td>
+                <td class="py-3 text-gray-600">
+                    {% if doc.category %}
+                    <span class="inline-block w-2 h-2 rounded-full mr-1" style="background:{{ doc.category.color }}"></span>{{ doc.category.name }}
+                    {% else %}—{% endif %}
+                </td>
+                <td class="py-3 text-gray-600">v{{ doc.version }}</td>
+                <td class="py-3"><span class="text-xs px-2 py-0.5 rounded
+                    {% if doc.status == 'publie' %}bg-green-100 text-green-700
+                    {% elif doc.status == 'brouillon' %}bg-gray-100 text-gray-600
+                    {% elif doc.status == 'relecture' %}bg-blue-100 text-blue-700
+                    {% elif doc.status == 'archive' %}bg-amber-100 text-amber-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">{{ doc.get_status_display }}</span></td>
+                <td class="py-3 text-gray-500 text-xs">
+                    {% for rv in doc.views.all %}{% if forloop.first %}{{ rv.viewed_at|date:"d/m/Y H:i" }}{% endif %}{% empty %}—{% endfor %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="py-8 text-center text-gray-400">Aucun document consulté récemment</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

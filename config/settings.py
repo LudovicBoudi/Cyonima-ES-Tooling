@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'apps.erp',
     'apps.ged',
     'apps.ressources',
+    'apps.portal.apps.PortalConfig',
+    'apps.favorites',
 ]
 
 MIDDLEWARE = [

@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.db.models import Q
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
-from .models import Document, DocumentCategory, DocumentVersion, SharedLink, UserFavorite, CategorySubscription, AuditLog
+from .models import Document, DocumentCategory, DocumentVersion, SharedLink, UserFavorite, CategorySubscription, AuditLog, DocumentView
 
 
 def _log_audit(request, document, action, details=''):
@@ -54,6 +54,7 @@ def document_detail(request, pk):
     audit_logs = AuditLog.objects.filter(document=doc).select_related('user').order_by('-created_at')[:50]
     is_fav = UserFavorite.objects.filter(user=request.user, document=doc).exists() if request.user.is_authenticated else False
     subscribed_cat_ids = list(CategorySubscription.objects.filter(user=request.user).values_list('category_id', flat=True)) if request.user.is_authenticated else []
+    DocumentView.objects.create(user=request.user, document=doc)
     return render(request, 'ged/document_detail.html', {'doc': doc, 'categories': categories, 'tags_list': tags_list, 'versions': versions, 'audit_logs': audit_logs, 'is_fav': is_fav, 'subscribed_cat_ids': subscribed_cat_ids})
 
 
@@ -236,7 +237,20 @@ def document_edit(request, pk):
         doc.save()
         _log_audit(request, doc, 'edit')
         messages.success(request, f'Document "{doc.title}" modifié.')
-        return redirect('ged_document_detail', pk=doc.pk)
+    return redirect('ged_document_detail', pk=doc.pk)
+
+
+@login_required
+def recent_documents(request):
+    recent_views = DocumentView.objects.filter(user=request.user).select_related('document', 'document__category')[:20]
+    docs = [rv.document for rv in recent_views]
+    categories = DocumentCategory.objects.all()
+    subscribed_cat_ids = list(CategorySubscription.objects.filter(user=request.user).values_list('category_id', flat=True))
+    return render(request, 'ged/recent_documents.html', {
+        'documents': docs,
+        'categories': categories,
+        'subscribed_cat_ids': subscribed_cat_ids,
+    })
     categories = DocumentCategory.objects.all()
     subscribed_cat_ids = list(CategorySubscription.objects.filter(user=request.user).values_list('category_id', flat=True)) if request.user.is_authenticated else []
     return render(request, 'ged/document_form.html', {'doc': doc, 'categories': categories, 'subscribed_cat_ids': subscribed_cat_ids})

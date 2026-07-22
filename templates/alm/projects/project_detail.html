@@ -1,9 +1,13 @@
 {% extends 'alm/base_project.html' %}
+{% load favorite_tags %}
 {% block title %}{{ project.name }}{% endblock %}
 {% block alm_content %}
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">{{ project.name }}</h1>
-    <a href="{% url 'project_edit' project.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>
+    <div class="flex gap-2 items-center">
+        {% favorite_button user "projects.Project" project.pk %}
+        <a href="{% url 'project_edit' project.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>
+    </div>
 </div>
 <p class="text-gray-500 mb-6">{{ project.description|default:"Aucune description" }}</p>
 

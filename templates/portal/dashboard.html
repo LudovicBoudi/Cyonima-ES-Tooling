@@ -1,0 +1,153 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}Tableau de bord — Portail{% endblock %}
+
+{% block portal_content %}
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <a href="{% url 'portal:quotation_list' %}" class="portal-card bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border border-transparent hover:border-[#1a3a6b]">
+        <div class="text-3xl mb-2">📄</div>
+        <p class="text-2xl font-bold text-[#1a3a6b]">{{ quotation_count }}</p>
+        <p class="text-sm text-gray-500">Devis</p>
+    </a>
+    <a href="{% url 'portal:invoice_list' %}" class="portal-card bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border border-transparent hover:border-[#1a3a6b]">
+        <div class="text-3xl mb-2">🧾</div>
+        <p class="text-2xl font-bold text-[#1a3a6b]">{{ invoice_count }}</p>
+        <p class="text-sm text-gray-500">Factures</p>
+    </a>
+    <a href="{% url 'portal:creditnote_list' %}" class="portal-card bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition border border-transparent hover:border-[#1a3a6b]">
+        <div class="text-3xl mb-2">📋</div>
+        <p class="text-2xl font-bold text-[#1a3a6b]">{{ creditnote_count }}</p>
+        <p class="text-sm text-gray-500">Avoirs</p>
+    </a>
+</div>
+
+{% if total_unpaid > 0 %}
+<div class="bg-red-50 border border-red-200 rounded-xl shadow-md p-6 mb-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-semibold text-red-700">⚠️ Impayés</h2>
+            <p class="text-sm text-red-600">{{ unpaid_count }} facture{{ unpaid_count|pluralize:"s" }} en attente</p>
+        </div>
+        <p class="text-2xl font-bold text-red-700">{{ total_unpaid|format_money }} €</p>
+    </div>
+</div>
+{% endif %}
+
+{% if overdue_invoices %}
+<div class="bg-white rounded-xl shadow-md p-6 mb-6 border-l-4 border-red-500">
+    <h2 class="text-lg font-semibold mb-4 text-red-600">🔴 Factures en retard</h2>
+    <div class="space-y-2">
+        {% for inv in overdue_invoices %}
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <div>
+                <a href="{% url 'portal:invoice_detail' inv.pk %}" class="font-medium text-[#1a3a6b] hover:underline">{{ inv.number }}</a>
+                <span class="text-sm text-gray-500 ml-2">{{ inv.date|date:"d/m/Y" }}</span>
+            </div>
+            <div class="text-right">
+                <p class="font-semibold text-red-600">{{ inv.remaining|format_money }} €</p>
+                <p class="text-xs text-red-400">Échéance : {{ inv.due_date|date:"d/m/Y" }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if unpaid_invoices %}
+<div class="bg-white rounded-xl shadow-md p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-4 text-amber-600">⏳ Factures en attente de paiement</h2>
+    <div class="space-y-2">
+        {% for inv in unpaid_invoices %}
+        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+            <div>
+                <a href="{% url 'portal:invoice_detail' inv.pk %}" class="font-medium text-[#1a3a6b] hover:underline">{{ inv.number }}</a>
+                <span class="text-sm text-gray-500 ml-2">{{ inv.date|date:"d/m/Y" }}</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="font-semibold text-amber-600">{{ inv.remaining|format_money }} €</p>
+                    {% if inv.due_date %}<p class="text-xs text-gray-400">Échéance : {{ inv.due_date|date:"d/m/Y" }}</p>{% endif %}
+                </div>
+                <a href="{% url 'portal:invoice_pdf' inv.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="Télécharger PDF">📥</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-4">Derniers devis</h2>
+        <div class="space-y-2">
+            {% for q in quotations %}
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <div class="flex-1 min-w-0">
+                    <a href="{% url 'portal:quotation_detail' q.pk %}" class="font-medium text-[#1a3a6b] hover:underline text-sm">{{ q.number }}</a>
+                    <p class="text-xs text-gray-400">{{ q.date|date:"d/m/Y" }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2 py-0.5 rounded
+                        {% if q.status == 'accepte' %}bg-green-100 text-green-700
+                        {% elif q.status == 'refuse' %}bg-red-100 text-red-700
+                        {% elif q.status == 'envoye' %}bg-blue-100 text-blue-700
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">{{ q.get_status_display }}</span>
+                    <a href="{% url 'portal:quotation_pdf' q.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="PDF">📥</a>
+                </div>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucun devis</p>{% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-4">Dernières factures</h2>
+        <div class="space-y-2">
+            {% for inv in invoices %}
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <div class="flex-1 min-w-0">
+                    <a href="{% url 'portal:invoice_detail' inv.pk %}" class="font-medium text-[#1a3a6b] hover:underline text-sm">{{ inv.number }}</a>
+                    <p class="text-xs text-gray-400">{{ inv.date|date:"d/m/Y" }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs px-2 py-0.5 rounded
+                        {% if inv.status == 'payee' %}bg-green-100 text-green-700
+                        {% elif inv.status == 'impayee' %}bg-red-100 text-red-700
+                        {% elif inv.status == 'emise' %}bg-blue-100 text-blue-700
+                        {% else %}bg-gray-100 text-gray-600{% endif %}">{{ inv.get_status_display }}</span>
+                    <a href="{% url 'portal:invoice_pdf' inv.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="PDF">📥</a>
+                </div>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucune facture</p>{% endfor %}
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-4">Derniers avoirs</h2>
+        <div class="space-y-2">
+            {% for cn in creditnotes %}
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                <div class="flex-1 min-w-0">
+                    <a href="{% url 'portal:creditnote_detail' cn.pk %}" class="font-medium text-[#1a3a6b] hover:underline text-sm">{{ cn.number }}</a>
+                    <p class="text-xs text-gray-400">{{ cn.date|date:"d/m/Y" }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-gray-700">{{ cn.total_ttc|format_money }} €</span>
+                    <a href="{% url 'portal:creditnote_pdf' cn.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="PDF">📥</a>
+                </div>
+            </div>
+            {% empty %}<p class="text-gray-400 text-sm">Aucun avoir</p>{% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if company %}
+<div class="mt-8 bg-white rounded-xl shadow-md p-6">
+    <h2 class="text-lg font-semibold mb-4">Mon compte</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div><span class="text-gray-500">Société :</span> <strong>{{ company }}</strong></div>
+        <div><span class="text-gray-500">Contact :</span> <strong>{{ contact }}</strong></div>
+        {% if contact.email %}<div><span class="text-gray-500">Email :</span> {{ contact.email }}</div>{% endif %}
+        {% if contact.phone %}<div><span class="text-gray-500">Téléphone :</span> {{ contact.phone }}</div>{% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

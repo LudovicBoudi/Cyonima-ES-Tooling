@@ -2,6 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
+{% load money_filters %}
 <style>
     @page {
         size: A4;
@@ -42,8 +43,9 @@
             <p class="subtitle">{{ doc_type }} — {{ doc.date|date:"d/m/Y" }}</p>
         </div>
         <div style="text-align:right">
-            <p style="font-size:18px;font-weight:bold;color:#1a3a6b;margin:0">Cyonima-ES-Tools</p>
-            <p style="font-size:10px;color:#666;margin:0">Généré le {% now "d/m/Y" %}</p>
+            {% if site_config.logo %}<img src="{{ site_config.logo.url }}" style="max-height:40px;margin-bottom:4px"><br>{% endif %}
+            <p style="font-size:18px;font-weight:bold;color:#1a3a6b;margin:0">{{ site_config.site_name|default:"Cyonima-ES-Tools" }}</p>
+            <p style="font-size:10px;color:#666;margin:0">Genere le {% now "d/m/Y" %}</p>
         </div>
     </div>
 
@@ -58,33 +60,33 @@
     <table class="info">
         <tr><td>Statut</td><td><span class="badge {% if doc.status == 'accepte' or doc.status == 'payee' %}badge-green{% elif doc.status == 'refuse' or doc.status == 'impayee' %}badge-red{% elif doc.status == 'envoye' or doc.status == 'emise' %}badge-blue{% else %}badge-gray{% endif %}">{{ doc.get_status_display }}</span></td></tr>
         {% if doc.valid_until %}<tr><td>Valable jusqu'au</td><td>{{ doc.valid_until|date:"d/m/Y" }}</td></tr>{% endif %}
-        {% if doc.due_date %}<tr><td>Échéance</td><td>{{ doc.due_date|date:"d/m/Y" }}</td></tr>{% endif %}
+        {% if doc.due_date %}<tr><td>Echeance</td><td>{{ doc.due_date|date:"d/m/Y" }}</td></tr>{% endif %}
     </table>
 
     <table class="items">
         <thead>
-            <tr><th style="width:50%">Description</th><th style="width:10%">Qté</th><th style="width:15%">P.U. HT</th><th style="width:10%">TVA</th><th style="width:15%;text-align:right">Total HT</th></tr>
+            <tr><th style="width:50%">Description</th><th style="width:10%">Qte</th><th style="width:15%">P.U. HT</th><th style="width:10%">TVA</th><th style="width:15%;text-align:right">Total HT</th></tr>
         </thead>
         <tbody>
             {% for l in doc.lines %}
             <tr>
                 <td>{{ l.description }}</td>
                 <td>{{ l.quantity }}</td>
-                <td>{{ l.unit_price|format_money }} €</td>
+                <td>{{ l.unit_price|format_money }} EUR</td>
                 <td>{{ l.vat_rate|default:20 }}%</td>
-                <td style="text-align:right">{% widthratio l.quantity 1 l.unit_price %} €</td>
+                <td style="text-align:right">{{ l.quantity|multiply:l.unit_price|format_money }} EUR</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
     <div class="totals">
-        <p>Total HT : <strong>{{ doc.total_ht|format_money }} €</strong></p>
-        <p>TVA : <strong>{{ doc.total_tva|format_money }} €</strong></p>
-        <p class="grand-total">Total TTC : {{ doc.total_ttc|format_money }} €</p>
+        <p>Total HT : <strong>{{ doc.total_ht|format_money }} EUR</strong></p>
+        <p>TVA : <strong>{{ doc.total_tva|format_money }} EUR</strong></p>
+        <p class="grand-total">Total TTC : {{ doc.total_ttc|format_money }} EUR</p>
         {% if show_payments %}
-        <p>Payé : <strong>{{ doc.paid_amount|format_money }} €</strong></p>
-        {% if doc.remaining > 0 %}<p style="color:#dc2626">Reste dû : <strong>{{ doc.remaining|format_money }} €</strong></p>{% endif %}
+        <p>Paye : <strong>{{ doc.paid_amount|format_money }} EUR</strong></p>
+        {% if doc.remaining > 0 %}<p style="color:#dc2626">Reste du : <strong>{{ doc.remaining|format_money }} EUR</strong></p>{% endif %}
         {% endif %}
     </div>
 
@@ -95,7 +97,7 @@
     {% endif %}
 
     <div class="footer">
-        Cyonima-ES-Tools — Document généré automatiquement
+        {{ site_config.site_name|default:"Cyonima-ES-Tools" }} — Document genere automatiquement
     </div>
 </body>
 </html>

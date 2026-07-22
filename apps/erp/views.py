@@ -850,3 +850,35 @@ def reconciliation(request):
         'unpaid_invoices': unpaid_invoices,
         'unlinked_payments': unlinked_payments,
     })
+
+
+@login_required
+def bulk_invoice_pdf(request):
+    import zipfile
+    import io
+    ids = request.GET.get('ids', '')
+    if not ids:
+        messages.error(request, 'Aucune facture sélectionnée.')
+        return redirect('erp_invoice_list')
+    invoice_ids = [int(i) for i in ids.split(',') if i.strip().isdigit()]
+    invoices = Invoice.objects.filter(pk__in=invoice_ids).select_related('company', 'contact')
+    if not invoices:
+        messages.error(request, 'Aucune facture trouvée.')
+        return redirect('erp_invoice_list')
+    if invoices.count() == 1:
+        inv = invoices.first()
+        html = render(request, 'erp/pdf_document.html', {'doc': inv, 'doc_type': 'Facture', 'show_payments': True}).content.decode('utf-8')
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'inline; filename="{inv.number}.pdf"'
+        HTML(string=html).write_pdf(response)
+        return response
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for inv in invoices:
+            html = render(request, 'erp/pdf_document.html', {'doc': inv, 'doc_type': 'Facture', 'show_payments': True}).content.decode('utf-8')
+            pdf_bytes = HTML(string=html).write_pdf()
+            zf.writestr(f'{inv.number}.pdf', pdf_bytes)
+    zip_buffer.seek(0)
+    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="factures_{invoices.count()}.zip"'
+    return response

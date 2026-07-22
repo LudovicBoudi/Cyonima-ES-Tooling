@@ -53,6 +53,7 @@ def article_detail(request, article_id):
         'list_url': 'dg_blog_list', 'create_url': 'dg_blog_create',
         'detail_url': 'dg_blog_detail', 'edit_url': 'dg_blog_edit',
         'can_write': can_write(request.user),
+        'content_type': 'dg_blog.DirectionArticle',
     })
 
 

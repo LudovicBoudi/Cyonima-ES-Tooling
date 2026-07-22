@@ -39,3 +39,11 @@ def sub(value, arg):
         return float(value) - float(arg)
     except Exception:
         return 0
+
+
+@register.filter
+def multiply(value, arg):
+    try:
+        return float(value) * float(arg)
+    except Exception:
+        return 0

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Portail — {{ site_config.site_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dark .portal-card { background-color: #1f2937; border-color: #374151; }
+    .sidebar-link.active { background: rgba(255,255,255,0.15); }
+</style>
+{% endblock %}
+
+{% block content %}
+<nav class="bg-[#1a3a6b] text-white rounded-xl shadow-md px-6 py-3 mb-6 -mt-4 flex items-center justify-between">
+    <a href="{% url 'portal:dashboard' %}" class="flex items-center space-x-2 font-semibold text-lg">
+        {% if site_config.logo %}
+            <img src="{{ site_config.logo.url }}" alt="" class="h-8">
+        {% endif %}
+        <span>{{ site_config.site_name }}</span>
+        <span class="text-white/60 text-sm font-normal">— Portail</span>
+    </a>
+    <div class="flex items-center gap-4 text-sm">
+        <span class="hidden sm:inline">{{ user.portal_profile.contact }}</span>
+        {% if unread_notifications_count %}
+        <a href="{% url 'notification_list' %}" class="relative text-sm hover:text-gray-300" title="Notifications">
+            🔔
+            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">{{ unread_notifications_count }}</span>
+        </a>
+        {% endif %}
+        <div class="relative" x-data="{ open: false }">
+            <button @click="open = !open" class="flex items-center gap-1 hover:text-gray-300">
+                <span class="w-7 h-7 rounded-full bg-indigo-400 flex items-center justify-center text-white font-bold text-xs">{{ user.username|first|upper }}</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </button>
+            <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-1 z-50" x-cloak>
+                <a href="{% url 'portal:dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tableau de bord</a>
+                <a href="{% url 'portal:account' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Mon compte</a>
+                <a href="{% url 'portal:password_change' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Changer mot de passe</a>
+                <hr class="my-1 border-gray-100">
+                <form method="post" action="{% url 'portal:logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Déconnexion</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="flex gap-6">
+    <aside class="w-56 shrink-0 hidden lg:block">
+        <nav class="bg-white rounded-xl shadow-md p-3 space-y-1">
+            <a href="{% url 'portal:dashboard' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <span>🏠</span> Tableau de bord
+            </a>
+            <a href="{% url 'portal:quotation_list' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 {% if 'quotation' in request.resolver_match.url_name %}active{% endif %}">
+                <span>📄</span> Devis
+                {% if quotation_count %}<span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{{ quotation_count }}</span>{% endif %}
+            </a>
+            <a href="{% url 'portal:invoice_list' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 {% if 'invoice' in request.resolver_match.url_name %}active{% endif %}">
+                <span>🧾</span> Factures
+                {% if invoice_count %}<span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{{ invoice_count }}</span>{% endif %}
+            </a>
+            <a href="{% url 'portal:creditnote_list' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 {% if 'creditnote' in request.resolver_match.url_name %}active{% endif %}">
+                <span>📋</span> Avoirs
+                {% if creditnote_count %}<span class="ml-auto text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{{ creditnote_count }}</span>{% endif %}
+            </a>
+            <hr class="my-2 border-gray-200">
+            <a href="{% url 'portal:account' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                <span>👤</span> Mon compte
+            </a>
+            <a href="{% url 'portal:password_change' %}" class="sidebar-link flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100">
+                <span>🔑</span> Mot de passe
+            </a>
+        </nav>
+    </aside>
+
+    <div class="flex-1 min-w-0">
+        {% block portal_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

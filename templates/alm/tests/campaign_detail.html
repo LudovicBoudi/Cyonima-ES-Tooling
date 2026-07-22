@@ -1,5 +1,6 @@
 {% extends 'alm/base_project.html' %}
 {% load static %}
+{% load favorite_tags %}
 
 {% block title %}{{ campaign.name }} - {{ project.name }}{% endblock %}
 
@@ -8,7 +9,10 @@
 
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-xl font-semibold">{{ campaign.name }}</h1>
-    <a href="{% url 'campaign_add_tests' project.id campaign.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Ajouter des tests</a>
+    <div class="flex gap-2 items-center">
+        {% favorite_button user "tests.TestCampaign" campaign.pk %}
+        <a href="{% url 'campaign_add_tests' project.id campaign.id %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Ajouter des tests</a>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="kanban-board">

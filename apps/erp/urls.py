@@ -42,4 +42,5 @@ urlpatterns = [
     path('factures-recurrentes/creer/', views.recurring_create, name='erp_recurring_create'),
     path('modele-devis/sauvegarder/', views.quotation_template_save, name='erp_template_save'),
     path('rapprochement/', views.reconciliation, name='erp_reconciliation'),
+    path('factures/pdf-multiple/', views.bulk_invoice_pdf, name='erp_bulk_invoice_pdf'),
 ]

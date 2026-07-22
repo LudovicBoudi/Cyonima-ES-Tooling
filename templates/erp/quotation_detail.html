@@ -1,4 +1,5 @@
 {% extends 'erp/base_erp.html' %}
+{% load favorite_tags %}
 {% block title %}{{ q.number }} — Devis{% endblock %}
 {% block erp_content %}
 <div class="bg-white rounded-xl shadow p-5">
@@ -8,6 +9,7 @@
             <p class="text-sm text-gray-500">{{ q.date|date:"d/m/Y" }}</p>
         </div>
         <div class="flex gap-2">
+            {% favorite_button user "erp.Quotation" q.pk %}
             {% if q.status == 'brouillon' or q.status == 'accepte' %}
             <a href="{% url 'erp_quotation_convert' q.pk %}" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">Convertir en facture</a>
             {% endif %}

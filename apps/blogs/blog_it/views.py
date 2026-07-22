@@ -63,6 +63,7 @@ def article_detail(request, article_id):
         'detail_url': 'it_blog_detail',
         'edit_url': 'it_blog_edit',
         'can_write': can_write(request.user),
+        'content_type': 'blog_it.ITArticle',
     })
 
 

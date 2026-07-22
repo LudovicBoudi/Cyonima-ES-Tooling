@@ -1,4 +1,5 @@
 {% extends 'crm/base_crm.html' %}
+{% load favorite_tags %}
 {% block title %}{{ deal.title }} — Affaires — CRM{% endblock %}
 {% block crm_content %}
 <div class="bg-white rounded-xl shadow p-6 mb-6">
@@ -11,6 +12,7 @@
             </p>
         </div>
         <div class="flex gap-2 text-sm">
+            {% favorite_button user "crm.Deal" deal.pk %}
             <a href="{% url 'crm_deal_create_quotation' deal.pk %}" class="text-green-600 hover:underline">📄 Créer un devis</a>
             <a href="{% url 'crm_deal_edit' deal.pk %}" class="text-amber-600 hover:underline">Modifier</a>
             <a href="{% url 'crm_deal_delete' deal.pk %}" class="text-red-600 hover:underline">Supprimer</a>

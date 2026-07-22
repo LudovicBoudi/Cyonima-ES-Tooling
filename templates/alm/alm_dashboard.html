@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard ALM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold">📊 Tableau de bord ALM</h1>
+        <a href="{% url 'project_list' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded text-sm hover:bg-[#142b52]">Voir les projets</a>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-gray-500 text-sm">Projets</p>
+            <p class="text-3xl font-bold text-[#1a3a6b]">{{ total_projects }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-gray-500 text-sm">Tickets ouverts</p>
+            <p class="text-3xl font-bold text-orange-600">{{ open_tickets }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-gray-500 text-sm">Exigences sans tests</p>
+            <p class="text-3xl font-bold text-red-600">{{ req_without_tests }}</p>
+            {% if total_requirements > 0 %}
+            <p class="text-xs text-gray-400 mt-1">{{ total_requirements }} exigences au total</p>
+            {% endif %}
+        </div>
+        <div class="bg-white rounded-xl shadow p-5">
+            <p class="text-gray-500 text-sm">Campagnes en cours</p>
+            <p class="text-3xl font-bold text-purple-600">{{ active_campaigns|length }}</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Tickets by status -->
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="font-semibold text-gray-700 mb-4">Tickets par statut</h2>
+            <div class="space-y-3">
+                {% for row in tickets_by_status %}
+                {% with max_count=tickets_by_status.0.count|default:1 %}
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-600">{{ row.get_status_display }}</span>
+                        <span class="font-medium">{{ row.count }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-[#1a3a6b] rounded-full h-2 transition-all"
+                             style="width: {% widthratio row.count max_count 100 %}%"></div>
+                    </div>
+                </div>
+                {% endwith %}
+                {% empty %}
+                <p class="text-gray-400 text-sm">Aucun ticket</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Campaigns in progress -->
+        <div class="bg-white rounded-xl shadow p-5">
+            <h2 class="font-semibold text-gray-700 mb-4">Campagnes de test</h2>
+            {% if active_campaigns %}
+            <div class="space-y-3">
+                {% for camp in active_campaigns %}
+                <div class="border rounded-lg p-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-medium text-sm">{{ camp.name }}</p>
+                            <p class="text-xs text-gray-500">{{ camp.project.name }}</p>
+                        </div>
+                        <span class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700">{{ camp.tests_count }} tests</span>
+                    </div>
+                    {% if camp.tests_count > 0 %}
+                    <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+                        <div class="bg-green-500 rounded-full h-1.5"
+                             style="width: {{ camp.validated_count|floatformat:0 }}%"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">{{ camp.validated_count }}/{{ camp.tests_count }} validés</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-gray-400 text-sm">Aucune campagne</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Projects table -->
+    <div class="bg-white rounded-xl shadow">
+        <div class="px-5 py-4 border-b">
+            <h2 class="font-semibold text-gray-700">Projets</h2>
+        </div>
+        <table class="w-full text-sm">
+            <thead><tr class="text-left text-gray-500 border-b">
+                <th class="px-5 py-3">Projet</th>
+                <th class="px-5 py-3 text-center">Membres</th>
+                <th class="px-5 py-3 text-center">Exigences</th>
+                <th class="px-5 py-3 text-center">Tickets ouverts</th>
+                <th class="px-5 py-3 text-center">Avancement</th>
+            </tr></thead>
+            <tbody>
+                {% for s in project_stats %}
+                <tr class="border-b border-gray-100 hover:bg-gray-50">
+                    <td class="px-5 py-3">
+                        <a href="{% url 'project_detail' s.project.id %}" class="font-medium text-blue-700 hover:underline">{{ s.project.name }}</a>
+                    </td>
+                    <td class="px-5 py-3 text-center text-gray-600">{{ s.members_count }}</td>
+                    <td class="px-5 py-3 text-center text-gray-600">{{ s.requirements_count }}</td>
+                    <td class="px-5 py-3 text-center">
+                        {% if s.open_tickets > 0 %}
+                        <span class="text-orange-600 font-medium">{{ s.open_tickets }}</span>
+                        {% else %}
+                        <span class="text-green-600">0</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-5 py-3">
+                        <div class="flex items-center gap-2">
+                            <div class="flex-1 bg-gray-100 rounded-full h-2">
+                                <div class="rounded-full h-2 {% if s.progress_pct == 100 %}bg-green-500{% elif s.progress_pct >= 50 %}bg-blue-500{% else %}bg-orange-400{% endif %}"
+                                     style="width: {{ s.progress_pct }}%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500 w-10 text-right">{{ s.progress_pct }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">Aucun projet</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

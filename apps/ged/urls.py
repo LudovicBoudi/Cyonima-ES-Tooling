@@ -27,4 +27,5 @@ urlpatterns = [
     path('<int:pk>/restaurer/', views.document_restore, name='ged_document_restore'),
     path('<int:pk>/supprimer-definitivement/', views.document_permanent_delete, name='ged_document_permanent_delete'),
     path('rapport-audit/', views.audit_report, name='ged_audit_report'),
+    path('recents/', views.recent_documents, name='ged_recent_documents'),
 ]

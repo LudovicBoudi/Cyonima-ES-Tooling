@@ -1,4 +1,5 @@
 {% extends 'blogs/base_blog.html' %}
+{% load favorite_tags %}
 
 {% block title %}{{ article.title }} - {{ blog_title }}{% endblock %}
 
@@ -13,6 +14,7 @@
             <p class="text-sm text-gray-400 mt-1">{{ article.display_id }} — {{ article.created_by.username }} — {{ article.created_at|date:"d/m/Y" }}</p>
         </div>
         <div class="flex gap-2 shrink-0">
+            {% favorite_button user content_type article.pk %}
             <a href="{% url list_url %}" class="text-sm text-gray-500 hover:underline">← Retour</a>
             {% if can_write %}
             <a href="{% url edit_url article.id %}" class="text-sm text-blue-600 hover:underline">Modifier</a>

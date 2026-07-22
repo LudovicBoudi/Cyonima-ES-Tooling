@@ -1,0 +1,53 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}Factures — Portail{% endblock %}
+
+{% block portal_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h1 class="text-xl font-bold mb-4">Mes factures</h1>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Numero</th>
+            <th class="pb-2">Date</th>
+            <th class="pb-2">Echeance</th>
+            <th class="pb-2">Statut</th>
+            <th class="pb-2 text-right">Montant TTC</th>
+            <th class="pb-2 text-right">Reste du</th>
+            <th class="pb-2"></th>
+        </tr></thead>
+        <tbody>
+            {% for inv in invoices %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50 {% if inv.is_overdue %}bg-red-50{% endif %}">
+                <td class="py-3 font-medium">
+                    <a href="{% url 'portal:invoice_detail' inv.pk %}" class="text-[#1a3a6b] hover:underline">{{ inv.number }}</a>
+                    {% if inv.is_overdue %}<span class="ml-1 text-xs text-red-500">En retard</span>{% endif %}
+                </td>
+                <td class="py-3 text-gray-600">{{ inv.date|date:"d/m/Y" }}</td>
+                <td class="py-3 {% if inv.is_overdue %}text-red-600 font-semibold{% else %}text-gray-600{% endif %}">
+                    {% if inv.due_date %}{{ inv.due_date|date:"d/m/Y" }}{% else %}—{% endif %}
+                </td>
+                <td class="py-3"><span class="text-xs px-2 py-0.5 rounded
+                    {% if inv.status == 'payee' %}bg-green-100 text-green-700
+                    {% elif inv.status == 'impayee' %}bg-red-100 text-red-700
+                    {% elif inv.status == 'emise' %}bg-blue-100 text-blue-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">{{ inv.get_status_display }}</span></td>
+                <td class="py-3 text-right font-semibold">{{ inv.total_ttc|format_money }} EUR</td>
+                <td class="py-3 text-right {% if inv.remaining > 0 %}text-red-600 font-semibold{% endif %}">{{ inv.remaining|format_money }} EUR</td>
+                <td class="py-3 text-right"><a href="{% url 'portal:invoice_pdf' inv.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="Telecharger PDF">PDF</a></td>
+            </tr>
+            {% empty %}<tr><td colspan="7" class="py-8 text-center text-gray-400">Aucune facture</td></tr>{% endfor %}
+        </tbody>
+    </table>
+
+    {% if invoices.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if invoices.has_previous %}
+        <a href="?page={{ invoices.previous_page_number }}" class="px-3 py-1 text-sm border rounded-lg hover:bg-gray-50">Precedent</a>
+        {% endif %}
+        <span class="px-3 py-1 text-sm text-gray-500">Page {{ invoices.number }} sur {{ invoices.paginator.num_pages }}</span>
+        {% if invoices.has_next %}
+        <a href="?page={{ invoices.next_page_number }}" class="px-3 py-1 text-sm border rounded-lg hover:bg-gray-50">Suivant</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

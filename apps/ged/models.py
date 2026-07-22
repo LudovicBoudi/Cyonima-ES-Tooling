@@ -236,3 +236,17 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f'{self.get_action_display()} — {self.document.title} ({self.created_at.strftime("%d/%m/%Y %H:%M")})'
+
+
+class DocumentView(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ged_views')
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='views')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Consultation'
+        verbose_name_plural = 'Consultations'
+        ordering = ['-viewed_at']
+
+    def __str__(self):
+        return f'{self.user.username} → {self.document.title}'

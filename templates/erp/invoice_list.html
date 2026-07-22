@@ -4,7 +4,10 @@
 <div class="bg-white rounded-xl shadow p-5">
     <div class="flex justify-between items-center mb-4">
         <h1 class="text-xl font-bold">Factures clients</h1>
-        <a href="{% url 'erp_invoice_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle facture</a>
+        <div class="flex gap-2">
+            <button onclick="downloadSelected()" id="bulk-pdf-btn" class="hidden bg-gray-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-gray-700">📥 PDF groupé</button>
+            <a href="{% url 'erp_invoice_create' %}" class="bg-[#1a3a6b] text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800">Nouvelle facture</a>
+        </div>
     </div>
     <form method="get" class="flex gap-2 mb-4">
         <input type="text" name="q" value="{{ q|default:'' }}" placeholder="Rechercher par n°, société..." class="border rounded-lg px-3 py-1.5 text-sm w-64">
@@ -19,8 +22,12 @@
         <a href="{% url 'erp_export_invoices_csv' %}" class="text-green-700 px-3 py-1.5 text-sm hover:underline ml-auto">⬇ CSV</a>
     </form>
     <table class="w-full text-sm">
-        <thead><tr class="text-left text-gray-500 border-b"><th class="pb-2">N°</th><th class="pb-2">Société</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th><th class="pb-2"></th></tr></thead>
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2 w-8"><input type="checkbox" id="select-all" onchange="toggleAll(this)"></th>
+            <th class="pb-2">N°</th><th class="pb-2">Société</th><th class="pb-2">Date</th><th class="pb-2">Total TTC</th><th class="pb-2">Payé</th><th class="pb-2">Statut</th><th class="pb-2"></th>
+        </tr></thead>
         <tbody>{% for inv in invoices %}<tr class="border-b border-gray-100 hover:bg-gray-50">
+            <td class="py-2"><input type="checkbox" class="inv-checkbox" value="{{ inv.pk }}" onchange="updateBulkBtn()"></td>
             <td class="py-2 font-medium">{{ inv.number }}</td>
             <td class="py-2">{{ inv.company|default:'-' }}</td>
             <td class="py-2 text-gray-600">{{ inv.date|date:"d/m/Y" }}</td>
@@ -28,7 +35,7 @@
             <td class="py-2">{{ inv.paid_amount|format_money }} €</td>
             <td class="py-2"><span class="px-2 py-0.5 rounded text-xs font-medium {% if inv.status == 'payee' %}bg-green-200 text-green-800{% elif inv.status == 'impayee' %}bg-red-200 text-red-800{% elif inv.status == 'emise' %}bg-blue-200 text-blue-800{% elif inv.status == 'annulee' %}bg-gray-200 text-gray-500{% else %}bg-gray-200 text-gray-600{% endif %}">{{ inv.get_status_display }}</span></td>
             <td class="py-2 text-right"><a href="{% url 'erp_invoice_detail' inv.pk %}" class="text-blue-600 hover:underline text-xs">Voir</a></td>
-        </tr>{% empty %}<tr><td colspan="7" class="py-8 text-center text-gray-400">Aucune facture</td></tr>{% endfor %}</tbody>
+        </tr>{% empty %}<tr><td colspan="8" class="py-8 text-center text-gray-400">Aucune facture</td></tr>{% endfor %}</tbody>
     </table>
     {% if invoices.paginator.num_pages > 1 %}
     <div class="flex justify-center gap-2 mt-4 text-sm">
@@ -38,4 +45,19 @@
     </div>
     {% endif %}
 </div>
+<script>
+function toggleAll(source) {
+    document.querySelectorAll('.inv-checkbox').forEach(cb => cb.checked = source.checked);
+    updateBulkBtn();
+}
+function updateBulkBtn() {
+    const checked = document.querySelectorAll('.inv-checkbox:checked');
+    const btn = document.getElementById('bulk-pdf-btn');
+    btn.classList.toggle('hidden', checked.length === 0);
+}
+function downloadSelected() {
+    const ids = Array.from(document.querySelectorAll('.inv-checkbox:checked')).map(cb => cb.value);
+    if (ids.length > 0) window.location.href = '{% url "erp_bulk_invoice_pdf" %}?ids=' + ids.join(',');
+}
+</script>
 {% endblock %}

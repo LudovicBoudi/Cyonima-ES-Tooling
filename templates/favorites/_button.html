@@ -1,0 +1,10 @@
+{% load favorite_tags %}
+<form method="post" action="{% url 'favorites:toggle' %}">
+    {% csrf_token %}
+    <input type="hidden" name="content_type" value="{{ content_type }}">
+    <input type="hidden" name="object_id" value="{{ object_id }}">
+    <input type="hidden" name="next" value="{{ request.path }}">
+    <button type="submit" class="px-3 py-1.5 rounded-lg text-sm border transition-colors {% if is_fav %}bg-yellow-50 border-yellow-300 text-yellow-700 hover:bg-yellow-100{% else %}bg-white border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-yellow-600{% endif %}">
+        {% if is_fav %}★ Favori{% else %}☆ Favori{% endif %}
+    </button>
+</form>

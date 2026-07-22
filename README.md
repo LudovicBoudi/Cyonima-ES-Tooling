@@ -17,13 +17,15 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 | **Administration** | Gestion des utilisateurs, rôles, configuration, sauvegarde/restauration | `/administration/` |
 | **Budget IT** | Budgets annuels, DAT, fournisseurs, tâches, tableau de bord | `/budget/` |
 | **Guichet IT** | Tickets d'incidents et expressions de besoins informatiques | `/guichet/` |
-| **ALM** | Projets, exigences, tests, tickets (incidents/tâches/FT) | `/projects/` |
+| **ALM** | Projets, exigences, tests, tickets, dashboard transversal | `/projects/`, `/alm/dashboard/` |
 | **Blogs** | Sécurité, direction, communication, IT, représentation syndicale | `/blog/*/` |
 | **Wiki** | Pages de documentation collaborative | `/wiki/` |
-| **CRM** | Gestion de la relation client (contacts, sociétés, affaires) | `/crm/` |
+| **CRM** | Gestion de la relation client (contacts, sociétés, affaires, export XLSX) | `/crm/` |
 | **RH** | Ressources Humaines (employés, contrats, congés, diplômes, formations, CV, évaluations) | `/rh/` |
-| **ERP** | Devis, factures, avoirs, paiements, factures fournisseurs | `/erp/` |
-| **GED** | Gestion électronique de documents (catégories, workflow validation, versionnage, favoris, corbeille, partage, audit) | `/ged/` |
+| **ERP** | Devis, factures, avoirs, paiements, factures fournisseurs, relances auto | `/erp/` |
+| **GED** | Gestion électronique de documents (catégories, workflow, versionnage, favoris, corbeille, partage, audit, documents récents) | `/ged/` |
+| **Favoris global** | Système de favoris transversal (GED, CRM, ERP, ALM…) | ⭐ navbar |
+| **Portail self-service** | Espace client (devis/factures, mon compte, notifications) | `/portail/` |
 | **Ressources Externes** | Références réglementaires (RGPD, IGI 1300, PCI DSS, NIS 2, Convention Métallurgie…) | `/ressources/` |
 | **COMEX** | Forum d'échange du comité exécutif | `/comex/` |
 | **Configuration** | Nom du site, logo, HTTPS (redirection + HSTS) | `/administration/configuration/` |
@@ -42,7 +44,7 @@ Plateforme web modulaire pour la gestion IT, le suivi de projet ALM, la communic
 
 ## Prérequis
 
-- Python 3.12+
+- Python 3.14+
 - pip (ou venv)
 
 ## Installation rapide (Docker, recommandé)
@@ -110,7 +112,7 @@ Serveur accessible sur `http://127.0.0.1:8080`.
 ## Compte par défaut
 
 - Identifiant : `admin`
-- Mot de passe : `admin123Admin!`
+- Mot de passe : `admin123!`
 - Rôles : `admin` (tous accès), `it_manager` (budget, guichet, blog IT)
 
 ## Sauvegarde / Restauration
@@ -139,13 +141,14 @@ Génère une archive ZIP (dump JSON + médias) dans le répertoire courant.
 
 ## Technologies
 
-- Django 6.0.6, Python 3.12
-- Tailwind CSS (CDN)
+- Django 6.0.6, Python 3.14
+- Tailwind CSS (CDN), Alpine.js
 - SQLite (développement), PostgreSQL/MySQL (production)
 - Chart.js (graphiques), WeasyPrint (PDF), openpyxl (XLSX)
 - CKEditor 5 (éditeur de texte riche) — blogs et wiki
 - BeautifulSoup4 (sanitizer HTML), Pillow (traitement d'images)
 - Système de rôles multiples (ManyToMany) avec 8 rôles prédéfinis
-- Export CSV (BOM-prefixed UTF-8), import CSV avec auto-détection de format
+- Export CSV (BOM-prefixed UTF-8) et XLSX, import CSV avec auto-détection de format
 - Diagrammes Chart.js : barres, donuts, courbes (dual axis count + amount)
 - Dark mode natif, recherche globale, format monétaire français
+- Favoris global transversal (GED, CRM, ERP, ALM…)

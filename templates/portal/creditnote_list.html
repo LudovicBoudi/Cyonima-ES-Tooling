@@ -1,0 +1,42 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}Avoirs — Portail{% endblock %}
+
+{% block portal_content %}
+<div class="bg-white rounded-xl shadow-md p-6">
+    <h1 class="text-xl font-bold mb-4">Mes avoirs</h1>
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Numéro</th>
+            <th class="pb-2">Date</th>
+            <th class="pb-2">Facture liée</th>
+            <th class="pb-2">Motif</th>
+            <th class="pb-2 text-right">Montant TTC</th>
+            <th class="pb-2"></th>
+        </tr></thead>
+        <tbody>
+            {% for cn in creditnotes %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-3 font-medium"><a href="{% url 'portal:creditnote_detail' cn.pk %}" class="text-[#1a3a6b] hover:underline">{{ cn.number }}</a></td>
+                <td class="py-3 text-gray-600">{{ cn.date|date:"d/m/Y" }}</td>
+                <td class="py-3 text-gray-600">{% if cn.invoice %}{{ cn.invoice.number }}{% else %}—{% endif %}</td>
+                <td class="py-3 text-gray-600 truncate max-w-[200px]">{{ cn.reason|default:"—" }}</td>
+                <td class="py-3 text-right font-semibold">{{ cn.total_ttc|format_money }} €</td>
+                <td class="py-3 text-right"><a href="{% url 'portal:creditnote_pdf' cn.pk %}" class="text-gray-400 hover:text-[#1a3a6b]" title="Télécharger PDF">📥</a></td>
+            </tr>
+            {% empty %}<tr><td colspan="6" class="py-8 text-center text-gray-400">Aucun avoir</td></tr>{% endfor %}
+        </tbody>
+    </table>
+
+    {% if creditnotes.has_other_pages %}
+    <div class="flex justify-center gap-2 mt-6">
+        {% if creditnotes.has_previous %}
+        <a href="?page={{ creditnotes.previous_page_number }}" class="px-3 py-1 text-sm border rounded-lg hover:bg-gray-50">← Précédent</a>
+        {% endif %}
+        <span class="px-3 py-1 text-sm text-gray-500">Page {{ creditnotes.number }} sur {{ creditnotes.paginator.num_pages }}</span>
+        {% if creditnotes.has_next %}
+        <a href="?page={{ creditnotes.next_page_number }}" class="px-3 py-1 text-sm border rounded-lg hover:bg-gray-50">Suivant →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -19,6 +19,7 @@
             <a href="{% url 'crm_interaction_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_interaction' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">💬 Interactions</a>
             <a href="{% url 'crm_task_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if 'crm_task' in request.resolver_match.url_name %}bg-gray-100 font-medium{% endif %}">✅ Tâches</a>
             <hr class="my-2">
+            <a href="{% url 'crm_portal_users_list' %}" class="block px-3 py-2 rounded text-sm hover:bg-gray-100 {% if request.resolver_match.url_name == 'crm_portal_users_list' %}bg-gray-100 font-medium{% endif %}">🌐 Portail</a>
             <a href="{% url 'crm_import_csv' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100 {% if request.resolver_match.url_name == 'crm_import_csv' %}bg-gray-100 font-medium{% endif %}">📥 Importer CSV</a>
             <a href="{% url 'home' %}" class="block px-3 py-2 rounded text-sm text-gray-500 hover:bg-gray-100">← Accueil</a>
         </div>

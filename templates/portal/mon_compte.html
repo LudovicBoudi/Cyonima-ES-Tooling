@@ -1,0 +1,37 @@
+{% extends 'portal/base_portal.html' %}
+{% block title %}Mon compte — Portail{% endblock %}
+
+{% block portal_content %}
+<div class="max-w-2xl">
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+        <h1 class="text-xl font-bold mb-6">Mon compte</h1>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-gray-500">Nom :</span>
+                <p class="font-medium">{{ contact.last_name|default:"—" }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Prénom :</span>
+                <p class="font-medium">{{ contact.first_name|default:"—" }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Email :</span>
+                <p class="font-medium">{{ contact.email|default:"—" }}</p>
+            </div>
+            <div>
+                <span class="text-gray-500">Téléphone :</span>
+                <p class="font-medium">{{ contact.phone|default:"—" }}</p>
+            </div>
+            <div class="sm:col-span-2">
+                <span class="text-gray-500">Société :</span>
+                <p class="font-medium">{{ contact.company|default:"—" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6">
+        <h2 class="text-lg font-semibold mb-4">Sécurité</h2>
+        <a href="{% url 'portal:password_change' %}" class="inline-block bg-[#1a3a6b] text-white px-6 py-2 rounded-lg text-sm hover:bg-[#152d54] transition">Changer le mot de passe</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'crm/base_crm.html' %}
+{% block title %}Portail — CRM{% endblock %}
+{% block crm_content %}
+<div class="bg-white rounded-xl shadow p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-xl font-bold">Comptes portail</h1>
+        <a href="{% url 'crm_contact_list' %}" class="text-sm text-gray-500 hover:underline">← Contacts</a>
+    </div>
+
+    <table class="w-full text-sm">
+        <thead><tr class="text-left text-gray-500 border-b">
+            <th class="pb-2">Contact</th>
+            <th class="pb-2">Société</th>
+            <th class="pb-2">Email</th>
+            <th class="pb-2">Statut</th>
+            <th class="pb-2">Invité le</th>
+            <th class="pb-2">Activé le</th>
+            <th class="pb-2 text-right">Actions</th>
+        </tr></thead>
+        <tbody>
+            {% for pu in portal_users %}
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="py-3 font-medium">{{ pu.contact }}</td>
+                <td class="py-3 text-gray-600">{{ pu.contact.company|default:"—" }}</td>
+                <td class="py-3 text-gray-600">{{ pu.contact.email|default:"—" }}</td>
+                <td class="py-3">
+                    {% if pu.is_active %}
+                    <span class="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">Actif</span>
+                    {% else %}
+                    <span class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-700">En attente</span>
+                    {% endif %}
+                </td>
+                <td class="py-3 text-gray-600">{{ pu.invited_at|date:"d/m/Y" }}</td>
+                <td class="py-3 text-gray-600">{% if pu.activated_at %}{{ pu.activated_at|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+                <td class="py-3 text-right">
+                    <div class="flex gap-2 justify-end">
+                        <form method="post" action="{% url 'crm_portal_user_toggle' pu.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs px-3 py-1 rounded border {% if pu.is_active %}border-amber-300 text-amber-700 hover:bg-amber-50{% else %}border-green-300 text-green-700 hover:bg-green-50{% endif %}">
+                                {% if pu.is_active %}Désactiver{% else %}Activer{% endif %}
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'crm_portal_user_revoke' pu.pk %}" onsubmit="return confirm('Révoquer l\\'accès portail pour {{ pu.contact }} ?')">
+                            {% csrf_token %}
+                            <button type="submit" class="text-xs px-3 py-1 rounded border border-red-300 text-red-700 hover:bg-red-50">Révoquer</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="py-8 text-center text-gray-400">Aucun compte portail</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

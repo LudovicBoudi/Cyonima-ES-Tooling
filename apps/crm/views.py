@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Count, Sum, Q
 from django.db.models.functions import TruncMonth
@@ -597,6 +598,105 @@ def export_deals_csv(request):
 
 
 @login_required
+def export_companies_xlsx(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Sociétés'
+    headers = ['Nom', 'Secteur', 'Adresse', 'Code postal', 'Ville', 'Pays', 'Téléphone', 'Email', 'Site web', 'SIRET']
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='1a3a6b', end_color='1a3a6b', fill_type='solid')
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+    for row, c in enumerate(Company.objects.all(), 2):
+        ws.cell(row=row, column=1, value=c.name)
+        ws.cell(row=row, column=2, value=c.sector)
+        ws.cell(row=row, column=3, value=c.address)
+        ws.cell(row=row, column=4, value=c.postal_code)
+        ws.cell(row=row, column=5, value=c.city)
+        ws.cell(row=row, column=6, value=c.country)
+        ws.cell(row=row, column=7, value=c.phone)
+        ws.cell(row=row, column=8, value=c.email)
+        ws.cell(row=row, column=9, value=c.website)
+        ws.cell(row=row, column=10, value=c.siret)
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        ws.column_dimensions[col[0].column_letter].width = min(max_len + 2, 40)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="societes.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_contacts_xlsx(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Contacts'
+    headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Portable', 'Fonction', 'Société']
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='1a3a6b', end_color='1a3a6b', fill_type='solid')
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+    for row, c in enumerate(Contact.objects.select_related('company').all(), 2):
+        ws.cell(row=row, column=1, value=c.first_name)
+        ws.cell(row=row, column=2, value=c.last_name)
+        ws.cell(row=row, column=3, value=c.email)
+        ws.cell(row=row, column=4, value=c.phone)
+        ws.cell(row=row, column=5, value=c.mobile)
+        ws.cell(row=row, column=6, value=c.function)
+        ws.cell(row=row, column=7, value=c.company.name if c.company else '')
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        ws.column_dimensions[col[0].column_letter].width = min(max_len + 2, 40)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="contacts.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
+def export_deals_xlsx(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment
+    wb = Workbook()
+    ws = wb.active
+    ws.title = 'Affaires'
+    headers = ['Titre', 'Société', 'Contact', 'Montant', 'Probabilité', 'Étape', 'Clôture prévue']
+    header_font = Font(bold=True, color='FFFFFF')
+    header_fill = PatternFill(start_color='1a3a6b', end_color='1a3a6b', fill_type='solid')
+    for col, h in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col, value=h)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center')
+    for row, d in enumerate(Deal.objects.select_related('company', 'contact').all(), 2):
+        ws.cell(row=row, column=1, value=d.title)
+        ws.cell(row=row, column=2, value=d.company.name if d.company else '')
+        ws.cell(row=row, column=3, value=str(d.contact) if d.contact else '')
+        ws.cell(row=row, column=4, value=float(d.amount))
+        ws.cell(row=row, column=5, value=d.probability)
+        ws.cell(row=row, column=6, value=d.get_stage_display())
+        ws.cell(row=row, column=7, value=str(d.expected_close_date) if d.expected_close_date else '')
+    for col in ws.columns:
+        max_len = max(len(str(cell.value or '')) for cell in col)
+        ws.column_dimensions[col[0].column_letter].width = min(max_len + 2, 40)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="affaires.xlsx"'
+    wb.save(response)
+    return response
+
+
+@login_required
 def deal_create_quotation(request, pk):
     deal = get_object_or_404(Deal, pk=pk)
     from apps.erp.models import Quotation
@@ -725,3 +825,77 @@ def _render_pdf(request, template_name, context, filename):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="{filename}"'
     return response
+
+
+@login_required
+def contact_grant_portal(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    if not contact.email:
+        messages.error(request, 'Ce contact n\'a pas d\'email. Veuillez en ajouter un avant d\'accorder l\'accès portail.')
+        return redirect('crm_contact_list')
+    if hasattr(contact, 'portal_user'):
+        messages.warning(request, f'{contact} a déjà accès au portail.')
+        return redirect('crm_contact_list')
+    from apps.portal.models import PortalUser
+    user = User.objects.create_user(
+        username=f'portal_{contact.email.split("@")[0]}_{contact.pk}',
+        email=contact.email,
+        is_staff=False,
+    )
+    portal_user = PortalUser.objects.create(user=user, contact=contact)
+    site_url = getattr(settings, 'SITE_URL', 'http://127.0.0.1:8000')
+    activation_url = f'{site_url}/portail/activation/{portal_user.token}/'
+    from django.core.mail import send_mail
+    send_mail(
+        subject=f'Invitation au portail {getattr(settings, "SITE_NAME", "Cyonima")}',
+        message=f'Bonjour {contact.first_name},\n\nVous avez été invité(e) à accéder au portail client.\n\nPour activer votre compte, cliquez sur le lien suivant :\n{activation_url}\n\nCordialement,\nL\'équipe Cyonima.',
+        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@cyonima.local'),
+        recipient_list=[contact.email],
+        fail_silently=True,
+    )
+    messages.success(request, f'Invitation envoyée à {contact} ({contact.email}).')
+    return redirect('crm_contact_list')
+
+
+@login_required
+def contact_revoke_portal(request, pk):
+    contact = get_object_or_404(Contact, pk=pk)
+    if not hasattr(contact, 'portal_user'):
+        messages.warning(request, f'{contact} n\'a pas d\'accès portail.')
+        return redirect('crm_contact_list')
+    portal_user = contact.portal_user
+    user = portal_user.user
+    portal_user.delete()
+    user.delete()
+    messages.success(request, f'Accès portail révoqué pour {contact}.')
+    return redirect('crm_contact_list')
+
+
+@login_required
+def portal_users_list(request):
+    from apps.portal.models import PortalUser
+    portal_users = PortalUser.objects.select_related('user', 'contact', 'contact__company').all()
+    return render(request, 'crm/portal_users.html', {'portal_users': portal_users})
+
+
+@login_required
+def portal_user_toggle(request, pk):
+    from apps.portal.models import PortalUser
+    portal_user = get_object_or_404(PortalUser, pk=pk)
+    portal_user.is_active = not portal_user.is_active
+    portal_user.save()
+    status = 'activé' if portal_user.is_active else 'désactivé'
+    messages.success(request, f'Compte portail de {portal_user.contact} {status}.')
+    return redirect('crm_portal_users_list')
+
+
+@login_required
+def portal_user_revoke(request, pk):
+    from apps.portal.models import PortalUser
+    portal_user = get_object_or_404(PortalUser, pk=pk)
+    contact = portal_user.contact
+    user = portal_user.user
+    portal_user.delete()
+    user.delete()
+    messages.success(request, f'Accès portail révoqué pour {contact}.')
+    return redirect('crm_portal_users_list')

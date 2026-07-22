@@ -53,6 +53,7 @@ def article_detail(request, article_id):
         'list_url': 'sec_blog_list', 'create_url': 'sec_blog_create',
         'detail_url': 'sec_blog_detail', 'edit_url': 'sec_blog_edit',
         'can_write': can_write(request.user),
+        'content_type': 'sec_blog.SecurityArticle',
     })
 
 

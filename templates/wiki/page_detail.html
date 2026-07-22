@@ -1,4 +1,5 @@
 {% extends 'wiki/base_wiki.html' %}
+{% load favorite_tags %}
 
 {% block title %}{{ page.title }} — Wiki{% endblock %}
 
@@ -19,6 +20,7 @@
             </p>
         </div>
         <div class="flex gap-2 text-sm shrink-0">
+            {% favorite_button user "wiki.WikiPage" page.pk %}
             <a href="{% url 'wiki_versions' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-300">🕓 Historique</a>
             <a href="{% url 'wiki_edit' page.slug %}" class="px-3 py-1.5 border rounded hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-300">✏️ Modifier</a>
         </div>
